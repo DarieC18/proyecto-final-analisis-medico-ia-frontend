@@ -7,7 +7,7 @@ Módulo frontend del sistema **Smart-Medical IA**, una plataforma de análisis c
 ## 📋 Tabla de Contenidos
 
 - [Funcionalidades incluidas](#funcionalidades-incluidas)
-- [Tecnologías utilizadas](#tecnologías-utilizadas)
+- [Tecnologías utilizadas](#tecnologias-utilizadas)
 - [Requisitos previos](#requisitos-previos)
 - [Clonar el repositorio](#clonar-el-repositorio)
 - [Configurar la base de datos](#configurar-la-base-de-datos)
@@ -18,6 +18,7 @@ Módulo frontend del sistema **Smart-Medical IA**, una plataforma de análisis c
 
 ---
 
+<a id="funcionalidades-incluidas"></a>
 ## ✨ Funcionalidades incluidas
 
 ### Módulo de Autenticación
@@ -56,6 +57,7 @@ Módulo frontend del sistema **Smart-Medical IA**, una plataforma de análisis c
 
 ---
 
+<a id="tecnologias-utilizadas"></a>
 ## 🛠 Tecnologías utilizadas
 
 | Capa       | Tecnología                              |
@@ -72,6 +74,7 @@ Módulo frontend del sistema **Smart-Medical IA**, una plataforma de análisis c
 
 ---
 
+<a id="requisitos-previos"></a>
 ## 📦 Requisitos previos
 
 | Herramienta       | Versión mínima                     |
@@ -92,6 +95,7 @@ psql --version
 
 ---
 
+<a id="clonar-el-repositorio"></a>
 ## 📥 Clonar el repositorio
 
 Clona la rama `frontend-admin` del repositorio:
@@ -105,6 +109,7 @@ Esto descargará tanto el frontend (`prototipo-medico/`) como el backend (`MedAn
 
 ---
 
+<a id="configurar-la-base-de-datos"></a>
 ## 🗄 Configurar la base de datos
 
 ### 1. Crear la base de datos en PostgreSQL
@@ -142,6 +147,7 @@ psql -U postgres -d MedAnalyzerDb -f prototipo-medico/seed.sql
 
 ---
 
+<a id="configurar-y-ejecutar-el-backend-net"></a>
 ## ⚙️ Configurar y ejecutar el Backend (.NET)
 
 ### 1. Restaurar paquetes NuGet
@@ -171,6 +177,7 @@ El backend estará disponible en: **http://localhost:5197**
 
 ---
 
+<a id="configurar-y-ejecutar-el-frontend-vue-3"></a>
 ## 🖥 Configurar y ejecutar el Frontend (Vue 3)
 
 ### 1. Instalar dependencias
@@ -200,6 +207,7 @@ Los archivos estáticos se generarán en la carpeta `dist/`.
 
 ---
 
+<a id="probar-el-sistema"></a>
 ## 🧪 Probar el sistema
 
 ### Credenciales por defecto (seed automático del backend)
@@ -231,6 +239,7 @@ El frontend se comunica con el backend a través del proxy de Vite. Puedes verif
 
 ---
 
+<a id="estructura-del-proyecto"></a>
 ## 📁 Estructura del proyecto
 
 ```
