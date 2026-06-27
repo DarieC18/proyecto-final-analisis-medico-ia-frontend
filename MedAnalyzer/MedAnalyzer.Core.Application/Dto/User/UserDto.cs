@@ -1,0 +1,19 @@
+﻿namespace MedAnalyzer.Core.Application.Dto.User
+{
+    public class UserDto
+    {
+        public required string Id { get; set; }
+        public required string Name { get; set; }
+        public required string LastName { get; set; }
+        
+        public required string UserName { get; set; }
+        public required string NumberIdentification { get; set; }
+        public required string Email { get; set; }
+        public required string Role { get; set; }
+
+        public bool isVerified { get; set; }
+        public bool Status { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+    }
+}

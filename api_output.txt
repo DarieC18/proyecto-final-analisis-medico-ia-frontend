@@ -1,0 +1,270 @@
+Usando la configuración de inicio de MedAnalyzer.Api\Properties\launchSettings.json...
+Compilando...
+warn: Microsoft.EntityFrameworkCore.Model.Validation[10400]
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (63ms) [Parameters=[@normalizedName='ADMINISTRATOR'], CommandType='Text', CommandTimeout='30']
+      SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+      FROM "Identity"."AspNetRoles" AS a
+      WHERE a."NormalizedName" = @normalizedName
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[@p0='686da659-0839-4cd2-92e2-99593526720b' (Nullable = false), @p1='f3729676-6f88-41df-ac2d-6824223858b1', @p2='Administrator', @p3='ADMINISTRATOR'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Identity"."AspNetRoles" ("Id", "ConcurrencyStamp", "Name", "NormalizedName")
+      VALUES (@p0, @p1, @p2, @p3);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedName='DOCTOR'], CommandType='Text', CommandTimeout='30']
+      SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+      FROM "Identity"."AspNetRoles" AS a
+      WHERE a."NormalizedName" = @normalizedName
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p0='059a2467-5a04-416a-bb7d-22fb3db1dc29' (Nullable = false), @p1='015fce10-a568-4b18-be94-e8edf750a1b1', @p2='Doctor', @p3='DOCTOR'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Identity"."AspNetRoles" ("Id", "ConcurrencyStamp", "Name", "NormalizedName")
+      VALUES (@p0, @p1, @p2, @p3);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedName='NURSE'], CommandType='Text', CommandTimeout='30']
+      SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+      FROM "Identity"."AspNetRoles" AS a
+      WHERE a."NormalizedName" = @normalizedName
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p0='3b665104-cf30-4d94-acf0-34462f5c7df4' (Nullable = false), @p1='fbf83891-79ce-4b16-9c59-ee1ff37ecb24', @p2='Nurse', @p3='NURSE'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Identity"."AspNetRoles" ("Id", "ConcurrencyStamp", "Name", "NormalizedName")
+      VALUES (@p0, @p1, @p2, @p3);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedName='CONSULTATIONUSER'], CommandType='Text', CommandTimeout='30']
+      SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+      FROM "Identity"."AspNetRoles" AS a
+      WHERE a."NormalizedName" = @normalizedName
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p0='22725bb9-11d0-4e4b-ba5e-a3ab5948097e' (Nullable = false), @p1='800fbb4f-fbcf-4ab4-ad3a-efa7c7bc7569', @p2='ConsultationUser', @p3='CONSULTATIONUSER'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Identity"."AspNetRoles" ("Id", "ConcurrencyStamp", "Name", "NormalizedName")
+      VALUES (@p0, @p1, @p2, @p3);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[@user_Id='33144cb3-7b65-42ec-830e-c6186de14ec9'], CommandType='Text', CommandTimeout='30']
+      SELECT NOT EXISTS (
+          SELECT 1
+          FROM "Identity"."Users" AS u
+          WHERE u."Id" = @user_Id)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedEmail='ADMIN@MEDANALYZER.COM'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedEmail" = @normalizedEmail
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedUserName='ADMINISTRATOR'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedUserName" = @normalizedUserName
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedEmail='ADMIN@MEDANALYZER.COM'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedEmail" = @normalizedEmail
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@p0='33144cb3-7b65-42ec-830e-c6186de14ec9' (Nullable = false), @p1='0', @p2='9771496a-7c61-4ef2-bdf0-e03717e1018c', @p3='2026-06-27T00:10:19.3828512Z' (DbType = DateTime), @p4='admin@medanalyzer.com', @p5='True', @p6='Carlos' (Nullable = false), @p7='Mendez' (Nullable = false), @p8='True', @p9=NULL (DbType = DateTime), @p10='ADMIN@MEDANALYZER.COM', @p11='ADMINISTRATOR', @p12='0000000001' (Nullable = false), @p13='AQAAAAIAAYagAAAAEKnNIu3BXE6I7HP+BQc9T6MYKv1cGxc3Ov6iZ/kvt1ORtSobU5M9H7607NFg7isvTg==', @p14=NULL, @p15='True', @p16='5F43VLIJFGV2FHZYHGBB7PJKCGNK5LTZ', @p17='True', @p18='False', @p19='Administrator'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Identity"."Users" ("Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedAt", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "NumberIdentification", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "Status", "TwoFactorEnabled", "UserName")
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedRoleName='ADMINISTRATOR'], CommandType='Text', CommandTimeout='30']
+      SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+      FROM "Identity"."AspNetRoles" AS a
+      WHERE a."NormalizedName" = @normalizedRoleName
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@p='33144cb3-7b65-42ec-830e-c6186de14ec9', @p1='686da659-0839-4cd2-92e2-99593526720b'], CommandType='Text', CommandTimeout='30']
+      SELECT u."UserId", u."RoleId"
+      FROM "Identity"."UserRoles" AS u
+      WHERE u."UserId" = @p AND u."RoleId" = @p1
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedRoleName='ADMINISTRATOR'], CommandType='Text', CommandTimeout='30']
+      SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+      FROM "Identity"."AspNetRoles" AS a
+      WHERE a."NormalizedName" = @normalizedRoleName
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedUserName='ADMINISTRATOR'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedUserName" = @normalizedUserName
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedEmail='ADMIN@MEDANALYZER.COM'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedEmail" = @normalizedEmail
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@p0='686da659-0839-4cd2-92e2-99593526720b' (Nullable = false), @p1='33144cb3-7b65-42ec-830e-c6186de14ec9' (Nullable = false), @p21='33144cb3-7b65-42ec-830e-c6186de14ec9' (Nullable = false), @p2='0', @p3='49e2b13f-63a2-4c50-829a-90dcbb2f1b2c', @p22='9771496a-7c61-4ef2-bdf0-e03717e1018c', @p4='2026-06-27T00:10:19.3828512Z' (DbType = DateTime), @p5='admin@medanalyzer.com', @p6='True', @p7='Carlos' (Nullable = false), @p8='Mendez' (Nullable = false), @p9='True', @p10=NULL (DbType = DateTime), @p11='ADMIN@MEDANALYZER.COM', @p12='ADMINISTRATOR', @p13='0000000001' (Nullable = false), @p14='AQAAAAIAAYagAAAAEKnNIu3BXE6I7HP+BQc9T6MYKv1cGxc3Ov6iZ/kvt1ORtSobU5M9H7607NFg7isvTg==', @p15=NULL, @p16='True', @p17='5F43VLIJFGV2FHZYHGBB7PJKCGNK5LTZ', @p18='True', @p19='False', @p20='Administrator'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Identity"."UserRoles" ("RoleId", "UserId")
+      VALUES (@p0, @p1);
+      UPDATE "Identity"."Users" SET "AccessFailedCount" = @p2, "ConcurrencyStamp" = @p3, "CreatedAt" = @p4, "Email" = @p5, "EmailConfirmed" = @p6, "FirstName" = @p7, "LastName" = @p8, "LockoutEnabled" = @p9, "LockoutEnd" = @p10, "NormalizedEmail" = @p11, "NormalizedUserName" = @p12, "NumberIdentification" = @p13, "PasswordHash" = @p14, "PhoneNumber" = @p15, "PhoneNumberConfirmed" = @p16, "SecurityStamp" = @p17, "Status" = @p18, "TwoFactorEnabled" = @p19, "UserName" = @p20
+      WHERE "Id" = @p21 AND "ConcurrencyStamp" = @p22;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@user_Id='80fe50bf-7297-4231-ada1-ef64d888522d'], CommandType='Text', CommandTimeout='30']
+      SELECT NOT EXISTS (
+          SELECT 1
+          FROM "Identity"."Users" AS u
+          WHERE u."Id" = @user_Id)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedEmail='DOCTOR@MEDANALYZER.COM'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedEmail" = @normalizedEmail
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedUserName='DOCTOR'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedUserName" = @normalizedUserName
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedEmail='DOCTOR@MEDANALYZER.COM'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedEmail" = @normalizedEmail
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p0='80fe50bf-7297-4231-ada1-ef64d888522d' (Nullable = false), @p1='0', @p2='53f8d11f-9a65-4aef-9a31-da2001e372e0', @p3='2026-06-27T00:10:19.6701059Z' (DbType = DateTime), @p4='doctor@medanalyzer.com', @p5='True', @p6='Maria' (Nullable = false), @p7='Garcia' (Nullable = false), @p8='True', @p9=NULL (DbType = DateTime), @p10='DOCTOR@MEDANALYZER.COM', @p11='DOCTOR', @p12='0000000002' (Nullable = false), @p13='AQAAAAIAAYagAAAAEMH9MO6tu6D5vj0nq9HlJ/LWkhyNz6Zz/A2W0u+ldAGURtGWaTyT4rnqpGlwOQ1Tug==', @p14=NULL, @p15='True', @p16='WZPNTL7CIQTXILLV2EEPARGS5SR6NNL5', @p17='True', @p18='False', @p19='Doctor'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Identity"."Users" ("Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedAt", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "NumberIdentification", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "Status", "TwoFactorEnabled", "UserName")
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedRoleName='DOCTOR'], CommandType='Text', CommandTimeout='30']
+      SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+      FROM "Identity"."AspNetRoles" AS a
+      WHERE a."NormalizedName" = @normalizedRoleName
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p='80fe50bf-7297-4231-ada1-ef64d888522d', @p1='059a2467-5a04-416a-bb7d-22fb3db1dc29'], CommandType='Text', CommandTimeout='30']
+      SELECT u."UserId", u."RoleId"
+      FROM "Identity"."UserRoles" AS u
+      WHERE u."UserId" = @p AND u."RoleId" = @p1
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedRoleName='DOCTOR'], CommandType='Text', CommandTimeout='30']
+      SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+      FROM "Identity"."AspNetRoles" AS a
+      WHERE a."NormalizedName" = @normalizedRoleName
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedUserName='DOCTOR'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedUserName" = @normalizedUserName
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedEmail='DOCTOR@MEDANALYZER.COM'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedEmail" = @normalizedEmail
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p0='059a2467-5a04-416a-bb7d-22fb3db1dc29' (Nullable = false), @p1='80fe50bf-7297-4231-ada1-ef64d888522d' (Nullable = false), @p21='80fe50bf-7297-4231-ada1-ef64d888522d' (Nullable = false), @p2='0', @p3='be27969c-bb75-4fc6-a41f-6537fccb8a1f', @p22='53f8d11f-9a65-4aef-9a31-da2001e372e0', @p4='2026-06-27T00:10:19.6701059Z' (DbType = DateTime), @p5='doctor@medanalyzer.com', @p6='True', @p7='Maria' (Nullable = false), @p8='Garcia' (Nullable = false), @p9='True', @p10=NULL (DbType = DateTime), @p11='DOCTOR@MEDANALYZER.COM', @p12='DOCTOR', @p13='0000000002' (Nullable = false), @p14='AQAAAAIAAYagAAAAEMH9MO6tu6D5vj0nq9HlJ/LWkhyNz6Zz/A2W0u+ldAGURtGWaTyT4rnqpGlwOQ1Tug==', @p15=NULL, @p16='True', @p17='WZPNTL7CIQTXILLV2EEPARGS5SR6NNL5', @p18='True', @p19='False', @p20='Doctor'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Identity"."UserRoles" ("RoleId", "UserId")
+      VALUES (@p0, @p1);
+      UPDATE "Identity"."Users" SET "AccessFailedCount" = @p2, "ConcurrencyStamp" = @p3, "CreatedAt" = @p4, "Email" = @p5, "EmailConfirmed" = @p6, "FirstName" = @p7, "LastName" = @p8, "LockoutEnabled" = @p9, "LockoutEnd" = @p10, "NormalizedEmail" = @p11, "NormalizedUserName" = @p12, "NumberIdentification" = @p13, "PasswordHash" = @p14, "PhoneNumber" = @p15, "PhoneNumberConfirmed" = @p16, "SecurityStamp" = @p17, "Status" = @p18, "TwoFactorEnabled" = @p19, "UserName" = @p20
+      WHERE "Id" = @p21 AND "ConcurrencyStamp" = @p22;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@user_Id='d2805cd5-9b68-4a96-800f-b7543d0acd25'], CommandType='Text', CommandTimeout='30']
+      SELECT NOT EXISTS (
+          SELECT 1
+          FROM "Identity"."Users" AS u
+          WHERE u."Id" = @user_Id)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedEmail='CONSULTATION@MEDANALYZER.COM'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedEmail" = @normalizedEmail
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedUserName='CONSULTATIONUSER'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedUserName" = @normalizedUserName
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedEmail='CONSULTATION@MEDANALYZER.COM'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedEmail" = @normalizedEmail
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p0='d2805cd5-9b68-4a96-800f-b7543d0acd25' (Nullable = false), @p1='0', @p2='ae090c16-d1da-4604-ad21-f2a274b016c1', @p3='2026-06-27T00:10:19.7587126Z' (DbType = DateTime), @p4='consultation@medanalyzer.com', @p5='True', @p6='Juan' (Nullable = false), @p7='Perez' (Nullable = false), @p8='True', @p9=NULL (DbType = DateTime), @p10='CONSULTATION@MEDANALYZER.COM', @p11='CONSULTATIONUSER', @p12='0000000003' (Nullable = false), @p13='AQAAAAIAAYagAAAAEFB1QRBxOtSzKgkHiXhX11uLT/fFLC3NsL970EOcuQZOG2CWCCeV/6o+ShOob6w8wg==', @p14=NULL, @p15='True', @p16='XOUBPNN5CVJD3DSS3FSBAOCCRZ4VGDJX', @p17='True', @p18='False', @p19='ConsultationUser'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Identity"."Users" ("Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedAt", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "NumberIdentification", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "Status", "TwoFactorEnabled", "UserName")
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedRoleName='CONSULTATIONUSER'], CommandType='Text', CommandTimeout='30']
+      SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+      FROM "Identity"."AspNetRoles" AS a
+      WHERE a."NormalizedName" = @normalizedRoleName
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p='d2805cd5-9b68-4a96-800f-b7543d0acd25', @p1='22725bb9-11d0-4e4b-ba5e-a3ab5948097e'], CommandType='Text', CommandTimeout='30']
+      SELECT u."UserId", u."RoleId"
+      FROM "Identity"."UserRoles" AS u
+      WHERE u."UserId" = @p AND u."RoleId" = @p1
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedRoleName='CONSULTATIONUSER'], CommandType='Text', CommandTimeout='30']
+      SELECT a."Id", a."ConcurrencyStamp", a."Name", a."NormalizedName"
+      FROM "Identity"."AspNetRoles" AS a
+      WHERE a."NormalizedName" = @normalizedRoleName
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedUserName='CONSULTATIONUSER'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedUserName" = @normalizedUserName
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedEmail='CONSULTATION@MEDANALYZER.COM'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedEmail" = @normalizedEmail
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='22725bb9-11d0-4e4b-ba5e-a3ab5948097e' (Nullable = false), @p1='d2805cd5-9b68-4a96-800f-b7543d0acd25' (Nullable = false), @p21='d2805cd5-9b68-4a96-800f-b7543d0acd25' (Nullable = false), @p2='0', @p3='c3b39d74-fdee-4df6-b7da-9c07a9516b80', @p22='ae090c16-d1da-4604-ad21-f2a274b016c1', @p4='2026-06-27T00:10:19.7587126Z' (DbType = DateTime), @p5='consultation@medanalyzer.com', @p6='True', @p7='Juan' (Nullable = false), @p8='Perez' (Nullable = false), @p9='True', @p10=NULL (DbType = DateTime), @p11='CONSULTATION@MEDANALYZER.COM', @p12='CONSULTATIONUSER', @p13='0000000003' (Nullable = false), @p14='AQAAAAIAAYagAAAAEFB1QRBxOtSzKgkHiXhX11uLT/fFLC3NsL970EOcuQZOG2CWCCeV/6o+ShOob6w8wg==', @p15=NULL, @p16='True', @p17='XOUBPNN5CVJD3DSS3FSBAOCCRZ4VGDJX', @p18='True', @p19='False', @p20='ConsultationUser'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Identity"."UserRoles" ("RoleId", "UserId")
+      VALUES (@p0, @p1);
+      UPDATE "Identity"."Users" SET "AccessFailedCount" = @p2, "ConcurrencyStamp" = @p3, "CreatedAt" = @p4, "Email" = @p5, "EmailConfirmed" = @p6, "FirstName" = @p7, "LastName" = @p8, "LockoutEnabled" = @p9, "LockoutEnd" = @p10, "NormalizedEmail" = @p11, "NormalizedUserName" = @p12, "NumberIdentification" = @p13, "PasswordHash" = @p14, "PhoneNumber" = @p15, "PhoneNumberConfirmed" = @p16, "SecurityStamp" = @p17, "Status" = @p18, "TwoFactorEnabled" = @p19, "UserName" = @p20
+      WHERE "Id" = @p21 AND "ConcurrencyStamp" = @p22;
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5197
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\Elis\Desktop\Clases_Itla\Clases\cuatrimestre_8\proyecto final\tarea\no\proyecto_frontend\prototipo-medico-plus\MedAnalyzer\MedAnalyzer.Api
+warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+      Failed to determine the https port for redirect.
+warn: LuckyPennySoftware.AutoMapper.License[0]
+      You do not have a valid license key for the Lucky Penny software AutoMapper. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@normalizedUserName='ADMINISTRATOR'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedUserName" = @normalizedUserName
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@normalizedUserName='ADMINISTRATOR'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedUserName" = @normalizedUserName
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@normalizedEmail='ADMIN@MEDANALYZER.COM'], CommandType='Text', CommandTimeout='30']
+      SELECT u."Id", u."AccessFailedCount", u."ConcurrencyStamp", u."CreatedAt", u."Email", u."EmailConfirmed", u."FirstName", u."LastName", u."LockoutEnabled", u."LockoutEnd", u."NormalizedEmail", u."NormalizedUserName", u."NumberIdentification", u."PasswordHash", u."PhoneNumber", u."PhoneNumberConfirmed", u."SecurityStamp", u."Status", u."TwoFactorEnabled", u."UserName"
+      FROM "Identity"."Users" AS u
+      WHERE u."NormalizedEmail" = @normalizedEmail
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[@p19='33144cb3-7b65-42ec-830e-c6186de14ec9' (Nullable = false), @p0='0', @p1='fa447c85-5f13-4b1b-a8d9-b88335ecac2c', @p20='49e2b13f-63a2-4c50-829a-90dcbb2f1b2c', @p2='2026-06-27T00:10:19.3828510Z' (DbType = DateTime), @p3='admin@medanalyzer.com', @p4='True', @p5='Carlos' (Nullable = false), @p6='Mendez' (Nullable = false), @p7='True', @p8=NULL (DbType = DateTime), @p9='ADMIN@MEDANALYZER.COM', @p10='ADMINISTRATOR', @p11='0000000001' (Nullable = false), @p12='AQAAAAIAAYagAAAAEKnNIu3BXE6I7HP+BQc9T6MYKv1cGxc3Ov6iZ/kvt1ORtSobU5M9H7607NFg7isvTg==', @p13=NULL, @p14='True', @p15='5F43VLIJFGV2FHZYHGBB7PJKCGNK5LTZ', @p16='False', @p17='False', @p18='Administrator'], CommandType='Text', CommandTimeout='30']
+      UPDATE "Identity"."Users" SET "AccessFailedCount" = @p0, "ConcurrencyStamp" = @p1, "CreatedAt" = @p2, "Email" = @p3, "EmailConfirmed" = @p4, "FirstName" = @p5, "LastName" = @p6, "LockoutEnabled" = @p7, "LockoutEnd" = @p8, "NormalizedEmail" = @p9, "NormalizedUserName" = @p10, "NumberIdentification" = @p11, "PasswordHash" = @p12, "PhoneNumber" = @p13, "PhoneNumberConfirmed" = @p14, "SecurityStamp" = @p15, "Status" = @p16, "TwoFactorEnabled" = @p17, "UserName" = @p18
+      WHERE "Id" = @p19 AND "ConcurrencyStamp" = @p20;
