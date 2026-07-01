@@ -56,18 +56,42 @@
             </tr>
           </thead>
           <tbody class="border-top-0">
-            <tr v-for="log in logs" :key="log.id">
-              <td class="ps-4 py-3 text-muted">{{ formatFecha(log.createdAt) }}</td>
-              <td class="py-3 fw-bold text-dark">{{ log.userName }}</td>
-              <td class="py-3">
-                <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">{{ log.userRole }}</span>
-              </td>
-              <td class="py-3">
-                <StatusBadge :text="log.action" variant="info" />
-              </td>
-              <td class="py-3 text-muted">{{ log.entityName }}</td>
-              <td class="pe-4 py-3 text-muted small">{{ log.entityId }}</td>
-            </tr>
+            <template v-for="log in logs" :key="log.id">
+              <tr @click="toggleDetalle(log)" class="cursor-pointer" style="cursor: pointer;">
+                <td class="ps-4 py-3 text-muted">{{ formatFecha(log.createdAt) }}</td>
+                <td class="py-3 fw-bold text-dark">{{ log.userName }}</td>
+                <td class="py-3">
+                  <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">{{ log.userRole }}</span>
+                </td>
+                <td class="py-3">
+                  <StatusBadge :text="log.action" variant="info" />
+                </td>
+                <td class="py-3 text-muted">{{ log.entityName }}</td>
+                <td class="pe-4 py-3 text-muted small">{{ log.entityId }}</td>
+              </tr>
+              <tr v-if="detalleId === log.id">
+                <td colspan="6" class="p-4 bg-light">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <h6 class="fw-bold mb-3">Detalle completo del registro</h6>
+                      <div class="row g-3">
+                        <div class="col-md-4"><strong>ID Registro:</strong> {{ log.id }}</div>
+                        <div class="col-md-4"><strong>Usuario ID:</strong> {{ log.userId }}</div>
+                        <div class="col-md-4"><strong>Rol:</strong> {{ log.userRole }}</div>
+                        <div class="col-md-4"><strong>Acción:</strong> {{ log.action }}</div>
+                        <div class="col-md-4"><strong>Entidad:</strong> {{ log.entityName }}</div>
+                        <div class="col-md-4"><strong>ID Entidad:</strong> {{ log.entityId }}</div>
+                        <div class="col-md-12" v-if="log.details">
+                          <strong>Detalles adicionales:</strong>
+                          <pre class="mt-2 mb-0 p-3 bg-white rounded-3 small">{{ JSON.stringify(log.details, null, 2) }}</pre>
+                        </div>
+                      </div>
+                    </div>
+                    <button @click.stop="detalleId = null" class="btn btn-sm btn-light border px-3">Cerrar</button>
+                  </div>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
@@ -82,6 +106,11 @@ import StatusBadge from '@/components/StatusBadge.vue'
 
 const loading = ref(true)
 const logs = ref([])
+const detalleId = ref(null)
+
+const toggleDetalle = (log) => {
+  detalleId.value = detalleId.value === log.id ? null : log.id
+}
 
 const filtros = reactive({
   userId: '', action: '', from: '', to: ''

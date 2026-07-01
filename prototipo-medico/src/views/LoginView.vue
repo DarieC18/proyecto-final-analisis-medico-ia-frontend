@@ -61,11 +61,13 @@ const iniciarSesion = async () => {
       return
     }
     auth.setSession(res.data)
-    const role = res.data.roles?.[0]
-    if (role === 'Administrator') {
+    const roles = res.data.roles || []
+    if (roles.includes('Administrator')) {
       router.push('/dashboard-admin')
-    } else {
+    } else if (roles.includes('Doctor') || roles.includes('Nurse')) {
       router.push('/dashboard-medico')
+    } else {
+      router.push('/perfil')
     }
   } catch (err) {
     const data = err.response?.data

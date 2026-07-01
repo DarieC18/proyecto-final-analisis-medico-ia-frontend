@@ -13,10 +13,15 @@
       <div class="card shadow-sm mb-4 border-0">
         <div class="card-body p-3">
           <div class="d-flex gap-3">
-            <div class="input-group">
+            <div class="input-group flex-grow-1">
               <span class="input-group-text bg-light border-0">🔍</span>
-              <input v-model="busqueda" type="text" class="form-control bg-light border-0" placeholder="Buscar por nombre completo o identificación...">
+              <input v-model="busqueda" type="text" class="form-control bg-light border-0" placeholder="Buscar por nombre completo o identificación..." @keyup.enter="buscarApi">
             </div>
+            <button @click="buscarApi" class="btn btn-dark px-4" :disabled="buscandoApi">
+              <span v-if="buscandoApi" class="spinner-border spinner-border-sm me-1"></span>
+              Buscar
+            </button>
+            <button @click="limpiarBusqueda" class="btn btn-light border px-3" v-if="busqueda">Limpiar</button>
           </div>
         </div>
       </div>
@@ -224,6 +229,7 @@ const deleteTarget = ref(null)
 const pacientes = ref([])
 const detalle = ref(null)
 const editId = ref(null)
+const buscandoApi = ref(false)
 
 const form = reactive({
   fullName: '', identificationNumber: '', identificationType: 'Cédula',
@@ -321,6 +327,27 @@ const cancelarForm = () => {
 const confirmarEliminar = (p) => {
   deleteTarget.value = p
   deleteDialog.value = true
+}
+
+const buscarApi = async () => {
+  if (!busqueda.value) {
+    await cargarPacientes()
+    return
+  }
+  buscandoApi.value = true
+  try {
+    const res = await patientService.search(busqueda.value)
+    pacientes.value = res.data || []
+  } catch (err) {
+    error.value = 'Error en la búsqueda'
+  } finally {
+    buscandoApi.value = false
+  }
+}
+
+const limpiarBusqueda = () => {
+  busqueda.value = ''
+  cargarPacientes()
 }
 
 const eliminarPaciente = async () => {
