@@ -9,6 +9,10 @@ namespace MedAnalyzer.Core.Domain.Entities
         public required string Gender { get; set; }
         public required string PhoneNumber { get; set; }
         public required string IdentificationNumber { get; set; }
+        public required string IdentificationType { get; set; }
+        public required string PatientType { get; set; }
+        public bool IsActive { get; set; } = true;
+
 
         public ICollection<Appointment>? Appointments { get; set; }
         public ICollection<MedicalRecord>? MedicalRecords { get; set; }

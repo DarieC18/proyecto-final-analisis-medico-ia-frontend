@@ -311,12 +311,16 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
             return listUsersDtos;
         }
 
-        public virtual async Task<string> ConfirmAccountAsync(string userId, string token)
+        public virtual async Task<UserResponseDto> ConfirmAccountAsync(string userId, string token)
         {
+            UserResponseDto response = new() { HasError = false, Errors = [] };
+
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return "No existe una cuenta registrada con este usuario.";
+                response.HasError = true;
+                response.Errors.Add("No existe una cuenta registrada con este usuario.");
+                return response;
             }
 
             token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
@@ -326,12 +330,14 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
             {
                 user.Status = true;
                 await _userManager.UpdateAsync(user);
-                return $"Cuenta confirmada para {user.Email}. Ya puedes usar la aplicación.";
             }
             else
             {
-                return $"Ocurrió un error al confirmar este correo electrónico: {user.Email}";
+                response.HasError = true;
+                response.Errors.Add($"Ocurrió un error al confirmar este correo electrónico: {user.Email}");
             }
+
+            return response;
         }
 
         public virtual async Task<UserResponseDto> CambiarEstadoAsync(string id)

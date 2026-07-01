@@ -49,7 +49,7 @@ namespace MedAnalyzer.Core.Application.Services
     {
         private readonly IAuditLogRepository _auditLogRepository;
         private readonly IMapper _mapper;
-        private readonly  IBaseAccountService _accountService;
+        private readonly IBaseAccountService _accountService;
 
         public AuditLogService(IMapper mapper, IAuditLogRepository logRepository, IBaseAccountService accountService)
             : base(mapper, logRepository)
