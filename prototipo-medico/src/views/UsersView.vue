@@ -15,7 +15,7 @@
     <div v-else-if="error" class="alert alert-danger border-0 rounded-3">{{ error }}</div>
 
     <template v-else>
-      <div v-if="vista === 'crear'" class="animation-fade">
+      <div v-if="vista === 'crear' || vista === 'editar'" class="animation-fade">
         <div class="card shadow-sm border-0 rounded-4">
           <div class="card-body p-5">
             <h5 class="fw-bold mb-4">Nuevo Usuario</h5>

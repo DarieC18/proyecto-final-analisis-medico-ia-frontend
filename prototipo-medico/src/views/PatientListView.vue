@@ -21,7 +21,13 @@
         </div>
       </div>
 
-      <div v-if="pacientesFiltrados.length === 0" class="text-center py-5 text-muted">
+      <div v-if="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
+
+      <div v-else-if="error" class="alert alert-danger border-0 rounded-3">{{ error }}</div>
+
+      <div v-else-if="pacientesFiltrados.length === 0" class="text-center py-5 text-muted">
         <p>No se encontraron pacientes.</p>
       </div>
       <div v-else class="card shadow-sm overflow-hidden border-0">
@@ -39,14 +45,15 @@
               </tr>
             </thead>
             <tbody class="border-top-0">
-              <tr v-for="(p, idx) in pacientesFiltrados" :key="idx">
-                <td class="ps-4 py-3 fw-bold text-dark">{{ p.nombre }}</td>
-                <td class="py-3 text-muted">{{ p.identificacion }}</td>
-                <td class="py-3 text-muted">{{ p.fechaNacimiento }}</td>
-                <td class="py-3 text-muted">{{ p.telefono }}</td>
-                <td class="py-3"><span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">{{ p.genero }}</span></td>
-                <td class="py-3 text-muted">{{ p.registro }}</td>
+              <tr v-for="p in pacientesFiltrados" :key="p.id">
+                <td class="ps-4 py-3 fw-bold text-dark">{{ p.fullName }}</td>
+                <td class="py-3 text-muted">{{ p.identificationNumber }}</td>
+                <td class="py-3 text-muted">{{ formatDate(p.birthDate) }}</td>
+                <td class="py-3 text-muted">{{ p.phoneNumber }}</td>
+                <td class="py-3"><span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">{{ p.gender }}</span></td>
+                <td class="py-3 text-muted">{{ formatDate(p.createdAt) }}</td>
                 <td class="pe-4 py-3 text-end">
+                  <button @click="abrirDetalle(p)" class="btn btn-sm btn-light border text-info fw-medium px-3 me-2">Ver</button>
                   <button @click="editarPaciente(p)" class="btn btn-sm btn-light border text-warning fw-medium px-3 me-2">Editar</button>
                   <button @click="confirmarEliminar(p)" class="btn btn-sm btn-light border text-danger fw-medium px-3">Eliminar</button>
                 </td>
@@ -61,30 +68,38 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h3 class="fw-bold mb-0">{{ vistaActual === 'crear' ? 'Nuevo Paciente' : 'Editar Paciente' }}</h3>
-          <p v-if="vistaActual === 'editar'" class="text-muted">Modificando datos de: <strong class="text-dark">{{ form.nombre }}</strong></p>
+          <p v-if="vistaActual === 'editar'" class="text-muted">Modificando datos de: <strong class="text-dark">{{ form.fullName }}</strong></p>
         </div>
-        <button @click="vistaActual = 'lista'" class="btn btn-light border text-muted shadow-sm">Volver al listado</button>
+        <button @click="cancelarForm" class="btn btn-light border text-muted shadow-sm">Volver al listado</button>
       </div>
 
       <div class="card shadow-sm border-0 rounded-4">
         <div class="card-body p-5">
+          <div v-if="formError" class="alert alert-danger border-0 rounded-3 py-2 small mb-4">{{ formError }}</div>
           <form @submit.prevent="guardarPaciente">
             <div class="row g-4">
               <div class="col-md-6">
                 <label class="form-label text-muted small fw-bold text-uppercase">Nombre Completo</label>
-                <input v-model="form.nombre" type="text" class="form-control bg-light border-0 py-2" required>
+                <input v-model="form.fullName" type="text" class="form-control bg-light border-0 py-2" required>
               </div>
               <div class="col-md-6">
                 <label class="form-label text-muted small fw-bold text-uppercase">Identificación</label>
-                <input v-model="form.identificacion" type="text" class="form-control bg-light border-0 py-2" required>
+                <input v-model="form.identificationNumber" type="text" class="form-control bg-light border-0 py-2" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label text-muted small fw-bold text-uppercase">Tipo ID</label>
+                <select v-model="form.identificationType" class="form-select bg-light border-0 py-2" required>
+                  <option value="Cédula">Cédula</option>
+                  <option value="Pasaporte">Pasaporte</option>
+                </select>
               </div>
               <div class="col-md-4">
                 <label class="form-label text-muted small fw-bold text-uppercase">Fecha de Nacimiento</label>
-                <input v-model="form.fechaNacimiento" type="date" class="form-control bg-light border-0 py-2" required>
+                <input v-model="form.birthDate" type="date" class="form-control bg-light border-0 py-2" required>
               </div>
               <div class="col-md-4">
                 <label class="form-label text-muted small fw-bold text-uppercase">Género</label>
-                <select v-model="form.genero" class="form-select bg-light border-0 py-2" required>
+                <select v-model="form.gender" class="form-select bg-light border-0 py-2" required>
                   <option value="Masculino">Masculino</option>
                   <option value="Femenino">Femenino</option>
                   <option value="Otro">Otro</option>
@@ -92,14 +107,90 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label text-muted small fw-bold text-uppercase">Teléfono</label>
-                <input v-model="form.telefono" type="text" class="form-control bg-light border-0 py-2" required>
+                <input v-model="form.phoneNumber" type="text" class="form-control bg-light border-0 py-2" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label text-muted small fw-bold text-uppercase">Tipo Paciente</label>
+                <select v-model="form.patientType" class="form-select bg-light border-0 py-2" required>
+                  <option value="General">General</option>
+                  <option value="Crónico">Crónico</option>
+                  <option value="Emergencia">Emergencia</option>
+                </select>
               </div>
             </div>
             <div class="d-flex justify-content-end gap-3 mt-5">
-              <button type="button" @click="vistaActual = 'lista'" class="btn btn-light border px-4 py-2">Cancelar</button>
-              <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm">Guardar Cambios</button>
+              <button type="button" @click="cancelarForm" class="btn btn-light border px-4 py-2">Cancelar</button>
+              <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm" :disabled="saving">
+                <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
+                {{ saving ? 'Guardando...' : 'Guardar Cambios' }}
+              </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="vistaActual === 'detalle'" class="animation-fade">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-bold mb-0">{{ detalle?.fullName }}</h3>
+          <p class="text-muted">Expediente completo del paciente</p>
+        </div>
+        <button @click="cancelarForm" class="btn btn-light border text-muted shadow-sm">Volver al listado</button>
+      </div>
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-5">
+          <div class="row g-4 mb-4">
+            <div class="col-md-4">
+              <label class="form-label text-muted small fw-bold text-uppercase">Identificación</label>
+              <p class="fw-medium">{{ detalle?.identificationNumber }}</p>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-muted small fw-bold text-uppercase">Teléfono</label>
+              <p class="fw-medium">{{ detalle?.phoneNumber }}</p>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-muted small fw-bold text-uppercase">Género</label>
+              <p class="fw-medium">{{ detalle?.gender }}</p>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-muted small fw-bold text-uppercase">Fecha Nacimiento</label>
+              <p class="fw-medium">{{ formatDate(detalle?.birthDate) }}</p>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-muted small fw-bold text-uppercase">Tipo Paciente</label>
+              <p class="fw-medium">{{ detalle?.patientType }}</p>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-muted small fw-bold text-uppercase">Registrado</label>
+              <p class="fw-medium">{{ formatDate(detalle?.createdAt) }}</p>
+            </div>
+          </div>
+
+          <h5 class="fw-bold mt-5 mb-3">Historial de Citas</h5>
+          <div v-if="detalle?.appointments?.length" class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light text-muted">
+                <tr>
+                  <th class="ps-4 py-3 fw-medium">Fecha</th>
+                  <th class="py-3 fw-medium">Médico</th>
+                  <th class="py-3 fw-medium">Motivo</th>
+                  <th class="py-3 fw-medium">Estado</th>
+                </tr>
+              </thead>
+              <tbody class="border-top-0">
+                <tr v-for="r in detalle.appointments" :key="r.id">
+                  <td class="ps-4 py-3">{{ formatDate(r.appointmentDate) }}</td>
+                  <td class="py-3">{{ r.doctorName }}</td>
+                  <td class="py-3">{{ r.reason }}</td>
+                  <td class="py-3">
+                    <StatusBadge :text="r.status" :variant="r.status?.toLowerCase()" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class="text-muted text-center py-4">No hay citas registradas para este paciente.</div>
         </div>
       </div>
     </div>
@@ -117,51 +208,114 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { patientService } from '@/api/patients'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import StatusBadge from '@/components/StatusBadge.vue'
 
 const busqueda = ref('')
 const vistaActual = ref('lista')
+const loading = ref(true)
+const error = ref('')
+const saving = ref(false)
+const formError = ref('')
 const deleteDialog = ref(false)
 const deleteTarget = ref(null)
-const editIndex = ref(-1)
-
-const pacientes = ref([
-  { nombre: 'Juan Pérez', identificacion: '402-1234567-8', fechaNacimiento: '12 Abr 1985', telefono: '809-555-1234', genero: 'Masculino', registro: '15 Jun 2026' },
-  { nombre: 'María Gómez', identificacion: '001-2345678-9', fechaNacimiento: '22 Oct 1990', telefono: '809-555-5678', genero: 'Femenino', registro: '14 Jun 2026' },
-  { nombre: 'Luis Medina', identificacion: '402-9876543-2', fechaNacimiento: '05 Mar 1978', telefono: '829-555-9012', genero: 'Masculino', registro: '12 Jun 2026' },
-  { nombre: 'Ana Rodríguez', identificacion: '001-8765432-1', fechaNacimiento: '18 Jul 1995', telefono: '849-555-3456', genero: 'Femenino', registro: '10 Jun 2026' },
-  { nombre: 'Carlos Santana', identificacion: '402-6543210-5', fechaNacimiento: '30 Ene 1982', telefono: '809-555-7890', genero: 'Masculino', registro: '08 Jun 2026' }
-])
+const pacientes = ref([])
+const detalle = ref(null)
+const editId = ref(null)
 
 const form = reactive({
-  nombre: '', identificacion: '', fechaNacimiento: '', telefono: '', genero: 'Masculino'
+  fullName: '', identificationNumber: '', identificationType: 'Cédula',
+  birthDate: '', gender: 'Masculino', phoneNumber: '', patientType: 'General'
 })
 
 const pacientesFiltrados = computed(() => {
   if (!busqueda.value) return pacientes.value
   const q = busqueda.value.toLowerCase()
   return pacientes.value.filter(p =>
-    p.nombre.toLowerCase().includes(q) || p.identificacion.includes(q)
+    p.fullName?.toLowerCase().includes(q) || p.identificationNumber?.includes(q)
   )
 })
 
-const editarPaciente = (p) => {
-  editIndex.value = pacientes.value.indexOf(p)
-  Object.assign(form, { ...p })
-  vistaActual.value = 'editar'
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  try {
+    return new Date(dateStr).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+  } catch {
+    return dateStr
+  }
 }
 
-const guardarPaciente = () => {
-  if (vistaActual.value === 'crear') {
-    pacientes.value.push({
-      ...form,
-      registro: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
-    })
-  } else if (editIndex.value >= 0) {
-    pacientes.value[editIndex.value] = { ...form, registro: pacientes.value[editIndex.value].registro }
+const cargarPacientes = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const res = await patientService.getAll()
+    pacientes.value = res.data || []
+  } catch (err) {
+    if (err.response?.status === 404 || err.response?.status === 204) {
+      pacientes.value = []
+    } else {
+      error.value = 'Error al cargar pacientes'
+    }
+  } finally {
+    loading.value = false
   }
+}
+
+const abrirDetalle = async (p) => {
+  vistaActual.value = 'detalle'
+  try {
+    const res = await patientService.getDetails(p.id)
+    detalle.value = res.data || p
+  } catch {
+    error.value = 'Error al cargar detalle del paciente'
+  }
+}
+
+const editarPaciente = (p) => {
+  editId.value = p.id
+  Object.assign(form, {
+    fullName: p.fullName || '',
+    identificationNumber: p.identificationNumber || '',
+    identificationType: p.identificationType || 'Cédula',
+    birthDate: p.birthDate ? p.birthDate.substring(0, 10) : '',
+    gender: p.gender || 'Masculino',
+    phoneNumber: p.phoneNumber || '',
+    patientType: p.patientType || 'General'
+  })
+  vistaActual.value = 'editar'
+  formError.value = ''
+}
+
+const guardarPaciente = async () => {
+  saving.value = true
+  formError.value = ''
+  try {
+    if (vistaActual.value === 'crear') {
+      await patientService.create({ ...form })
+    } else {
+      await patientService.update(editId.value, { ...form })
+    }
+    vistaActual.value = 'lista'
+    await cargarPacientes()
+  } catch (err) {
+    const data = err.response?.data
+    formError.value = data?.errors?.join(', ') || data?.message || 'Error al guardar paciente'
+  } finally {
+    saving.value = false
+  }
+}
+
+const cancelarForm = () => {
   vistaActual.value = 'lista'
+  detalle.value = null
+  editId.value = null
+  Object.assign(form, {
+    fullName: '', identificationNumber: '', identificationType: 'Cédula',
+    birthDate: '', gender: 'Masculino', phoneNumber: '', patientType: 'General'
+  })
 }
 
 const confirmarEliminar = (p) => {
@@ -169,11 +323,17 @@ const confirmarEliminar = (p) => {
   deleteDialog.value = true
 }
 
-const eliminarPaciente = () => {
-  const idx = pacientes.value.indexOf(deleteTarget.value)
-  if (idx >= 0) pacientes.value.splice(idx, 1)
+const eliminarPaciente = async () => {
   deleteDialog.value = false
+  try {
+    await patientService.remove(deleteTarget.value.id)
+    await cargarPacientes()
+  } catch (err) {
+    error.value = 'Error al eliminar paciente'
+  }
 }
+
+onMounted(cargarPacientes)
 </script>
 
 <style scoped>
