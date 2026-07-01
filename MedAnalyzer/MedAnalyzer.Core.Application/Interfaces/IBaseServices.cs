@@ -10,7 +10,9 @@
         Task<TDto?> SaveDtoAsync(TDto dtoSave);
         Task<List<TDto>> GetWithInclude(List<string> properties);
         Task<bool> DeleteHardDtoAsync(int dtoDelete);
+        Task<List<TDto>> GetAllQuery();
 
-       
+
+
     }
 }

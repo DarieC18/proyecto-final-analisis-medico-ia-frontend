@@ -15,5 +15,8 @@ export const authService = {
   },
   resetPassword(id, token, password) {
     return api.post('/api/v1/Auth/reset-password', { id, token, password })
+  },
+  confirmAccount(userId, token) {
+    return api.get('/api/v1/Auth/confirm-account', { params: { userId, token } })
   }
 }

@@ -1,6 +1,7 @@
 using MedAnalyzer.Core.Application.Dto.Dashboard;
 using MedAnalyzer.Core.Application.Interfaces;
 using MedAnalyzer.Core.Domain.Entities;
+using MedAnalyzer.Core.Domain.Enum;
 using MedAnalyzer.Core.Domain.Interfaces;
 using MedAnalyzer.Infraestructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -45,6 +46,29 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
 
             var latestLogs = await _auditLogService.GetFilteredAsync(null, null, null, null);
 
+            var todayStart = DateTime.UtcNow.Date;
+            var todayEnd = todayStart.AddDays(1);
+
+            var totalAppointmentsToday = await _appointmentRepo.GetAllQuery()
+                .CountAsync(a => a.AppointmentDate >= todayStart && a.AppointmentDate < todayEnd);
+
+            var completedToday = await _appointmentRepo.GetAllQuery()
+                .CountAsync(a => a.AppointmentDate >= todayStart && a.AppointmentDate < todayEnd
+                              && a.Status == AppointmentStatus.Completed.ToString());
+
+            var pendingToday = await _appointmentRepo.GetAllQuery()
+                .CountAsync(a => a.AppointmentDate >= todayStart && a.AppointmentDate < todayEnd
+                              && a.Status == AppointmentStatus.Pending.ToString());
+
+            var pendingAi = await _aiAnalysisRepo.GetAllQuery()
+                .CountAsync(a => a.Status == AiAnalysisStatus.Pending.ToString());
+
+            var approvedAi = await _aiAnalysisRepo.GetAllQuery()
+                .CountAsync(a => a.Status == AiAnalysisStatus.Approved.ToString());
+
+            var rejectedAi = await _aiAnalysisRepo.GetAllQuery()
+                .CountAsync(a => a.Status == AiAnalysisStatus.Rejected.ToString());
+
             return new AdminDashboardDto
             {
                 TotalUsers = totalUsers,
@@ -54,7 +78,13 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
                 AppointmentsByStatus = appointmentsByStatus.ToDictionary(x => x.Key, x => x.Count),
                 TotalAiAnalyses = await _aiAnalysisRepo.GetAllQuery().CountAsync(),
                 ActiveAlerts = await _alertRepo.GetAllQuery().CountAsync(a => !a.IsResolved),
-                LatestAuditLogs = latestLogs.Take(10).ToList()
+                LatestAuditLogs = latestLogs.Take(10).ToList(),
+                TotalAppointmentsToday = totalAppointmentsToday,
+                CompletedAppointmentsToday = completedToday,
+                PendingAppointmentsToday = pendingToday,
+                PendingAiAnalyses = pendingAi,
+                ApprovedAiAnalyses = approvedAi,
+                RejectedAiAnalyses = rejectedAi
             };
         }
     }

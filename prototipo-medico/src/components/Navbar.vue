@@ -10,16 +10,20 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mx-auto gap-3 fw-medium text-secondary">
 
-          <!-- Clinical dropdown -->
-          <li class="nav-item dropdown" :class="{ show: showClinical }">
+          <!-- Clinical dropdown (solo Doctor/Nurse) -->
+          <li v-if="auth.hasRole('Doctor') || auth.hasRole('Nurse')" class="nav-item dropdown" :class="{ show: showClinical }">
             <button @click="showClinical = !showClinical" class="btn btn-sm btn-light border rounded-pill px-3 py-1 d-flex align-items-center gap-1 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
               <span>🩺</span>
               <span>Clínico</span>
             </button>
-            <ul class="dropdown-menu shadow-sm border-0 rounded-4 p-2 mt-2" :class="{ show: showClinical }" style="min-width: 200px;">
+            <ul class="dropdown-menu shadow-sm border-0 rounded-4 p-2 mt-2" :class="{ show: showClinical }" style="min-width: 220px;">
               <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/dashboard-medico">📊 Dashboard Médico</RouterLink></li>
               <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/pacientes">👥 Pacientes</RouterLink></li>
               <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/citas">📅 Citas Médicas</RouterLink></li>
+              <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/alertas">🔔 Alertas</RouterLink></li>
+              <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/recomendaciones">💡 Recomendaciones</RouterLink></li>
+              <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/documentos">📄 Documentos</RouterLink></li>
+              <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/reportes">📋 Reportes</RouterLink></li>
             </ul>
           </li>
 

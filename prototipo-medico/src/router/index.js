@@ -3,6 +3,7 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import ForgotPasswordView from '../views/ForgotPasswordView.vue'
 import ResetPasswordView from '../views/ResetPasswordView.vue'
+import ConfirmAccountView from '../views/ConfirmAccountView.vue'
 import DoctorDashboardView from '../views/DoctorDashboardView.vue'
 import AdminDashboardView from '../views/AdminDashboardView.vue'
 import PatientListView from '../views/PatientListView.vue'
@@ -11,6 +12,10 @@ import AppointmentDetailView from '../views/AppointmentDetailView.vue'
 import UsersView from '../views/UsersView.vue'
 import AuditLogView from '../views/AuditLogView.vue'
 import ProfileView from '../views/ProfileView.vue'
+import AlertsView from '../views/AlertsView.vue'
+import RecommendationsView from '../views/RecommendationsView.vue'
+import MedicalDocumentsView from '../views/MedicalDocumentsView.vue'
+import ReportsView from '../views/ReportsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -44,10 +49,16 @@ const router = createRouter({
       meta: { public: true }
     },
     {
+      path: '/confirm-account',
+      name: 'confirm-account',
+      component: ConfirmAccountView,
+      meta: { public: true }
+    },
+    {
       path: '/dashboard-medico',
       name: 'dashboard-medico',
       component: DoctorDashboardView,
-      meta: { roles: ['Doctor', 'Nurse', 'Administrator'] }
+      meta: { roles: ['Doctor', 'Nurse'] }
     },
     {
       path: '/dashboard-admin',
@@ -59,19 +70,20 @@ const router = createRouter({
       path: '/pacientes',
       name: 'pacientes',
       component: PatientListView,
-      meta: { roles: ['Doctor', 'Nurse', 'Administrator'] }
+      meta: { roles: ['Doctor', 'Nurse'] }
     },
     {
       path: '/citas',
       name: 'citas',
       component: AppointmentsView,
-      meta: { roles: ['Doctor', 'Nurse', 'Administrator'] }
+      meta: { roles: ['Doctor', 'Nurse'] }
     },
     {
-      path: '/citas/detalle',
+      path: '/citas/:id',
       name: 'detalle-cita',
       component: AppointmentDetailView,
-      meta: { roles: ['Doctor', 'Nurse', 'Administrator'] }
+      props: true,
+      meta: { roles: ['Doctor', 'Nurse'] }
     },
     {
       path: '/usuarios',
@@ -90,6 +102,30 @@ const router = createRouter({
       name: 'perfil',
       component: ProfileView,
       meta: { roles: ['Doctor', 'Nurse', 'Administrator', 'ConsultationUser'] }
+    },
+    {
+      path: '/alertas',
+      name: 'alertas',
+      component: AlertsView,
+      meta: { roles: ['Doctor', 'Nurse'] }
+    },
+    {
+      path: '/recomendaciones',
+      name: 'recomendaciones',
+      component: RecommendationsView,
+      meta: { roles: ['Doctor', 'Nurse'] }
+    },
+    {
+      path: '/documentos',
+      name: 'documentos',
+      component: MedicalDocumentsView,
+      meta: { roles: ['Doctor', 'Nurse'] }
+    },
+    {
+      path: '/reportes',
+      name: 'reportes',
+      component: ReportsView,
+      meta: { roles: ['Doctor', 'Nurse'] }
     }
   ]
 })
@@ -105,8 +141,10 @@ router.beforeEach((to, from, next) => {
   } else if (to.meta.public && isAuthenticated) {
     if (roles.includes('Administrator')) {
       next('/dashboard-admin')
-    } else {
+    } else if (roles.includes('Doctor') || roles.includes('Nurse')) {
       next('/dashboard-medico')
+    } else {
+      next('/perfil')
     }
   } else if (!to.meta.public && to.meta.roles && isAuthenticated) {
     const hasRole = to.meta.roles.some(r => roles.includes(r))
@@ -115,8 +153,10 @@ router.beforeEach((to, from, next) => {
     } else {
       if (roles.includes('Administrator')) {
         next('/dashboard-admin')
-      } else {
+      } else if (roles.includes('Doctor') || roles.includes('Nurse')) {
         next('/dashboard-medico')
+      } else {
+        next('/perfil')
       }
     }
   } else {

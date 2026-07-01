@@ -6,7 +6,7 @@ namespace MedAnalyzer.Core.Domain.Entities
     public class Appointment : BaseEntity<int>
     {
         public int PatientId { get; set; }
-        public int DoctorId { get; set; }
+        public required string DoctorId { get; set; }
         public DateTime AppointmentDate { get; set; }
         public required string Status { get; set; } 
         public required string Reason { get; set; } 
