@@ -10,7 +10,6 @@ obj/
 
 
 **/appsettings.Development.json
-**/appsettings.json
 
 # Postman - solo versionar collections y globals
 postman/environments/
