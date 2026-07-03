@@ -1,3 +1,26 @@
+.vs/
+.vscode/
+
+bin/
+obj/
+
+*.user
+*.suo
+*.cache
+
+
+**/appsettings.Development.json
+
+# Postman - solo versionar collections y globals
+postman/environments/
+postman/flows/
+postman/mocks/
+postman/specs/
+.postman/
+postman/
+
+# EF Core Migrations — cada dev genera las suyas localmente
+**/Migrations/
 # Logs
 logs
 *.log
