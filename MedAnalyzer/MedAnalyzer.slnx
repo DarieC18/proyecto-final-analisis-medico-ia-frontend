@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/Src/" />
+  <Folder Name="/Src/Core/" />
+  <Folder Name="/Src/Core/Application/">
+    <Project Path="MedAnalyzer.Core.Application/MedAnalyzer.Core.Application.csproj" />
+  </Folder>
+  <Folder Name="/Src/Core/Domain/">
+    <Project Path="MedAnalyzer.Core.Domain/MedAnalyzer.Core.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Src/Infraestructure/">
+    <Project Path="MedAnalyzer.Infraestructure.Identity/MedAnalyzer.Infraestructure.Identity.csproj" />
+    <Project Path="MedAnalyzer.Infraestructure.Persistences/MedAnalyzer.Infraestructure.Persistences.csproj" />
+    <Project Path="MedAnalyzer.Infraestructure.Shared/MedAnalyzer.Infraestructure.Shared.csproj" Id="9dc8cef1-93a1-4017-b662-34da5aebebba" />
+  </Folder>
+  <Folder Name="/Src/Presentation/">
+    <Project Path="MedAnalyzer.Api/MedAnalyzer.Api.csproj" Id="811627e3-ae57-4c01-8d38-47e43f3d87f0" />
+  </Folder>
+</Solution>

@@ -1,0 +1,6 @@
+@MedAnalyzer.Api_HostAddress = http://localhost:5197
+
+GET {{MedAnalyzer.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
