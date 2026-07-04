@@ -1,7 +1,10 @@
 import api from './axios'
 
 export const dashboardService = {
-  getStats() {
-    return api.get('/api/AdminDashboard')
+  getAdminStats() {
+    return api.get('/api/v1/dashboard')
+  },
+  getDoctorStats() {
+    return api.get('/api/v1/dashboard/doctor')
   }
 }

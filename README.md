@@ -34,26 +34,60 @@ Módulo frontend del sistema **Smart-Medical IA**, una plataforma de análisis c
 - Tarjetas de estadísticas reutilizables
 
 ### Módulo de Pacientes
-- Listado de pacientes con filtros
+- Listado de pacientes conectado a la API con filtros de búsqueda
 - Creación, edición y eliminación de pacientes
-- Visualización de expediente clínico
+- Visualización de expediente clínico completo con datos del backend
+- Historial de citas agendadas del paciente
 
 ### Módulo de Citas
 - Listado de citas con filtros por estado y fecha
+- Creación de citas con selección de paciente
 - Vista de detalle de cita con pestañas:
   - Información general
-  - Síntomas
-  - Signos vitales
+  - Síntomas (registro y visualización)
+  - Signos vitales (registro y visualización)
   - Análisis IA (diagnóstico asistido)
 - Alertas y recomendaciones generadas por IA
+
+### Módulo de Registros Clínicos (Medical Records)
+- Creación de registros clínicos asociados a citas
+- Diagnóstico inicial, notas, antecedentes y observaciones
+- Visualización en el expediente del paciente
+
+### Módulo de Signos Vitales
+- Registro de presión arterial, frecuencia cardíaca, temperatura, saturación de oxígeno, peso y talla
+- Asociación a citas médicas
+
+### Módulo de Síntomas
+- Registro de síntomas con severidad y duración
+- Asociación a citas médicas
+
+### Módulo de Análisis IA
+- Análisis de diagnóstico asistido por inteligencia artificial
+- Resultados y recomendaciones generadas automáticamente
+
+### Módulo de Alertas y Recomendaciones
+- Alertas generadas por el sistema de IA
+- Recomendaciones personalizadas por paciente
+- Visualización en el detalle de la cita
+
+### Módulo de Documentos Médicos
+- Subida y gestión de documentos clínicos (imágenes, PDFs)
+- Asociación a pacientes y citas
+
+### Módulo de Reportes
+- Generación de reportes de pacientes
+- Descarga en formato PDF
 
 ### Módulo de Administración
 - Gestión de usuarios (CRUD completo)
 - Activación/desactivación de cuentas
+- Asignación de roles (Administrator, Doctor, Nurse, ConsultationUser)
 - Registro de auditoría con filtros por usuario, acción y rango de fechas
 
 ### Módulo de Perfil
 - Visualización del perfil del usuario autenticado
+- Cambio de contraseña
 
 ---
 
@@ -98,10 +132,10 @@ psql --version
 <a id="clonar-el-repositorio"></a>
 ## 📥 Clonar el repositorio
 
-Clona la rama `frontend-admin` del repositorio:
+Clona la rama `frontend-module-complete` del repositorio:
 
 ```bash
-git clone -b frontend-admin https://github.com/DarieC18/proyecto-final-analisis-medico-ia-frontend.git
+git clone -b frontend-module-complete https://github.com/DarieC18/proyecto-final-analisis-medico-ia-frontend.git
 cd proyecto-final-analisis-medico-ia-frontend
 ```
 
@@ -150,18 +184,27 @@ psql -U postgres -d MedAnalyzerDb -f prototipo-medico/seed.sql
 <a id="configurar-y-ejecutar-el-backend-net"></a>
 ## ⚙️ Configurar y ejecutar el Backend (.NET)
 
-### 1. Restaurar paquetes NuGet
+### 1. Configurar la cadena de conexión
+
+Edita `MedAnalyzer/MedAnalyzer.Api/appsettings.json` y ajusta la conexión a PostgreSQL:
+```json
+"ConnectionStrings": {
+  "ConnectionDb": "Host=localhost;Port=5432;Database=MedAnalyzerDb;Username=postgres;Password=1234"
+}
+```
+
+### 2. Restaurar paquetes NuGet
 
 ```bash
 cd MedAnalyzer
 dotnet restore
 ```
 
-### 2. Ejecutar migraciones (la base de datos se crea automáticamente al iniciar)
+### 3. Ejecutar migraciones (la base de datos se crea automáticamente al iniciar)
 
-El proyecto usa Entity Framework Core con `EnsureCreated()` o migraciones automáticas. Al ejecutar el backend por primera vez, las tablas se crearán solas.
+El proyecto usa Entity Framework Core con migraciones automáticas. Al ejecutar el backend por primera vez, las tablas se crearán solas.
 
-### 3. Iniciar el servidor backend
+### 4. Iniciar el servidor backend
 
 ```bash
 cd MedAnalyzer.Api
@@ -212,9 +255,11 @@ Los archivos estáticos se generarán en la carpeta `dist/`.
 
 ### Credenciales por defecto (seed automático del backend)
 
-| Rol          | Usuario      | Contraseña |
-|--------------|-------------|------------|
-| Administrator | Administrador | 1234       |
+| Rol              | Usuario           | Contraseña      |
+|------------------|-------------------|-----------------|
+| Administrator    | Administrador     | 123Pas$$word!   |
+| Doctor           | Doctor            | 123Pas$$word!   |
+| ConsultationUser | ConsultationUser  | 123Pas$$word!   |
 
 ### Flujo de prueba recomendado
 
@@ -251,7 +296,15 @@ proyecto-final-analisis-medico-ia-frontend/
 │   │   │   ├── auth.js                  # Auth endpoints
 │   │   │   ├── account.js               # CRUD de usuarios
 │   │   │   ├── dashboard.js             # Estadísticas del dashboard
-│   │   │   └── auditLog.js              # Registro de auditoría
+│   │   │   ├── auditLog.js              # Registro de auditoría
+│   │   │   ├── patients.js              # Pacientes
+│   │   │   ├── appointments.js          # Citas
+│   │   │   ├── medicalRecords.js        # Registros clínicos
+│   │   │   ├── vitalSigns.js            # Signos vitales
+│   │   │   ├── symptoms.js              # Síntomas
+│   │   │   ├── aiAnalysis.js            # Análisis IA
+│   │   │   ├── alerts.js                # Alertas
+│   │   │   └── recommendations.js       # Recomendaciones
 │   │   ├── components/                  # Componentes reutilizables
 │   │   │   ├── Navbar.vue               # Barra de navegación
 │   │   │   ├── StatCard.vue             # Tarjeta de estadística
@@ -282,11 +335,32 @@ proyecto-final-analisis-medico-ia-frontend/
 │
 ├── MedAnalyzer/                         # Backend .NET
 │   ├── MedAnalyzer.Api/                 # API (controladores, Program.cs)
-│   ├── MedAnalyzer.Core.Application/    # Lógica de aplicación (DTOs, interfaces)
+│   │   └── Controllers/
+│   │       ├── AuthController.cs
+│   │       ├── AccountController.cs
+│   │       ├── AuditLogController.cs
+│   │       ├── PatientController.cs
+│   │       ├── AppointmentController.cs
+│   │       ├── MedicalRecordController.cs
+│   │       ├── VitalSignController.cs
+│   │       ├── SymptomController.cs
+│   │       ├── AiAnalysisController.cs
+│   │       ├── MedicalDocumentController.cs
+│   │       ├── AlertController.cs
+│   │       ├── RecommendationController.cs
+│   │       ├── ReportController.cs
+│   │       ├── DashboardController.cs
+│   │       └── AdminDashboardController.cs
+│   ├── MedAnalyzer.Core.Application/    # Lógica de aplicación (DTOs, interfaces, servicios)
+│   │   ├── Base/
+│   │   ├── Dto/
+│   │   ├── Interfaces/
+│   │   ├── Mappers/
+│   │   └── Services/
 │   ├── MedAnalyzer.Core.Domain/         # Entidades del dominio
 │   ├── MedAnalyzer.Infraestructure.Identity/  # Identity (usuarios, JWT)
 │   ├── MedAnalyzer.Infraestructure.Persistences/ # EF Core, DbContext
-│   └── MedAnalyzer.Infraestructure.Shared/      # Servicios compartidos (email)
+│   └── MedAnalyzer.Infraestructure.Shared/      # Servicios compartidos (email, archivos)
 ```
 
 ---
@@ -324,7 +398,6 @@ Esto asegura que el enlace de restablecimiento de contraseña enviado por correo
 
 ## 📌 Notas importantes
 
-- Las vistas de **Pacientes** y **Citas** actualmente usan datos mock (hardcoded) y no están conectadas a la API.
-- La funcionalidad de **registro de usuario** desde el frontend envía los datos a la API, pero la creación exitosa depende de las reglas de negocio del backend.
+- Todas las vistas del frontend están conectadas a la API REST del backend.
 - El proyecto no usa variables de entorno (`.env`); toda la configuración está en `appsettings.json` y `vite.config.js`.
 - El interceptor de Axios redirige automáticamente al login si recibe un `401 Unauthorized`.

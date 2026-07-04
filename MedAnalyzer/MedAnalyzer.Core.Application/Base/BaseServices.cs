@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MedAnalyzer.Core.Application.Interfaces;
 using MedAnalyzer.Core.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace MedAnalyzer.Core.Application.Base
 {
@@ -69,10 +67,21 @@ namespace MedAnalyzer.Core.Application.Base
         {
             try
             {
-                var query = _repository.GetAllQueryWithInclude(properties);
+                var entities = await _repository.GetAllListWithInclude(properties);
+                return _mapper.Map<List<Tdto>>(entities);
+            }
+            catch
+            {
+                return [];
+            }
+        }
 
-                var result = await query.ProjectTo<Tdto>(_mapper.ConfigurationProvider).ToListAsync();
-
+        public async Task<List<Tdto>> GetAllQuery()
+        {
+            try
+            {
+                var query = _repository.GetAllQuery();
+                var result = _mapper.Map<List<Tdto>>(query);
                 return result;
             }
             catch
@@ -102,7 +111,7 @@ namespace MedAnalyzer.Core.Application.Base
             }
         }
 
-        public async Task<Tdto?> UpdateDtoAsync(Tdto dtoUpdate, int id)
+        public virtual async Task<Tdto?> UpdateDtoAsync(Tdto dtoUpdate, int id)
         {
             try
             {

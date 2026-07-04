@@ -31,11 +31,12 @@ namespace MedAnalyzer.Infraestructure.Persistences.Repositories
 
             foreach (var property in properties)
             {
-                query.Include(property);
+                query = query.Include(property);
             }
 
             return query;
         }
+
 
         public virtual async Task<List<TEntity>> GetAllListWithInclude(List<string> properties)
         {
@@ -43,11 +44,13 @@ namespace MedAnalyzer.Infraestructure.Persistences.Repositories
 
             foreach (var property in properties)
             {
-                query.Include(property);
+                query = query.Include(property);
             }
 
             return await query.ToListAsync();
         }
+
+
 
         public virtual async Task<TEntity?> GetEntityByIdAsync(int Id)
         {
@@ -78,6 +81,10 @@ namespace MedAnalyzer.Infraestructure.Persistences.Repositories
 
             if (entry != null)
             {
+                foreach (var keyProp in _context.Entry(entry).Metadata.FindPrimaryKey()!.Properties)
+                    entity.GetType().GetProperty(keyProp.Name)
+                        ?.SetValue(entity, _context.Entry(entry).Property(keyProp.Name).CurrentValue);
+
                 _context.Entry(entry).CurrentValues.SetValues(entity);
                 await _context.SaveChangesAsync();
                 return entry;

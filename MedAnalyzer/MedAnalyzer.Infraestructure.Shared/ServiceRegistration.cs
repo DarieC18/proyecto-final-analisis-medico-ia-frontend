@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using MedAnalyzer.Core.Application.Interfaces;
+﻿using MedAnalyzer.Core.Application.Interfaces;
 using MedAnalyzer.Core.Domain.Setting;
 using MedAnalyzer.Infraestructure.Shared.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MedAnalyzer.Infraestructure.Shared
 {
@@ -15,8 +15,9 @@ namespace MedAnalyzer.Infraestructure.Shared
             
             #endregion
 
-            #region Services 
+            #region Services
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IFileStorageService, FileStorageService>();
             #endregion
         }
     }

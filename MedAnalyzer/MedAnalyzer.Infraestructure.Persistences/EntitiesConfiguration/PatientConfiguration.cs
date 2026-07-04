@@ -16,6 +16,9 @@ namespace MedAnalyzer.Infraestructure.Persistences.EntitiesConfiguration
             builder.Property(p => p.IdentificationNumber).IsRequired().HasMaxLength(50);
             builder.HasIndex(p => p.IdentificationNumber).IsUnique();
             builder.Property(p => p.CreatedAt).IsRequired();
+            builder.Property(p => p.IdentificationType).IsRequired().HasMaxLength(50);
+            builder.Property(p => p.PatientType).IsRequired().HasMaxLength(50);
+            builder.Property(p => p.IsActive).IsRequired();
         }
     }
 }

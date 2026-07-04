@@ -98,7 +98,7 @@ const totalCitas = computed(() => {
 
 onMounted(async () => {
   try {
-    const res = await dashboardService.getStats()
+    const res = await dashboardService.getAdminStats()
     stats.value = res.data
   } catch (err) {
     if (err.response?.status === 404 || err.response?.status === 204) {

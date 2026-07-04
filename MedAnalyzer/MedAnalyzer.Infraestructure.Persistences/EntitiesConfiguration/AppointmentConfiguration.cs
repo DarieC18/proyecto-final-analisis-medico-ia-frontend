@@ -10,6 +10,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.EntitiesConfiguration
         {
             builder.ToTable("Appointments");
             builder.HasKey(a => a.Id);
+            builder.Property(a => a.DoctorId).IsRequired().HasMaxLength(450);
             builder.Property(a => a.Status).IsRequired().HasMaxLength(30);
             builder.Property(a => a.Reason).IsRequired().HasMaxLength(500);
             builder.Property(a => a.Notes).HasMaxLength(2000);

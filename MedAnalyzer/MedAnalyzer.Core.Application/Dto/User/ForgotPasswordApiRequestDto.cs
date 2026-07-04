@@ -1,5 +1,3 @@
-﻿using Swashbuckle.AspNetCore.Annotations;
-
 namespace MedAnalyzer.Core.Application.Dto.User
 {
     /// <summary>
@@ -8,7 +6,6 @@ namespace MedAnalyzer.Core.Application.Dto.User
     public class ForgotPasswordApiRequestDto
     {
         /// <example>juanp</example>
-        [SwaggerParameter(Description = "The username of the account requesting password reset")]
         public required string UserName { get; set; }
     }
 }

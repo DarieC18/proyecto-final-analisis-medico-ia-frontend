@@ -13,6 +13,7 @@ const props = defineProps({
 const badgeClass = computed(() => {
   const map = {
     pending: 'bg-warning bg-opacity-10 text-warning',
+    inprogress: 'bg-primary bg-opacity-10 text-primary',
     completed: 'bg-success bg-opacity-10 text-success',
     cancelled: 'bg-danger bg-opacity-10 text-danger',
     active: 'bg-success bg-opacity-10 text-success',

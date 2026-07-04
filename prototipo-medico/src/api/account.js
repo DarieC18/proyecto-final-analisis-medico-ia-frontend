@@ -2,18 +2,18 @@ import api from './axios'
 
 export const accountService = {
   getAll() {
-    return api.get('/api/Account')
+    return api.get('/api/v1/account')
   },
   create(data) {
-    return api.post('/api/Account', data)
+    return api.post('/api/v1/account', data)
   },
   update(id, data) {
-    return api.put(`/api/Account/${id}`, data)
+    return api.put(`/api/v1/account/${id}`, data)
   },
   toggleStatus(id) {
-    return api.patch(`/api/Account/${id}/status`)
+    return api.patch(`/api/v1/account/${id}/status`)
   },
   remove(id) {
-    return api.delete(`/api/Account/${id}`)
+    return api.delete(`/api/v1/account/${id}`)
   }
 }

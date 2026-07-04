@@ -5,7 +5,7 @@ namespace MedAnalyzer.Core.Application.Interfaces
     public interface IBaseAccountService
     {
         Task<UserResponseDto> CambiarEstadoAsync(string id);
-        Task<string> ConfirmAccountAsync(string userId, string token);
+        Task<UserResponseDto> ConfirmAccountAsync(string userId, string token);
         Task<UserResponseDto> DeleteAsync(string id);
         Task<UserResponseDto> ForgotPasswordAsync(ForgotPasswordRequestDto request);
         Task<List<UserDto>> GetAllUser(bool? isActive = true);

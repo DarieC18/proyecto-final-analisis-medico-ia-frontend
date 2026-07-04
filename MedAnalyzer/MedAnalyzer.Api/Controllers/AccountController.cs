@@ -1,3 +1,4 @@
+using MedAnalyzer.Api.Models;
 using MedAnalyzer.Core.Application.Dto.User;
 using MedAnalyzer.Core.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +7,8 @@ using System.Security.Claims;
 
 namespace MedAnalyzer.Api.Controllers
 {
-    [Route("api/[controller]")]
+    /// <summary>Gestión de cuentas de usuario (solo administradores).</summary>
+    [Route("api/v1/[controller]")]
     [ApiController]
     [Authorize(Roles = "Administrator")]
     public class AccountController : ControllerBase
@@ -20,6 +22,8 @@ namespace MedAnalyzer.Api.Controllers
             _auditLogService = auditLogService;
         }
 
+        /// <summary>Obtiene la lista de todos los usuarios del sistema.</summary>
+        /// <returns>Lista de usuarios registrados.</returns>
         [HttpGet]
         [ProducesResponseType(typeof(List<UserDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
@@ -28,6 +32,9 @@ namespace MedAnalyzer.Api.Controllers
             return Ok(users);
         }
 
+        /// <summary>Crea un nuevo usuario en el sistema.</summary>
+        /// <param name="dto">Datos del nuevo usuario.</param>
+        /// <returns>Datos del usuario creado.</returns>
         [HttpPost]
         [ProducesResponseType(typeof(RegisterResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(RegisterResponseDto), StatusCodes.Status400BadRequest)]
@@ -45,6 +52,10 @@ namespace MedAnalyzer.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, response);
         }
 
+        /// <summary>Actualiza los datos de un usuario existente.</summary>
+        /// <param name="id">Identificador del usuario.</param>
+        /// <param name="dto">Nuevos datos del usuario.</param>
+        /// <returns>Datos del usuario actualizado.</returns>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status400BadRequest)]
@@ -61,14 +72,17 @@ namespace MedAnalyzer.Api.Controllers
             return Ok(response);
         }
 
+        /// <summary>Activa o desactiva la cuenta de un usuario.</summary>
+        /// <param name="id">Identificador del usuario.</param>
+        /// <returns>Estado actualizado del usuario.</returns>
         [HttpPatch("{id}/status")]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ToggleStatus(string id)
         {
             var currentUserId = User.FindFirstValue("uid");
             if (currentUserId == id)
-                return BadRequest(new { Message = "No puedes inactivar tu propia cuenta." });
+                return BadRequest(new ErrorResponse { Message = "No puedes inactivar tu propia cuenta." });
 
             var response = await _accountService.CambiarEstadoAsync(id);
 
@@ -80,6 +94,9 @@ namespace MedAnalyzer.Api.Controllers
             return Ok(response);
         }
 
+        /// <summary>Elimina un usuario del sistema.</summary>
+        /// <param name="id">Identificador del usuario.</param>
+        /// <returns>Resultado de la operación.</returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status400BadRequest)]
