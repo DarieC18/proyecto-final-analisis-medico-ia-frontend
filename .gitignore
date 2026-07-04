@@ -16,6 +16,8 @@ postman/specs/
 .postman/
 postman/
 
+# EF Core Migrations
+
 # Logs
 logs
 *.log
