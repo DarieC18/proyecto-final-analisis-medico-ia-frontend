@@ -19,9 +19,6 @@ postman/specs/
 .postman/
 postman/
 
-# EF Core Migrations — cada dev genera las suyas localmente
-**/Migrations/
-
 # Logs
 logs
 *.log
