@@ -8,6 +8,9 @@ obj/
 *.suo
 *.cache
 
+
+**/appsettings.Development.json
+
 # Postman - solo versionar collections y globals
 postman/environments/
 postman/flows/
