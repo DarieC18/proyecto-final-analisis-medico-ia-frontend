@@ -16,6 +16,13 @@ import AlertsView from '../views/AlertsView.vue'
 import RecommendationsView from '../views/RecommendationsView.vue'
 import MedicalDocumentsView from '../views/MedicalDocumentsView.vue'
 import ReportsView from '../views/ReportsView.vue'
+import AiChatView from '../views/AiChatView.vue'
+import PortalProfileView from '../views/patient/PortalProfileView.vue'
+import PortalAppointmentsView from '../views/patient/PortalAppointmentsView.vue'
+import PortalMedicalRecordsView from '../views/patient/PortalMedicalRecordsView.vue'
+import PortalRecommendationsView from '../views/patient/PortalRecommendationsView.vue'
+import PortalDocumentsView from '../views/patient/PortalDocumentsView.vue'
+import PortalResultsView from '../views/patient/PortalResultsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -101,7 +108,7 @@ const router = createRouter({
       path: '/perfil',
       name: 'perfil',
       component: ProfileView,
-      meta: { roles: ['Doctor', 'Nurse', 'Administrator', 'ConsultationUser'] }
+      meta: { roles: ['Doctor', 'Nurse', 'Administrator'] }
     },
     {
       path: '/alertas',
@@ -126,41 +133,76 @@ const router = createRouter({
       name: 'reportes',
       component: ReportsView,
       meta: { roles: ['Doctor', 'Nurse'] }
+    },
+    {
+      path: '/chat-ia',
+      name: 'chat-ia',
+      component: AiChatView,
+      meta: { roles: ['Doctor', 'Nurse'] }
+    },
+    {
+      path: '/portal/perfil',
+      name: 'portal-perfil',
+      component: PortalProfileView,
+      meta: { roles: ['Patient'] }
+    },
+    {
+      path: '/portal/citas',
+      name: 'portal-citas',
+      component: PortalAppointmentsView,
+      meta: { roles: ['Patient'] }
+    },
+    {
+      path: '/portal/historial',
+      name: 'portal-historial',
+      component: PortalMedicalRecordsView,
+      meta: { roles: ['Patient'] }
+    },
+    {
+      path: '/portal/recomendaciones',
+      name: 'portal-recomendaciones',
+      component: PortalRecommendationsView,
+      meta: { roles: ['Patient'] }
+    },
+    {
+      path: '/portal/documentos',
+      name: 'portal-documentos',
+      component: PortalDocumentsView,
+      meta: { roles: ['Patient'] }
+    },
+    {
+      path: '/portal/resultados',
+      name: 'portal-resultados',
+      component: PortalResultsView,
+      meta: { roles: ['Patient'] }
     }
   ]
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
   const isAuthenticated = !!localStorage.getItem('accessToken')
   const userData = localStorage.getItem('user')
   const user = userData ? JSON.parse(userData) : null
   const roles = user?.roles || []
 
   if (!to.meta.public && !isAuthenticated) {
-    next('/login')
-  } else if (to.meta.public && isAuthenticated) {
-    if (roles.includes('Administrator')) {
-      next('/dashboard-admin')
-    } else if (roles.includes('Doctor') || roles.includes('Nurse')) {
-      next('/dashboard-medico')
-    } else {
-      next('/perfil')
-    }
-  } else if (!to.meta.public && to.meta.roles && isAuthenticated) {
+    return '/login'
+  }
+
+  const homeRoute = roles.includes('Administrator') ? '/dashboard-admin'
+    : roles.includes('Doctor') || roles.includes('Nurse') ? '/dashboard-medico'
+    : roles.includes('Patient') ? '/portal/perfil'
+    : '/perfil'
+
+  if (to.meta.public && isAuthenticated) {
+    return homeRoute
+  }
+
+  if (!to.meta.public && to.meta.roles && isAuthenticated) {
     const hasRole = to.meta.roles.some(r => roles.includes(r))
-    if (hasRole) {
-      next()
-    } else {
-      if (roles.includes('Administrator')) {
-        next('/dashboard-admin')
-      } else if (roles.includes('Doctor') || roles.includes('Nurse')) {
-        next('/dashboard-medico')
-      } else {
-        next('/perfil')
-      }
+    if (!hasRole) {
+      return homeRoute
     }
-  } else {
-    next()
   }
 })
 

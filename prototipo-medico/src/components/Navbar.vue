@@ -30,6 +30,16 @@
           <!-- Divider -->
           <li class="nav-item d-none d-lg-flex align-items-center"><span class="text-muted" style="opacity: 0.3;">│</span></li>
 
+          <!-- Patient portal section -->
+          <template v-if="auth.hasRole('Patient')">
+            <li class="nav-item"><RouterLink class="nav-link rounded-pill px-3" to="/portal/perfil">Mi Perfil</RouterLink></li>
+            <li class="nav-item"><RouterLink class="nav-link rounded-pill px-3" to="/portal/citas">Mis Citas</RouterLink></li>
+            <li class="nav-item"><RouterLink class="nav-link rounded-pill px-3" to="/portal/historial">Historial</RouterLink></li>
+            <li class="nav-item"><RouterLink class="nav-link rounded-pill px-3" to="/portal/recomendaciones">Recomendaciones</RouterLink></li>
+            <li class="nav-item"><RouterLink class="nav-link rounded-pill px-3" to="/portal/documentos">Documentos</RouterLink></li>
+            <li class="nav-item"><RouterLink class="nav-link rounded-pill px-3" to="/portal/resultados">Resultados</RouterLink></li>
+          </template>
+
           <!-- Admin section (always visible for admins) -->
           <template v-if="auth.isAdmin()">
             <li class="nav-item"><RouterLink class="nav-link rounded-pill px-3" to="/dashboard-admin">Panel Admin</RouterLink></li>
@@ -37,7 +47,10 @@
             <li class="nav-item"><RouterLink class="nav-link rounded-pill px-3" to="/auditoria">Auditoría</RouterLink></li>
           </template>
 
-          <li class="nav-item"><RouterLink class="nav-link rounded-pill px-3" to="/perfil">Mi Perfil</RouterLink></li>
+          <!-- Doctor/Nurse/Admin profile link -->
+          <template v-if="!auth.hasRole('Patient')">
+            <li class="nav-item"><RouterLink class="nav-link rounded-pill px-3" to="/perfil">Mi Perfil</RouterLink></li>
+          </template>
         </ul>
         <div class="d-flex align-items-center gap-3">
           <small class="text-muted d-none d-lg-block">{{ auth.user?.name }} {{ auth.user?.lastName }}</small>
