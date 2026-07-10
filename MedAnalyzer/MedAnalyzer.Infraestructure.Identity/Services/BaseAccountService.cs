@@ -7,6 +7,7 @@ using MedAnalyzer.Infraestructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using System.Text;
 
@@ -63,13 +64,6 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
                 return response;
             }
 
-            if (dto.Password != dto.ConfirmPassword)
-            {
-                response.HasError = true;
-                response.Errors.Add("Las contraseñas no coinciden.");
-                return response;
-            }
-
             var restrictedRoles = new[] { Role.Doctor.ToString(), Role.Nurse.ToString(), Role.Administrator.ToString() };
 
             if (string.IsNullOrWhiteSpace(currentUserId) && !string.IsNullOrWhiteSpace(dto.Role))
@@ -83,15 +77,34 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
             }
 
             bool isAdmin = false;
-            string role = Role.ConsultationUser.ToString();
+            bool isDoctorRegistration = false;
+            string role = Role.Patient.ToString();
+            string? generatedPassword = null;
+
             if (!string.IsNullOrWhiteSpace(currentUserId))
             {
                 var currentUser = await _userManager.FindByIdAsync(currentUserId);
-                if (currentUser != null && await _userManager.IsInRoleAsync(currentUser, Role.Administrator.ToString()))
+                if (currentUser != null)
                 {
-                    isAdmin = true;
-                    role = string.IsNullOrWhiteSpace(dto.Role) ? Role.ConsultationUser.ToString() : dto.Role;
+                    if (await _userManager.IsInRoleAsync(currentUser, Role.Administrator.ToString()))
+                    {
+                        isAdmin = true;
+                        role = string.IsNullOrWhiteSpace(dto.Role) ? Role.Patient.ToString() : dto.Role;
+                    }
+                    else if (await _userManager.IsInRoleAsync(currentUser, Role.Doctor.ToString()))
+                    {
+                        isDoctorRegistration = true;
+                        role = Role.Patient.ToString();
+                        generatedPassword = await GenerateRandomPassword();
+                    }
                 }
+            }
+
+            if (!isDoctorRegistration && dto.Password != dto.ConfirmPassword)
+            {
+                response.HasError = true;
+                response.Errors.Add("Las contraseñas no coinciden.");
+                return response;
             }
 
             AppUser user = new()
@@ -101,16 +114,32 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
                 Email = dto.Email,
                 UserName = dto.UserName,
                 NumberIdentification = dto.NumberIdentification,
-                EmailConfirmed = isAdmin,
-                Status = isAdmin
+                Specialty = dto.Specialty,
+                EmailConfirmed = isAdmin || isDoctorRegistration,
+                Status = isAdmin || isDoctorRegistration
             };
 
-            var result = await _userManager.CreateAsync(user, dto.Password);
+            var passwordToUse = isDoctorRegistration ? generatedPassword! : dto.Password;
+
+            var result = await _userManager.CreateAsync(user, passwordToUse);
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, role);
 
-                if (!isAdmin)
+                if (isDoctorRegistration)
+                {
+                    await _emailService.SendEmailAsync(new EmailRequestDto()
+                    {
+                        To = dto.Email,
+                        HtmlBody = $@"
+                    <p>Tu médico ha creado una cuenta para ti en MedAnalyzer.</p>
+                    <p><b>Usuario:</b> {user.UserName}<br/>
+                    <b>Contraseña temporal:</b> {generatedPassword}</p>
+                    <p>Por favor inicia sesión y cambia tu contraseña lo antes posible.</p>",
+                        Subject = "Tus credenciales de acceso a MedAnalyzer"
+                    });
+                }
+                else if (!isAdmin)
                 {
                     var verificationUri = await GetVerificationEmailUri(user);
                     await _emailService.SendEmailAsync(new EmailRequestDto()
@@ -126,6 +155,7 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
                 response.LastName = user.LastName;
                 response.Email = user.Email ?? "";
                 response.UserName = user.UserName ?? "";
+                response.Roles = [role];
 
                 return response;
             }
@@ -226,6 +256,7 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
                 Email = user.Email ?? "",
                 UserName = user.UserName ?? "",
                 NumberIdentification = user.NumberIdentification,
+                Specialty = user.Specialty,
                 isVerified = user.EmailConfirmed,
                 Role = rolesList.FirstOrDefault() ?? "",
                 Status = user.Status
@@ -247,6 +278,7 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
                 Email = user.Email ?? "",
                 UserName = user.UserName ?? "",
                 NumberIdentification = user.NumberIdentification,
+                Specialty = user.Specialty,
                 isVerified = user.EmailConfirmed,
                 Role = rolesList.FirstOrDefault() ?? "",
                 Status = user.Status
@@ -301,6 +333,7 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
                     Email = user.Email ?? "",
                     UserName = user.UserName ?? "",
                     NumberIdentification = user.NumberIdentification,
+                    Specialty = user.Specialty,
                     isVerified = user.EmailConfirmed,
                     Role = roleList.FirstOrDefault() ?? "",
                     Status = user.Status,
@@ -406,6 +439,7 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
             user.Email = dto.Email;
             user.UserName = dto.UserName;
             user.NumberIdentification = dto.NumberIdentification;
+            user.Specialty = dto.Specialty;
 
             var updateResult = await _userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
@@ -426,6 +460,8 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
         }
 
         #region "Private methods"
+
+        protected async Task<string> GetResetPasswordUriPublic(AppUser user) => await GetResetPasswordUri(user);
 
         private async Task<string> GetVerificationEmailUri(AppUser user)
         {
@@ -457,6 +493,12 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
         {
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             return WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        }
+
+        private async Task<string> GenerateRandomPassword()
+        {
+            const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*";
+            return RandomNumberGenerator.GetString(chars, 12);
         }
 
         #endregion

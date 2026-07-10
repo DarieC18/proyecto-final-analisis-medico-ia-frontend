@@ -36,7 +36,8 @@
                 </div>
                 <div class="col-md-6">
                   <label class="form-label text-muted small fw-bold text-uppercase">Identificación</label>
-                  <input v-model="form.numberIdentification" type="text" class="form-control bg-light border-0 py-2" required>
+                  <input v-model="form.numberIdentification" type="text" class="form-control bg-light border-0 py-2" maxlength="10" required>
+                  <small v-if="form.numberIdentification.length === 10" class="text-danger">Máximo 10 caracteres</small>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label text-muted small fw-bold text-uppercase">Email</label>
@@ -44,10 +45,10 @@
                 </div>
                 <div class="col-md-6">
                   <label class="form-label text-muted small fw-bold text-uppercase">Rol</label>
-                  <select v-model="form.role" class="form-select bg-light border-0 py-2" required>
+                    <select v-model="form.role" class="form-select bg-light border-0 py-2" required>
                     <option value="Doctor">Médico</option>
                     <option value="Nurse">Enfermera</option>
-                    <option value="ConsultationUser">Usuario de consulta</option>
+                    <option value="Patient">Paciente</option>
                     <option value="Administrator">Administrador</option>
                   </select>
                 </div>

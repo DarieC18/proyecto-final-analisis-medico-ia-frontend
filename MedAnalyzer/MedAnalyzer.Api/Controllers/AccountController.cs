@@ -1,4 +1,5 @@
 using MedAnalyzer.Api.Models;
+using MedAnalyzer.Core.Application.Dto.Patient;
 using MedAnalyzer.Core.Application.Dto.User;
 using MedAnalyzer.Core.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -15,11 +16,13 @@ namespace MedAnalyzer.Api.Controllers
     {
         private readonly IAccountServiceForWebApi _accountService;
         private readonly IAuditLogService _auditLogService;
+        private readonly IPatientService _patientService;
 
-        public AccountController(IAccountServiceForWebApi accountService, IAuditLogService auditLogService)
+        public AccountController(IAccountServiceForWebApi accountService, IAuditLogService auditLogService, IPatientService patientService)
         {
             _accountService = accountService;
             _auditLogService = auditLogService;
+            _patientService = patientService;
         }
 
         /// <summary>Obtiene la lista de todos los usuarios del sistema.</summary>
@@ -48,6 +51,16 @@ namespace MedAnalyzer.Api.Controllers
 
             if (response.HasError)
                 return BadRequest(response);
+
+            if (response.Roles?.Contains("Patient") == true && !string.IsNullOrWhiteSpace(response.Id))
+            {
+                await _patientService.SaveDtoAsync(new PatientDto
+                {
+                    Id = 0,
+                    UserId = response.Id,
+                    IsActive = true
+                });
+            }
 
             return StatusCode(StatusCodes.Status201Created, response);
         }
