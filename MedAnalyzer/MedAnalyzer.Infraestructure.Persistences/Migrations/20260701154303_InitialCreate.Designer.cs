@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MedAnalyzer.Infraestructure.Persistences.Migrations
 {
     [DbContext(typeof(MedAnalyzerContextDb))]
-    [Migration("20260628053440_FixAppointmentDoctorId")]
-    partial class FixAppointmentDoctorId
+    [Migration("20260701154303_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,7 +46,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int?>("DocumentId")
                         .HasColumnType("integer");
@@ -97,7 +97,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -137,10 +137,10 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AppointmentDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("DoctorId")
                         .IsRequired()
@@ -185,7 +185,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("EntityId")
                         .IsRequired()
@@ -249,7 +249,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UploadedByUserId")
                         .IsRequired()
@@ -272,23 +272,32 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Antecedentes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
                     b.Property<int>("AppointmentId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedByUserId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("DiagnosisInitial")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("ObservacionesConsulta")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<int>("PatientId")
                         .HasColumnType("integer");
@@ -314,7 +323,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         .HasColumnType("date");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -372,7 +381,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -444,7 +453,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("DiastolicPressure")
                         .HasColumnType("integer");
@@ -456,7 +465,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("MeasuredAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("OxygenSaturation")
                         .HasColumnType("decimal(5,2)");

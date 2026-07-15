@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MedAnalyzer.Infraestructure.Persistences.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialPersistence : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,7 +24,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     Action = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     EntityName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     EntityId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,7 +42,10 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     Gender = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     PhoneNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     IdentificationNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    IdentificationType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    PatientType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -56,12 +59,12 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     PatientId = table.Column<int>(type: "integer", nullable: false),
-                    DoctorId = table.Column<int>(type: "integer", nullable: false),
-                    AppointmentDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DoctorId = table.Column<string>(type: "character varying(450)", maxLength: 450, nullable: false),
+                    AppointmentDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Status = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
                     Reason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     Notes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -86,7 +89,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     Description = table.Column<string>(type: "text", nullable: false),
                     Severity = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     IsResolved = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -113,12 +116,12 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     PatientId = table.Column<int>(type: "integer", nullable: false),
                     AppointmentId = table.Column<int>(type: "integer", nullable: true),
-                    UploadedByUserId = table.Column<int>(type: "integer", nullable: false),
+                    UploadedByUserId = table.Column<string>(type: "text", nullable: false),
                     FileName = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
                     FileType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     FilePath = table.Column<string>(type: "text", nullable: false),
                     ExtractedText = table.Column<string>(type: "text", nullable: true),
-                    UploadedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    UploadedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -144,10 +147,12 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     PatientId = table.Column<int>(type: "integer", nullable: false),
                     AppointmentId = table.Column<int>(type: "integer", nullable: false),
-                    CreatedByUserId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedByUserId = table.Column<string>(type: "text", nullable: false),
                     DiagnosisInitial = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     Notes = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Antecedentes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    ObservacionesConsulta = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -163,7 +168,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         column: x => x.PatientId,
                         principalTable: "Patients",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -195,16 +200,16 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PatientId = table.Column<int>(type: "integer", nullable: false),
                     AppointmentId = table.Column<int>(type: "integer", nullable: false),
                     Temperature = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
                     HeartRate = table.Column<int>(type: "integer", nullable: false),
-                    DiastolicPressure = table.Column<int>(type: "integer", nullable: false),
                     SystolicPressure = table.Column<int>(type: "integer", nullable: false),
+                    DiastolicPressure = table.Column<int>(type: "integer", nullable: false),
                     OxygenSaturation = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
                     Glucose = table.Column<decimal>(type: "numeric(6,2)", nullable: true),
-                    MeasuredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    MeasuredAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    PatientId = table.Column<int>(type: "integer", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -219,8 +224,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         name: "FK_VitalSigns_Patients_PatientId",
                         column: x => x.PatientId,
                         principalTable: "Patients",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -232,12 +236,14 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     PatientId = table.Column<int>(type: "integer", nullable: false),
                     AppointmentId = table.Column<int>(type: "integer", nullable: false),
                     DocumentId = table.Column<int>(type: "integer", nullable: true),
-                    RequestedByUserId = table.Column<int>(type: "integer", nullable: false),
+                    RequestedByUserId = table.Column<string>(type: "text", nullable: false),
                     AnalysisType = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     PromptUsed = table.Column<string>(type: "text", nullable: false),
                     AiResponse = table.Column<string>(type: "text", nullable: false),
                     ModelUsed = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    IsReviewed = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -272,7 +278,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     Title = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     RiskLevel = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {

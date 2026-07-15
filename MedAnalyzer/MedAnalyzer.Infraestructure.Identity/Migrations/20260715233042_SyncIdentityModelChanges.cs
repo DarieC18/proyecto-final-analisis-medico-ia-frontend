@@ -5,26 +5,24 @@
 namespace MedAnalyzer.Infraestructure.Identity.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateIdentityModel : Migration
+    public partial class SyncIdentityModelChanges : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "NumberIdentification",
+                name: "Specialty",
                 schema: "Identity",
                 table: "Users",
-                type: "character varying(10)",
-                maxLength: 10,
-                nullable: false,
-                defaultValue: "");
+                type: "text",
+                nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "NumberIdentification",
+                name: "Specialty",
                 schema: "Identity",
                 table: "Users");
         }

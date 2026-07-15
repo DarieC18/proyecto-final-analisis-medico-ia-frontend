@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MedAnalyzer.Infraestructure.Identity.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    [Migration("20260624091036_UpdateIdentityModel")]
-    partial class UpdateIdentityModel
+    [Migration("20260715233042_SyncIdentityModelChanges")]
+    partial class SyncIdentityModelChanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,7 +39,7 @@ namespace MedAnalyzer.Infraestructure.Identity.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -87,6 +87,9 @@ namespace MedAnalyzer.Infraestructure.Identity.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Specialty")
                         .HasColumnType("text");
 
                     b.Property<bool>("Status")
