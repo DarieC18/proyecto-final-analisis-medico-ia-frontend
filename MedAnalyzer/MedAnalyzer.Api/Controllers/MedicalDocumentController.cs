@@ -15,11 +15,13 @@ namespace MedAnalyzer.Api.Controllers
     {
         private readonly IMedicalDocumentService _documentService;
         private readonly IFileStorageService _fileStorage;
+        private readonly IAccountServiceForWebApi _accountService;
 
-        public MedicalDocumentController(IMedicalDocumentService documentService, IFileStorageService fileStorage)
+        public MedicalDocumentController(IMedicalDocumentService documentService, IFileStorageService fileStorage, IAccountServiceForWebApi accountService)
         {
             _documentService = documentService;
             _fileStorage = fileStorage;
+            _accountService = accountService;
         }
 
         /// <summary>Obtiene los documentos médicos de un paciente.</summary>
@@ -29,8 +31,19 @@ namespace MedAnalyzer.Api.Controllers
         [ProducesResponseType(typeof(List<MedicalDocumentDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetByPatient(int patientId)
         {
-            var docs = await _documentService.GetByPatientId(patientId);
-            return Ok(docs ?? []);
+            var docs = await _documentService.GetByPatientId(patientId) ?? [];
+
+            var userIds = docs.Select(d => d.UploadedByUserId).Distinct();
+            foreach (var userId in userIds)
+            {
+                var user = await _accountService.GetUserById(userId);
+                if (user == null) continue;
+
+                foreach (var doc in docs.Where(d => d.UploadedByUserId == userId))
+                    doc.UploadedByUserName = $"{user.Name} {user.LastName}";
+            }
+
+            return Ok(docs);
         }
 
         /// <summary>Obtiene los documentos médicos de una cita.</summary>
@@ -122,7 +135,7 @@ namespace MedAnalyzer.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, result);
         }
 
-        /// <summary>Elimina un documento médico y su archivo físico.</summary>
+        /// <summary>Elimina un documento médico y su archivo del almacenamiento.</summary>
         /// <param name="id">Identificador del documento.</param>
         /// <returns>Sin contenido si la operación fue exitosa.</returns>
         [HttpDelete("{id}")]
@@ -134,7 +147,8 @@ namespace MedAnalyzer.Api.Controllers
             if (doc == null)
                 return NotFound(new ErrorResponse { Message = "Documento no encontrado." });
 
-            _fileStorage.Delete(doc.FilePath);
+            if (!string.IsNullOrWhiteSpace(doc.FilePath))
+                _fileStorage.Delete(doc.FilePath);
 
             await _documentService.DeleteHardDtoAsync(id);
             return NoContent();

@@ -12,7 +12,7 @@ namespace MedAnalyzer.Api.Controllers
     /// <summary>Generación de reportes clínicos consolidados.</summary>
     [Route("api/v1/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Doctor,Nurse")]
+    [Authorize(Roles = "Doctor,Nurse,Administrator")]
     public class ReportController : ControllerBase
     {
         private readonly IReportService _reportService;

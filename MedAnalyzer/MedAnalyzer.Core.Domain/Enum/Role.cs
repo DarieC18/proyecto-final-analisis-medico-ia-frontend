@@ -5,6 +5,6 @@
         Administrator,
         Doctor,
         Nurse,
-        ConsultationUser
+        Patient
     }
 }

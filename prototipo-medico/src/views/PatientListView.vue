@@ -40,7 +40,8 @@
           <table class="table table-hover align-middle mb-0">
             <thead class="bg-light text-muted">
               <tr>
-                <th class="ps-4 py-3 fw-medium">Nombre Completo</th>
+                <th class="ps-4 py-3 fw-medium">ID</th>
+                <th class="py-3 fw-medium">Nombre Completo</th>
                 <th class="py-3 fw-medium">Identificación</th>
                 <th class="py-3 fw-medium">F. Nacimiento</th>
                 <th class="py-3 fw-medium">Teléfono</th>
@@ -51,8 +52,9 @@
             </thead>
             <tbody class="border-top-0">
               <tr v-for="p in pacientesFiltrados" :key="p.id">
-                <td class="ps-4 py-3 fw-bold text-dark">{{ p.fullName }}</td>
-                <td class="py-3 text-muted">{{ p.identificationNumber }}</td>
+                <td class="ps-4 py-3 text-muted fw-medium">{{ p.id }}</td>
+                <td class="py-3 fw-bold text-dark">{{ p.fullName }}</td>
+                <td class="py-3 text-muted">{{ p.numberIdentification || p.identificationNumber }}</td>
                 <td class="py-3 text-muted">{{ formatDate(p.birthDate) }}</td>
                 <td class="py-3 text-muted">{{ p.phoneNumber }}</td>
                 <td class="py-3"><span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">{{ p.gender }}</span></td>
@@ -60,7 +62,8 @@
                 <td class="pe-4 py-3 text-end">
                   <button @click="abrirDetalle(p)" class="btn btn-sm btn-light border text-info fw-medium px-3 me-2">Ver</button>
                   <button @click="editarPaciente(p)" class="btn btn-sm btn-light border text-warning fw-medium px-3 me-2">Editar</button>
-                  <button @click="confirmarEliminar(p)" class="btn btn-sm btn-light border text-danger fw-medium px-3">Eliminar</button>
+                  <button v-if="!auth.isAdmin()" @click="desactivarPaciente(p)" class="btn btn-sm btn-light border text-secondary fw-medium px-3 me-2">Desactivar</button>
+                  <button v-if="auth.isAdmin()" @click="confirmarEliminar(p)" class="btn btn-sm btn-light border text-danger fw-medium px-3">Eliminar</button>
                 </td>
               </tr>
             </tbody>
@@ -73,7 +76,7 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h3 class="fw-bold mb-0">{{ vistaActual === 'crear' ? 'Nuevo Paciente' : 'Editar Paciente' }}</h3>
-          <p v-if="vistaActual === 'editar'" class="text-muted">Modificando datos de: <strong class="text-dark">{{ form.fullName }}</strong></p>
+          <p v-if="vistaActual === 'editar'" class="text-muted">Modificando datos de: <strong class="text-dark">{{ form.firstName }} {{ form.lastName }}</strong></p>
         </div>
         <button @click="cancelarForm" class="btn btn-light border text-muted shadow-sm">Volver al listado</button>
       </div>
@@ -83,13 +86,22 @@
           <div v-if="formError" class="alert alert-danger border-0 rounded-3 py-2 small mb-4">{{ formError }}</div>
           <form @submit.prevent="guardarPaciente">
             <div class="row g-4">
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Nombre Completo</label>
-                <input v-model="form.fullName" type="text" class="form-control bg-light border-0 py-2" required>
+              <div class="col-md-4">
+                <label class="form-label text-muted small fw-bold text-uppercase">Nombre</label>
+                <input v-model="form.firstName" type="text" class="form-control bg-light border-0 py-2" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label text-muted small fw-bold text-uppercase">Apellido</label>
+                <input v-model="form.lastName" type="text" class="form-control bg-light border-0 py-2" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label text-muted small fw-bold text-uppercase">Correo Electrónico</label>
+                <input v-model="form.email" type="email" class="form-control bg-light border-0 py-2" required>
               </div>
               <div class="col-md-6">
                 <label class="form-label text-muted small fw-bold text-uppercase">Identificación</label>
-                <input v-model="form.identificationNumber" type="text" class="form-control bg-light border-0 py-2" required>
+                <input v-model="form.identificationNumber" type="text" class="form-control bg-light border-0 py-2" maxlength="10" required>
+                <small v-if="form.identificationNumber.length === 10" class="text-danger">Máximo 10 caracteres</small>
               </div>
               <div class="col-md-4">
                 <label class="form-label text-muted small fw-bold text-uppercase">Tipo ID</label>
@@ -146,9 +158,13 @@
       <div class="card shadow-sm border-0 rounded-4">
         <div class="card-body p-5">
           <div class="row g-4 mb-4">
+            <div class="col-md-2">
+              <label class="form-label text-muted small fw-bold text-uppercase">ID</label>
+              <p class="fw-medium">#{{ detalle?.id }}</p>
+            </div>
             <div class="col-md-4">
               <label class="form-label text-muted small fw-bold text-uppercase">Identificación</label>
-              <p class="fw-medium">{{ detalle?.identificationNumber }}</p>
+              <p class="fw-medium">{{ detalle?.numberIdentification || detalle?.identificationNumber }}</p>
             </div>
             <div class="col-md-4">
               <label class="form-label text-muted small fw-bold text-uppercase">Teléfono</label>
@@ -209,12 +225,22 @@
       @confirm="eliminarPaciente"
       @cancel="deleteDialog = false"
     />
+    <ConfirmDialog
+      :visible="deactivateDialog"
+      title="Desactivar Paciente"
+      :message="`¿Está seguro que desea desactivar a ${deactivateTarget?.fullName}?`"
+      confirmText="Desactivar"
+      icon="⚠️"
+      @confirm="desactivarConfirmado"
+      @cancel="deactivateDialog = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { patientService } from '@/api/patients'
+import { authStore } from '@/stores/auth'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 
@@ -226,13 +252,17 @@ const saving = ref(false)
 const formError = ref('')
 const deleteDialog = ref(false)
 const deleteTarget = ref(null)
+const deactivateDialog = ref(false)
+const deactivateTarget = ref(null)
 const pacientes = ref([])
 const detalle = ref(null)
 const editId = ref(null)
+const editUserId = ref(null)
 const buscandoApi = ref(false)
+const auth = authStore
 
 const form = reactive({
-  fullName: '', identificationNumber: '', identificationType: 'Cédula',
+  firstName: '', lastName: '', email: '', identificationNumber: '', identificationType: 'Cédula',
   birthDate: '', gender: 'Masculino', phoneNumber: '', patientType: 'General'
 })
 
@@ -240,14 +270,16 @@ const pacientesFiltrados = computed(() => {
   if (!busqueda.value) return pacientes.value
   const q = busqueda.value.toLowerCase()
   return pacientes.value.filter(p =>
-    p.fullName?.toLowerCase().includes(q) || p.identificationNumber?.includes(q)
+    p.fullName?.toLowerCase().includes(q) || (p.numberIdentification || p.identificationNumber)?.includes(q)
   )
 })
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
   try {
-    return new Date(dateStr).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+    const d = new Date(dateStr)
+    if (d.getFullYear() <= 1) return '-'
+    return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
   } catch {
     return dateStr
   }
@@ -282,9 +314,13 @@ const abrirDetalle = async (p) => {
 
 const editarPaciente = (p) => {
   editId.value = p.id
+  editUserId.value = p.userId
+  const nameParts = (p.fullName || '').split(' ')
   Object.assign(form, {
-    fullName: p.fullName || '',
-    identificationNumber: p.identificationNumber || '',
+    firstName: nameParts[0] || '',
+    lastName: nameParts.slice(1).join(' ') || '',
+    email: p.email || '',
+    identificationNumber: p.numberIdentification || p.identificationNumber || '',
     identificationType: p.identificationType || 'Cédula',
     birthDate: p.birthDate ? p.birthDate.substring(0, 10) : '',
     gender: p.gender || 'Masculino',
@@ -300,15 +336,37 @@ const guardarPaciente = async () => {
   formError.value = ''
   try {
     if (vistaActual.value === 'crear') {
-      await patientService.create({ ...form })
+      await patientService.create({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        numberIdentification: form.identificationNumber,
+        identificationType: form.identificationType,
+        birthDate: form.birthDate,
+        gender: form.gender,
+        phoneNumber: form.phoneNumber,
+        patientType: form.patientType
+      })
     } else {
-      await patientService.update(editId.value, { ...form })
+      await patientService.update(editId.value, {
+        id: editId.value,
+        userId: editUserId.value,
+        fullName: `${form.firstName} ${form.lastName}`.trim(),
+        numberIdentification: form.identificationNumber,
+        email: form.email,
+        birthDate: form.birthDate,
+        gender: form.gender,
+        phoneNumber: form.phoneNumber,
+        identificationType: form.identificationType,
+        patientType: form.patientType,
+        isActive: true
+      })
     }
     vistaActual.value = 'lista'
     await cargarPacientes()
   } catch (err) {
     const data = err.response?.data
-    formError.value = data?.errors?.join(', ') || data?.message || 'Error al guardar paciente'
+    formError.value = Array.isArray(data?.errors) ? data.errors.join(', ') : data?.message || data?.title || 'Error al guardar paciente'
   } finally {
     saving.value = false
   }
@@ -318,8 +376,9 @@ const cancelarForm = () => {
   vistaActual.value = 'lista'
   detalle.value = null
   editId.value = null
+  editUserId.value = null
   Object.assign(form, {
-    fullName: '', identificationNumber: '', identificationType: 'Cédula',
+    firstName: '', lastName: '', email: '', identificationNumber: '', identificationType: 'Cédula',
     birthDate: '', gender: 'Masculino', phoneNumber: '', patientType: 'General'
   })
 }
@@ -327,6 +386,22 @@ const cancelarForm = () => {
 const confirmarEliminar = (p) => {
   deleteTarget.value = p
   deleteDialog.value = true
+}
+
+const desactivarPaciente = (p) => {
+  deactivateTarget.value = p
+  deactivateDialog.value = true
+}
+
+const desactivarConfirmado = async () => {
+  deactivateDialog.value = false
+  try {
+    await patientService.deactivate(deactivateTarget.value.id)
+    await cargarPacientes()
+  } catch (err) {
+    const data = err.response?.data
+    error.value = data?.message || 'Error al desactivar paciente'
+  }
 }
 
 const buscarApi = async () => {

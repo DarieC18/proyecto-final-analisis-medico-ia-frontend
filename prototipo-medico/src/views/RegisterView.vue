@@ -25,7 +25,8 @@
                 </div>
                 <div class="col-md-6 mb-3">
                   <label class="form-label text-muted small fw-bold text-uppercase">Cédula / Identificación</label>
-                  <input v-model="form.numberIdentification" type="text" class="form-control bg-light border-0" required>
+                  <input v-model="form.numberIdentification" type="text" class="form-control bg-light border-0" maxlength="10" required>
+                  <small v-if="form.numberIdentification.length === 10" class="text-danger">Máximo 10 caracteres</small>
                 </div>
               </div>
               <div class="mb-3">

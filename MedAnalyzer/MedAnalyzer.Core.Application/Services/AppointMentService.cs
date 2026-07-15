@@ -79,6 +79,12 @@ namespace MedAnalyzer.Core.Application.Services
             return updated == null ? null : _mapper.Map<AppointmentDto>(updated);
         }
 
+        public async Task<List<AppointmentDto>> GetByPatientId(int patientId)
+        {
+            var all = await _appointmentRepository.GetAllListAsync();
+            return _mapper.Map<List<AppointmentDto>>(all.Where(a => a.PatientId == patientId).ToList());
+        }
+
         public async Task<AppointmentDetailDto?> GetAppointmentDetail(int id)
         {
             var appointment = await _appointmentRepository.GetEntityByIdAsync(id);
@@ -112,5 +118,34 @@ namespace MedAnalyzer.Core.Application.Services
                     allAiAnalyses.Where(a => a.AppointmentId == id).ToList())
             };
         }
+
+        public async Task<AppointmentConsultDto?> GetConsultDetail(int appointmentId)
+        {
+            var appointment = await _appointmentRepository.GetEntityByIdAsync(appointmentId);
+            if (appointment == null) return null;
+
+            var allSymptoms = await _symptomRepository.GetAllListAsync();
+            var allVitalSigns = await _vitalSignRepository.GetAllListAsync();
+            var allRecords = await _medicalRecordRepository.GetAllListAsync();
+            var allDocuments = await _medicalDocumentRepository.GetAllListAsync();
+
+            return new AppointmentConsultDto
+            {
+                Id = appointment.Id,
+                AppointmentDate = appointment.AppointmentDate,
+                DoctorId = appointment.DoctorId,
+                Reason = appointment.Reason,
+                Status = appointment.Status,
+                Symptoms = _mapper.Map<List<SymptomDto>>(
+                    allSymptoms.Where(s => s.AppointmentId == appointmentId).ToList()),
+                VitalSigns = _mapper.Map<List<VitalSignDto>>(
+                    allVitalSigns.Where(v => v.AppointmentId == appointmentId).ToList()),
+                MedicalRecords = _mapper.Map<List<MedicalRecordDto>>(
+                    allRecords.Where(r => r.AppointmentId == appointmentId).ToList()),
+                Documents = _mapper.Map<List<MedicalDocumentDto>>(
+                    allDocuments.Where(d => d.AppointmentId == appointmentId).ToList())
+            };
+        }
+
     }
 }

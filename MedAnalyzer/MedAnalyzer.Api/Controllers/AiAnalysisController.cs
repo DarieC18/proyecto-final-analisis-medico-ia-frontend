@@ -3,6 +3,7 @@ using MedAnalyzer.Core.Application.Dto.AiAnalisys;
 using MedAnalyzer.Core.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace MedAnalyzer.Api.Controllers
 {
@@ -17,6 +18,22 @@ namespace MedAnalyzer.Api.Controllers
         public AiAnalysisController(IAiAnalisysServices aiService)
         {
             _aiService = aiService;
+        }
+
+        /// <summary>Genera un nuevo análisis de IA para una cita médica usando Gemini.</summary>
+        /// <param name="request">Cita y tipo de análisis a generar.</param>
+        /// <returns>El análisis de IA generado.</returns>
+        [HttpPost("generate")]
+        [ProducesResponseType(typeof(AiAnalisysDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Generate([FromBody] GenerateAiAnalysisRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var currentUserId = User.FindFirstValue("uid") ?? string.Empty;
+            var result = await _aiService.GenerateAnalysisAsync(request, currentUserId);
+            return StatusCode(StatusCodes.Status201Created, result);
         }
 
         /// <summary>Obtiene los análisis de IA asociados a una cita médica.</summary>
@@ -58,6 +75,7 @@ namespace MedAnalyzer.Api.Controllers
         /// <summary>Marca un análisis de IA como revisado por el médico.</summary>
         /// <param name="id">Identificador del análisis.</param>
         /// <returns>Sin contenido si la operación fue exitosa.</returns>
+        [Authorize(Roles = "Doctor")]
         [HttpPatch("{id}/review")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]

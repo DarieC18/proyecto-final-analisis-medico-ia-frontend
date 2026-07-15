@@ -19,9 +19,8 @@ namespace MedAnalyzer.Infraestructure.Identity.Entities
 
         public bool Status { get; set; } // true = Activo, false = Inactivo
 
+        public string? Specialty { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-
-        
     }
 }

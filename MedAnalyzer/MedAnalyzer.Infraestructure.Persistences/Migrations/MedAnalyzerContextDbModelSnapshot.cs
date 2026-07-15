@@ -269,10 +269,6 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Antecedentes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
                     b.Property<int>("AppointmentId")
                         .HasColumnType("integer");
 
@@ -291,10 +287,6 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<string>("ObservacionesConsulta")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
 
                     b.Property<int>("PatientId")
                         .HasColumnType("integer");
@@ -322,20 +314,10 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
-
-                    b.Property<string>("IdentificationNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("IdentificationType")
                         .IsRequired()
@@ -355,9 +337,14 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("IdentificationNumber")
+                    b.HasIndex("UserId")
                         .IsUnique();
 
                     b.ToTable("Patients", (string)null);
@@ -452,28 +439,28 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("DiastolicPressure")
+                    b.Property<int?>("DiastolicPressure")
                         .HasColumnType("integer");
 
                     b.Property<decimal?>("Glucose")
                         .HasColumnType("decimal(6,2)");
 
-                    b.Property<int>("HeartRate")
+                    b.Property<int?>("HeartRate")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("MeasuredAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<decimal>("OxygenSaturation")
+                    b.Property<decimal?>("OxygenSaturation")
                         .HasColumnType("decimal(5,2)");
 
                     b.Property<int?>("PatientId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("SystolicPressure")
+                    b.Property<int?>("SystolicPressure")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("Temperature")
+                    b.Property<decimal?>("Temperature")
                         .HasColumnType("decimal(5,2)");
 
                     b.HasKey("Id");

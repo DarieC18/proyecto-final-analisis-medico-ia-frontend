@@ -7,5 +7,6 @@ namespace MedAnalyzer.Core.Application.Interfaces
     {
         Task<List<AiAnalisysDto>> GetByAppointmentIdAsync(int appointmentId);
         Task<List<AiAnalisysDto>> GetByPatientIdAsync(int patientId);
+        Task<AiAnalisysDto> GenerateAnalysisAsync(GenerateAiAnalysisRequestDto request, string requestedByUserId);
     }
 }

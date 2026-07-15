@@ -14,10 +14,12 @@ namespace MedAnalyzer.Api.Controllers
     public class AppointmentController : ControllerBase
     {
         private readonly IAppointmentService _appointmentService;
+        private readonly IAccountServiceForWebApi _accountService; 
 
-        public AppointmentController(IAppointmentService appointmentService)
+        public AppointmentController(IAppointmentService appointmentService, IAccountServiceForWebApi accountService)
         {
             _appointmentService = appointmentService;
+            _accountService = accountService;
         }
 
         /// <summary>Obtiene todas las citas médicas registradas.</summary>
@@ -115,6 +117,23 @@ namespace MedAnalyzer.Api.Controllers
                 return NotFound(new ErrorResponse { Message = "Cita no encontrada." });
 
             return Ok(new MessageResponse { Message = $"Estado actualizado a '{dto.Status}' correctamente." });
+        }
+
+        [HttpGet("{id}/consult")]
+        [Authorize(Roles = "Doctor,Nurse")]
+        [ProducesResponseType(typeof(AppointmentConsultDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetConsultDetail(int id)
+        {
+            var consult = await _appointmentService.GetConsultDetail(id);
+            if (consult == null)
+                return NotFound(new ErrorResponse { Message = "Cita no encontrada." });
+
+            var doctor = await _accountService.GetUserById(consult.DoctorId);
+            if (doctor != null)
+                consult.DoctorName = $"{doctor.Name} {doctor.LastName}";
+
+            return Ok(consult);
         }
     }
 }

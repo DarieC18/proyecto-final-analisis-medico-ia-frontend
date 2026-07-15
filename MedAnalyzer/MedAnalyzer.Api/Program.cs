@@ -3,12 +3,10 @@ using MedAnalyzer.Core.Application;
 using MedAnalyzer.Core.Application.Interfaces;
 using MedAnalyzer.Core.Domain.Exceptions;
 using MedAnalyzer.Infraestructure.Identity.Configurations;
-using MedAnalyzer.Infraestructure.Identity.Services;
 using MedAnalyzer.Infraestructure.Persistences;
 using MedAnalyzer.Infraestructure.Shared;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.OpenApi;
-using Swashbuckle.AspNetCore.Swagger;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -70,13 +68,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapGet("/swagger/v1/swagger.json", async (ISwaggerProvider swaggerProvider) =>
-    {
-        var doc = swaggerProvider.GetSwagger("v1");
-        var json = await doc.SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_1);
-        return Results.Content(json, "application/json");
-    });
-
+    app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "MedAnalyzer API v1");

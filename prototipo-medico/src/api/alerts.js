@@ -1,6 +1,9 @@
 import api from './axios'
 
 export const alertService = {
+  getAll() {
+    return api.get('/api/v1/alert')
+  },
   getByPatient(patientId) {
     return api.get(`/api/v1/alert/by-patient/${patientId}`)
   },

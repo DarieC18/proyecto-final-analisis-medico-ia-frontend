@@ -81,21 +81,5 @@ namespace MedAnalyzer.Api.Controllers
 
             return Ok(result);
         }
-
-        /// <summary>Elimina permanentemente un síntoma.</summary>
-        /// <param name="id">Identificador del síntoma.</param>
-        /// <returns>Sin contenido si la operación fue exitosa.</returns>
-        [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var existing = await _symptomService.GetDtoById(id);
-            if (existing == null)
-                return NotFound(new ErrorResponse { Message = "Síntoma no encontrado." });
-
-            await _symptomService.DeleteHardDtoAsync(id);
-            return NoContent();
-        }
     }
 }

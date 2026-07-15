@@ -10,6 +10,7 @@
         public required string NumberIdentification { get; set; }
         public required string Email { get; set; }
         public required string Role { get; set; }
+        public string? Specialty { get; set; }
 
         public bool isVerified { get; set; }
         public bool Status { get; set; }

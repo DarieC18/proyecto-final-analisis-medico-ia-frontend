@@ -5,7 +5,7 @@ using MedAnalyzer.Infraestructure.Persistences.Context;
 
 namespace MedAnalyzer.Infraestructure.Persistences.Repositories
 {
-    public class AppointmentRepository : BaseRepository<Appointment>
+    public class AppointmentRepository : BaseRepository<Appointment>, IAppointmentRepository
     {
         public AppointmentRepository(MedAnalyzerContextDb context) : base(context)
         {

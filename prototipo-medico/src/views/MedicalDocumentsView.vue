@@ -10,19 +10,31 @@
     <div class="card shadow-sm mb-4 border-0">
       <div class="card-body p-3">
         <div class="row g-2 align-items-end">
-          <div class="col-md-4">
-            <label class="form-label text-muted small fw-bold text-uppercase">Paciente ID</label>
-            <input v-model="pacienteId" type="number" class="form-control bg-light border-0" placeholder="Ingrese ID del paciente">
+          <div class="col-md-5 position-relative">
+            <label class="form-label text-muted small fw-bold text-uppercase">Buscar Paciente</label>
+            <input v-model="searchQuery" @input="buscarPacientes" @blur="ocultarDropdown" type="text" class="form-control bg-light border-0" placeholder="Nombre, identificación o ID del paciente" autocomplete="off">
+            <ul v-if="searchResults.length && showDropdown" class="list-group position-absolute w-100 shadow-sm rounded-3 mt-1" style="z-index: 1050; max-height: 250px; overflow-y: auto;">
+              <li v-for="p in searchResults" :key="p.id" @click="seleccionarPaciente(p)" class="list-group-item list-group-item-action py-2 px-3 d-flex justify-content-between align-items-center">
+                <span class="fw-medium">{{ p.fullName }}</span>
+                <small class="text-muted">#{{ p.id }} · {{ p.numberIdentification || p.identificationNumber }}</small>
+              </li>
+            </ul>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
             <button @click="cargarDocumentos" class="btn btn-dark px-4 w-100">Buscar</button>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
             <button @click="limpiarBusqueda" class="btn btn-light border px-4 w-100">Limpiar</button>
           </div>
           <div class="col-md-2" v-if="documentos.length">
             <button @click="showUpload = true" class="btn btn-primary px-4 w-100">+ Subir</button>
           </div>
+        </div>
+        <div v-if="pacienteSeleccionado" class="mt-2">
+          <span class="badge bg-dark bg-opacity-10 text-dark rounded-pill px-3 py-2">
+            Paciente: <strong>{{ pacienteSeleccionado.fullName }}</strong> · #{{ pacienteSeleccionado.id }}
+            <button @click="limpiarBusqueda" class="btn-close btn-close-dark ms-2" style="font-size: 0.6rem;"></button>
+          </span>
         </div>
       </div>
     </div>
@@ -69,8 +81,15 @@
                 <small class="text-muted">PDF, JPG o PNG. Máximo 10MB.</small>
               </div>
               <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Descripción (opcional)</label>
-                <input v-model="uploadDescription" type="text" class="form-control bg-light border-0" placeholder="Descripción del documento">
+                <label class="form-label text-muted small fw-bold text-uppercase">Tipo de Documento</label>
+                <select v-model="fileType" class="form-select bg-light border-0" required>
+                  <option value="" disabled>Seleccione un tipo</option>
+                  <option value="Resultados de laboratorio">Resultados de laboratorio</option>
+                  <option value="Indicaciones médicas">Indicaciones médicas</option>
+                  <option value="Historial externo">Historial externo</option>
+                  <option value="Estudios en PDF">Estudios en PDF</option>
+                  <option value="Documentos administrativos">Documentos administrativos</option>
+                </select>
               </div>
             </div>
             <div class="d-flex justify-content-end gap-3 mt-4">
@@ -105,6 +124,7 @@
 <script setup>
 import { ref } from 'vue'
 import { medicalDocumentService } from '@/api/medicalDocuments'
+import { patientService } from '@/api/patients'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const loading = ref(false)
@@ -114,10 +134,47 @@ const pacienteId = ref('')
 const buscado = ref(false)
 const showUpload = ref(false)
 const subiendo = ref(false)
-const uploadDescription = ref('')
+const fileType = ref('')
 const fileInput = ref(null)
 const deleteDialog = ref(false)
 const deleteTarget = ref(null)
+const searchQuery = ref('')
+const searchResults = ref([])
+const showDropdown = ref(false)
+const pacienteSeleccionado = ref(null)
+let searchTimeout = null
+
+const ocultarDropdown = () => {
+  setTimeout(() => { showDropdown.value = false }, 200)
+}
+
+const buscarPacientes = () => {
+  clearTimeout(searchTimeout)
+  const q = searchQuery.value.trim()
+  if (!q) {
+    searchResults.value = []
+    showDropdown.value = false
+    return
+  }
+  searchTimeout = setTimeout(async () => {
+    try {
+      const res = await patientService.search(q)
+      searchResults.value = res.data || []
+      showDropdown.value = searchResults.value.length > 0
+    } catch {
+      searchResults.value = []
+      showDropdown.value = false
+    }
+  }, 300)
+}
+
+const seleccionarPaciente = (p) => {
+  pacienteSeleccionado.value = p
+  searchQuery.value = p.fullName
+  showDropdown.value = false
+  pacienteId.value = p.id
+  cargarDocumentos()
+}
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
@@ -137,6 +194,10 @@ const fileIcon = (name) => {
 }
 
 const cargarDocumentos = async () => {
+  if (!pacienteId.value && searchQuery.value) {
+    const numId = parseInt(searchQuery.value)
+    if (!isNaN(numId)) pacienteId.value = numId
+  }
   if (!pacienteId.value) return
   loading.value = true
   error.value = ''
@@ -157,8 +218,13 @@ const cargarDocumentos = async () => {
 
 const limpiarBusqueda = () => {
   pacienteId.value = ''
+  searchQuery.value = ''
+  searchResults.value = []
+  showDropdown.value = false
+  pacienteSeleccionado.value = null
   documentos.value = []
   buscado.value = false
+  fileType.value = ''
   showUpload.value = false
 }
 
@@ -170,10 +236,11 @@ const subirDocumento = async () => {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('patientId', pacienteId.value)
-    if (uploadDescription.value) formData.append('description', uploadDescription.value)
+    formData.append('fileName', file.name)
+    formData.append('fileType', fileType.value)
     await medicalDocumentService.upload(formData)
     showUpload.value = false
-    uploadDescription.value = ''
+    fileType.value = ''
     fileInput.value.value = ''
     await cargarDocumentos()
   } catch (err) {

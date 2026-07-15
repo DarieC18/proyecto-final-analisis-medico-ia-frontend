@@ -32,5 +32,24 @@ namespace MedAnalyzer.Core.Application.Services
             return _mapper.Map<List<MedicalRecordDto>>(
                 all.Where(r => r.PatientId == patientId).ToList());
         }
+
+        public async Task<List<MedicalRecordSummaryDto>> GetSummariesByPatientId(int patientId)
+        {
+            var all = await _repository.GetAllListWithInclude(new List<string> { "Appointment" });
+            var patientRecords = all.Where(r => r.PatientId == patientId).ToList();
+            var summaries = _mapper.Map<List<MedicalRecordSummaryDto>>(patientRecords);
+
+            summaries.Select(s =>
+            {
+                var appointment = patientRecords.FirstOrDefault(r => r.Id == s.Id)?.Appointment;
+                if (appointment != null)
+                {
+                    s.AppointmentStatus = appointment.Status;
+                }
+                return s;
+            }).ToList();
+
+            return summaries;
+        }
     }
 }

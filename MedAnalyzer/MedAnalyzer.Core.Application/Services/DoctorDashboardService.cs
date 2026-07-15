@@ -31,7 +31,7 @@ namespace MedAnalyzer.Core.Application.Services
                 var allAlerts = await _alertService.GetAllListDto();
 
                 var totalAppointmentsToday = totalAppointments.Where(a => a.DoctorId == id 
-                    && a.AppointmentDate == DateTime.Now.Date);
+                    && a.AppointmentDate.Date == DateTime.Now.Date);
 
                 var totalAiAnalysesByDoctor = totalAiAnalyses.Where(a => a.RequestedByUserId == id);
                 

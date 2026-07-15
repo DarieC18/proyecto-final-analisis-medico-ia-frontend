@@ -19,6 +19,16 @@ namespace MedAnalyzer.Api.Controllers
             _alertService = alertService;
         }
 
+        /// <summary>Obtiene todas las alertas registradas.</summary>
+        /// <returns>Lista de todas las alertas.</returns>
+        [HttpGet]
+        [ProducesResponseType(typeof(List<AlertDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll()
+        {
+            var alerts = await _alertService.GetAllListDto();
+            return Ok(alerts);
+        }
+
         /// <summary>Obtiene las alertas asociadas a un paciente.</summary>
         /// <param name="patientId">Identificador del paciente.</param>
         /// <returns>Lista de alertas del paciente.</returns>

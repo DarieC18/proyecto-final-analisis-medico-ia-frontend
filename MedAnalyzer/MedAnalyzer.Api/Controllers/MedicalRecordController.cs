@@ -59,6 +59,7 @@ namespace MedAnalyzer.Api.Controllers
         /// <summary>Crea un nuevo registro clínico asociado a una cita.</summary>
         /// <param name="dto">Datos del registro clínico.</param>
         /// <returns>Datos del registro clínico creado.</returns>
+        [Authorize(Roles = "Doctor")]
         [HttpPost]
         [ProducesResponseType(typeof(MedicalRecordDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -109,5 +110,25 @@ namespace MedAnalyzer.Api.Controllers
 
             return Ok(result);
         }
+
+
+        /// <summary>Obtiene todos los registros clínicos de un paciente para el botón ver detalles.</summary>
+        /// <param name="patientId">Identificador del paciente.</param>
+        /// <returns>Lista de registros clínicos del paciente para el botón "ver detalles".</returns>
+
+        [HttpGet("detail-by-patient/{patientId}")]
+        [ProducesResponseType(typeof(List<MedicalRecordDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetDetailsByPatient(int patientId)
+        {
+            var records = await _medicalRecordService.GetSummariesByPatientId(patientId);
+
+            if (records == null)
+            {
+                return NotFound(new ErrorResponse { Message = "El paciente no tiene registros clínicos." });
+            }
+
+            return Ok(records ?? []);
+        }
+
     }
 }

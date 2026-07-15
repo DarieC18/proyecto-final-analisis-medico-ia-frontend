@@ -10,10 +10,10 @@ namespace MedAnalyzer.Infraestructure.Persistences.EntitiesConfiguration
         {
             builder.ToTable("VitalSigns");
             builder.HasKey(v => v.Id);
-            builder.Property(v => v.Temperature).HasColumnType("decimal(5,2)").IsRequired();
-            builder.Property(v => v.HeartRate).IsRequired();
-            builder.Property(v => v.SystolicPressure).IsRequired();
-            builder.Property(v => v.OxygenSaturation).HasColumnType("decimal(5,2)").IsRequired();
+            builder.Property(v => v.Temperature).HasColumnType("decimal(5,2)");
+            builder.Property(v => v.HeartRate);
+            builder.Property(v => v.SystolicPressure);
+            builder.Property(v => v.OxygenSaturation).HasColumnType("decimal(5,2)");
             builder.Property(v => v.Glucose).HasColumnType("decimal(6,2)");
 
             builder.HasOne<Appointment>(v => v.Appointment)

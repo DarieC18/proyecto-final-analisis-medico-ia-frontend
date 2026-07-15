@@ -189,8 +189,11 @@ const crearCita = async () => {
   formError.value = ''
   try {
     const payload = {
+      id: 0,
       patientId: Number(form.patientId),
+      doctorId: auth.user?.id || '',
       appointmentDate: form.appointmentDate,
+      status: 'Pending',
       reason: form.reason,
       notes: form.notes || null
     }
@@ -199,7 +202,13 @@ const crearCita = async () => {
     await cargarCitas()
   } catch (err) {
     const data = err.response?.data
-    formError.value = data?.errors?.join(', ') || data?.message || 'Error al crear la cita'
+    if (data?.errors && typeof data.errors === 'object') {
+      formError.value = Object.values(data.errors).flat().join(', ')
+    } else if (Array.isArray(data?.errors)) {
+      formError.value = data.errors.join(', ')
+    } else {
+      formError.value = data?.message || 'Error al crear la cita'
+    }
   } finally {
     saving.value = false
   }

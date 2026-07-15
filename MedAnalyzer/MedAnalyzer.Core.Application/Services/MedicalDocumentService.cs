@@ -21,9 +21,11 @@ namespace MedAnalyzer.Core.Application.Services
 
         public async Task<List<MedicalDocumentDto>> GetByPatientId(int patientId)
         {
-            var all = await _repository.GetAllListAsync();
-            return _mapper.Map<List<MedicalDocumentDto>>(
-                all.Where(d => d.PatientId == patientId).ToList());
+            var docs = _repository.GetAllQuery().Where(d => d.PatientId == patientId).OrderByDescending(d => d.UploadedAt).ToList();
+
+            var dtos = _mapper.Map<List<MedicalDocumentDto>>(docs);
+
+            return dtos;
         }
 
         public async Task<List<MedicalDocumentDto>> GetByAppointmentId(int appointmentId)

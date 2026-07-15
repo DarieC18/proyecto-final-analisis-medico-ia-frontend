@@ -19,6 +19,7 @@ namespace MedAnalyzer.Core.Application
             service.AddScoped<IDashboardService<DoctorDashboardDto>, DoctorDashboardService>();
             service.AddScoped<IAlertService, AlertService>();
             service.AddScoped<IAiAnalisysServices, AiAnalisysServices>();
+            service.AddScoped<IAiChatService, AiChatService>();
             service.AddScoped<IAppointmentService, AppointMentService>();
             service.AddScoped<IPatientService, PatientService>();
             service.AddScoped<IMedicalRecordService, MedicalRecordService>();

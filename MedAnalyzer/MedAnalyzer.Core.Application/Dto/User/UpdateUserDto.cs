@@ -8,5 +8,6 @@ namespace MedAnalyzer.Core.Application.Dto.User
         public required string UserName { get; set; }
         public required string NumberIdentification { get; set; }
         public string? Role { get; set; }
+        public string? Specialty { get; set; }
     }
 }
