@@ -54,16 +54,24 @@
         </div>
         <hr>
 
-        <div v-if="reporte.patientInfo" class="mb-4">
+        <div v-if="reporte.patientDetail" class="mb-4">
           <h6 class="fw-bold text-muted text-uppercase mb-3">Información del Paciente</h6>
           <div class="row g-3">
-            <div class="col-md-4"><strong>Nombre:</strong> {{ reporte.patientInfo.fullName }}</div>
-            <div class="col-md-4"><strong>ID:</strong> {{ reporte.patientInfo.identificationNumber }}</div>
-            <div class="col-md-4"><strong>Teléfono:</strong> {{ reporte.patientInfo.phoneNumber }}</div>
+            <div class="col-md-4"><strong>Nombre:</strong> {{ reporte.patientDetail.fullName }}</div>
+            <div class="col-md-4"><strong>Identificación:</strong> {{ reporte.patientDetail.identificationType }} - {{ reporte.patientDetail.numberIdentification }}</div>
+            <div class="col-md-4"><strong>Teléfono:</strong> {{ reporte.patientDetail.phoneNumber }}</div>
+            <div class="col-md-4"><strong>Email:</strong> {{ reporte.patientDetail.email }}</div>
+            <div class="col-md-4"><strong>Fecha de nacimiento:</strong> {{ formatDate(reporte.patientDetail.birthDate) }}</div>
+            <div class="col-md-4"><strong>Género:</strong> {{ reporte.patientDetail.gender }}</div>
+            <div class="col-md-4"><strong>Tipo de paciente:</strong> {{ reporte.patientDetail.patientType }}</div>
+            <div class="col-md-4">
+              <strong>Estado:</strong>
+              <StatusBadge :text="reporte.patientDetail.isActive ? 'Activo' : 'Inactivo'" :variant="reporte.patientDetail.isActive ? 'success' : 'secondary'" />
+            </div>
           </div>
         </div>
 
-        <div v-if="reporte.citas?.length" class="mb-4">
+        <div v-if="reporte.patientDetail?.medicalRecords?.length" class="mb-4">
           <h6 class="fw-bold text-muted text-uppercase mb-3">Historial de Citas</h6>
           <div class="table-responsive">
             <table class="table table-sm table-hover">
@@ -76,23 +84,51 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="c in reporte.citas" :key="c.id">
-                  <td>{{ formatDate(c.appointmentDate) }}</td>
-                  <td>{{ c.reason }}</td>
-                  <td><StatusBadge :text="c.status" :variant="c.status?.toLowerCase()" /></td>
-                  <td>{{ c.doctorName }}</td>
+                <tr v-for="rec in reporte.patientDetail.medicalRecords" :key="rec.id">
+                  <td>{{ formatDate(rec.appointmentDate) }}</td>
+                  <td>{{ rec.reason }}</td>
+                  <td><StatusBadge :text="rec.appointmentStatus" :variant="rec.appointmentStatus?.toLowerCase()" /></td>
+                  <td>{{ rec.doctorName }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <div v-if="reporte.alertas?.length" class="mb-4">
+        <div v-if="reporte.patientDetail?.documents?.length" class="mb-4">
+          <h6 class="fw-bold text-muted text-uppercase mb-3">Documentos Médicos</h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead class="bg-light">
+                <tr>
+                  <th>Archivo</th>
+                  <th>Tipo</th>
+                  <th>Subido</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="doc in reporte.patientDetail.documents" :key="doc.id">
+                  <td>{{ doc.fileName }}</td>
+                  <td>{{ doc.fileType }}</td>
+                  <td>{{ formatDate(doc.uploadedAt) }}</td>
+                  <td><a :href="doc.filePath" target="_blank" class="btn btn-sm btn-outline-primary">Ver</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div v-if="reporte.alerts?.length" class="mb-4">
           <h6 class="fw-bold text-muted text-uppercase mb-3">Alertas</h6>
-          <div v-for="a in reporte.alertas" :key="a.id" class="alert border-0 rounded-3 mb-2" :class="a.isResolved ? 'bg-light text-muted' : 'bg-danger bg-opacity-10 text-danger'">
-            <strong>{{ a.alertType }}</strong> - {{ a.description }}
+          <div v-for="a in reporte.alerts" :key="a.id" class="alert border-0 rounded-3 mb-2" :class="a.isResolved ? 'bg-light text-muted' : 'bg-danger bg-opacity-10 text-danger'">
+            <strong>{{ a.title }}</strong> - {{ a.description }}
+            <span class="badge bg-secondary ms-2">{{ a.severity }}</span>
             <span v-if="a.isResolved" class="badge bg-success ms-2">Resuelta</span>
           </div>
+        </div>
+        <div v-else-if="reporte.patientDetail" class="text-muted mb-4">
+          Sin alertas registradas para este paciente.
         </div>
 
         <div v-if="reporte.aiAnalyses?.length" class="mb-4">
