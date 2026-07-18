@@ -10,3 +10,15 @@ C:\Users\Elis\Desktop\Clases_Itla\Clases\cuatrimestre_8\proyecto final\tarea\no\
 C:\Users\Elis\Desktop\Clases_Itla\Clases\cuatrimestre_8\proyecto final\tarea\no\project_frontend_v3\MedAnalyzer\MedAnalyzer.Core.Domain\obj\Debug\net10.0\refint\MedAnalyzer.Core.Domain.dll
 C:\Users\Elis\Desktop\Clases_Itla\Clases\cuatrimestre_8\proyecto final\tarea\no\project_frontend_v3\MedAnalyzer\MedAnalyzer.Core.Domain\obj\Debug\net10.0\MedAnalyzer.Core.Domain.pdb
 C:\Users\Elis\Desktop\Clases_Itla\Clases\cuatrimestre_8\proyecto final\tarea\no\project_frontend_v3\MedAnalyzer\MedAnalyzer.Core.Domain\obj\Debug\net10.0\ref\MedAnalyzer.Core.Domain.dll
+C:\Users\Admin\Desktop\Proyecto final\Proyecto\proyecto-final-analisis-medico-ia-frontend\MedAnalyzer\MedAnalyzer.Core.Domain\bin\Debug\net10.0\MedAnalyzer.Core.Domain.deps.json
+C:\Users\Admin\Desktop\Proyecto final\Proyecto\proyecto-final-analisis-medico-ia-frontend\MedAnalyzer\MedAnalyzer.Core.Domain\bin\Debug\net10.0\MedAnalyzer.Core.Domain.dll
+C:\Users\Admin\Desktop\Proyecto final\Proyecto\proyecto-final-analisis-medico-ia-frontend\MedAnalyzer\MedAnalyzer.Core.Domain\bin\Debug\net10.0\MedAnalyzer.Core.Domain.pdb
+C:\Users\Admin\Desktop\Proyecto final\Proyecto\proyecto-final-analisis-medico-ia-frontend\MedAnalyzer\MedAnalyzer.Core.Domain\obj\Debug\net10.0\MedAnalyzer.Core.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Admin\Desktop\Proyecto final\Proyecto\proyecto-final-analisis-medico-ia-frontend\MedAnalyzer\MedAnalyzer.Core.Domain\obj\Debug\net10.0\MedAnalyzer.Core.Domain.AssemblyInfoInputs.cache
+C:\Users\Admin\Desktop\Proyecto final\Proyecto\proyecto-final-analisis-medico-ia-frontend\MedAnalyzer\MedAnalyzer.Core.Domain\obj\Debug\net10.0\MedAnalyzer.Core.Domain.AssemblyInfo.cs
+C:\Users\Admin\Desktop\Proyecto final\Proyecto\proyecto-final-analisis-medico-ia-frontend\MedAnalyzer\MedAnalyzer.Core.Domain\obj\Debug\net10.0\MedAnalyzer.Core.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Admin\Desktop\Proyecto final\Proyecto\proyecto-final-analisis-medico-ia-frontend\MedAnalyzer\MedAnalyzer.Core.Domain\obj\Debug\net10.0\MedAnalyzer.Core.Domain.sourcelink.json
+C:\Users\Admin\Desktop\Proyecto final\Proyecto\proyecto-final-analisis-medico-ia-frontend\MedAnalyzer\MedAnalyzer.Core.Domain\obj\Debug\net10.0\MedAnalyzer.Core.Domain.dll
+C:\Users\Admin\Desktop\Proyecto final\Proyecto\proyecto-final-analisis-medico-ia-frontend\MedAnalyzer\MedAnalyzer.Core.Domain\obj\Debug\net10.0\refint\MedAnalyzer.Core.Domain.dll
+C:\Users\Admin\Desktop\Proyecto final\Proyecto\proyecto-final-analisis-medico-ia-frontend\MedAnalyzer\MedAnalyzer.Core.Domain\obj\Debug\net10.0\MedAnalyzer.Core.Domain.pdb
+C:\Users\Admin\Desktop\Proyecto final\Proyecto\proyecto-final-analisis-medico-ia-frontend\MedAnalyzer\MedAnalyzer.Core.Domain\obj\Debug\net10.0\ref\MedAnalyzer.Core.Domain.dll

@@ -202,7 +202,7 @@
               <tbody class="border-top-0">
                 <tr v-for="r in detalle.appointments" :key="r.id">
                   <td class="ps-4 py-3">{{ formatDate(r.appointmentDate) }}</td>
-                  <td class="py-3">{{ r.doctorName }}</td>
+                  <td class="py-3">{{ getDoctorName(r.doctorId) }}</td>
                   <td class="py-3">{{ r.reason }}</td>
                   <td class="py-3">
                     <StatusBadge :text="r.status" :variant="r.status?.toLowerCase()" />
@@ -216,33 +216,42 @@
       </div>
     </div>
 
-    <ConfirmDialog
+    <ConfirmModal
       :visible="deleteDialog"
+      headerTitle="Eliminar Paciente"
       title="Eliminar Paciente"
       message="¿Está seguro que desea eliminar este paciente y todo su historial clínico? Esta acción no se puede deshacer."
       confirmText="Eliminar"
       :danger="true"
+      icon="🗑️"
       @confirm="eliminarPaciente"
       @cancel="deleteDialog = false"
     />
-    <ConfirmDialog
+    <ConfirmModal
       :visible="deactivateDialog"
+      headerTitle="Desactivar Paciente"
       title="Desactivar Paciente"
       :message="`¿Está seguro que desea desactivar a ${deactivateTarget?.fullName}?`"
       confirmText="Desactivar"
       icon="⚠️"
+      headerColor="#ffc107"
       @confirm="desactivarConfirmado"
       @cancel="deactivateDialog = false"
     />
+
+    <ToastNotification :message="toastMessage" :type="toastType" />
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { patientService } from '@/api/patients'
+import { appointmentService } from '@/api/appointments'
+import { accountService } from '@/api/account'
 import { authStore } from '@/stores/auth'
-import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
+import ToastNotification from '@/components/ToastNotification.vue'
 
 const busqueda = ref('')
 const vistaActual = ref('lista')
@@ -254,7 +263,10 @@ const deleteDialog = ref(false)
 const deleteTarget = ref(null)
 const deactivateDialog = ref(false)
 const deactivateTarget = ref(null)
+const toastMessage = ref('')
+const toastType = ref('success')
 const pacientes = ref([])
+const doctores = ref([])
 const detalle = ref(null)
 const editId = ref(null)
 const editUserId = ref(null)
@@ -285,6 +297,11 @@ const formatDate = (dateStr) => {
   }
 }
 
+const getDoctorName = (id) => {
+  const d = doctores.value.find(doc => doc.id === id)
+  return d ? `${d.name} ${d.lastName}` : `Dr. #${id}`
+}
+
 const cargarPacientes = async () => {
   loading.value = true
   error.value = ''
@@ -307,6 +324,22 @@ const abrirDetalle = async (p) => {
   try {
     const res = await patientService.getDetails(p.id)
     detalle.value = res.data || p
+
+    try {
+      const appRes = await appointmentService.getAll()
+      const patientId = p.id
+      detalle.value.appointments = (appRes.data || []).filter(a => a.patientId === patientId)
+        .sort((a, b) => new Date(b.appointmentDate || 0) - new Date(a.appointmentDate || 0))
+    } catch {
+      detalle.value.appointments = []
+    }
+
+    try {
+      const accountsRes = await accountService.getAll()
+      doctores.value = accountsRes.data || []
+    } catch {
+      doctores.value = []
+    }
   } catch {
     error.value = 'Error al cargar detalle del paciente'
   }
@@ -334,8 +367,9 @@ const editarPaciente = (p) => {
 const guardarPaciente = async () => {
   saving.value = true
   formError.value = ''
+  const esCreando = vistaActual.value === 'crear'
   try {
-    if (vistaActual.value === 'crear') {
+    if (esCreando) {
       await patientService.create({
         firstName: form.firstName,
         lastName: form.lastName,
@@ -363,6 +397,8 @@ const guardarPaciente = async () => {
       })
     }
     vistaActual.value = 'lista'
+    toastMessage.value = esCreando ? 'Paciente creado exitosamente' : 'Paciente actualizado exitosamente'
+    toastType.value = 'success'
     await cargarPacientes()
   } catch (err) {
     const data = err.response?.data
@@ -397,10 +433,13 @@ const desactivarConfirmado = async () => {
   deactivateDialog.value = false
   try {
     await patientService.deactivate(deactivateTarget.value.id)
+    toastMessage.value = 'Paciente desactivado exitosamente'
+    toastType.value = 'warning'
     await cargarPacientes()
   } catch (err) {
     const data = err.response?.data
-    error.value = data?.message || 'Error al desactivar paciente'
+    toastMessage.value = data?.message || 'Error al desactivar paciente'
+    toastType.value = 'error'
   }
 }
 
@@ -429,9 +468,12 @@ const eliminarPaciente = async () => {
   deleteDialog.value = false
   try {
     await patientService.remove(deleteTarget.value.id)
+    toastMessage.value = 'Paciente eliminado exitosamente'
+    toastType.value = 'success'
     await cargarPacientes()
   } catch (err) {
-    error.value = 'Error al eliminar paciente'
+    toastMessage.value = 'Error al eliminar paciente'
+    toastType.value = 'error'
   }
 }
 

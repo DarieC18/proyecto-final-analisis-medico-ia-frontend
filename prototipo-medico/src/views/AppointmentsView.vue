@@ -152,7 +152,11 @@ const cargarCitas = async () => {
       appointmentService.getAll(),
       patientService.getAll()
     ])
-    citas.value = citasRes.data || []
+    citas.value = (citasRes.data || []).sort((a, b) => {
+      const dateA = new Date(a.appointmentDate || 0)
+      const dateB = new Date(b.appointmentDate || 0)
+      return dateB - dateA
+    })
     pacientes.value = pacientesRes.data || []
 
     const userData = localStorage.getItem('user')

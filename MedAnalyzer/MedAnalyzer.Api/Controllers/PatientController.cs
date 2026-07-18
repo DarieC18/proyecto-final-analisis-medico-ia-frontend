@@ -54,12 +54,20 @@ namespace MedAnalyzer.Api.Controllers
         [HttpGet("{id}")]
         [Authorize(Roles = "Doctor,Nurse")]
         [ProducesResponseType(typeof(PatientDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id)
         {
             var patient = await _patientService.GetDtoById(id);
             if (patient == null)
                 return NotFound(new ErrorResponse { Message = "Paciente no encontrado." });
+
+            if (!string.IsNullOrWhiteSpace(patient.UserId))
+            {
+                var user = await _accountService.GetUserById(patient.UserId);
+                if (user != null)
+                    patient.FullName = $"{user.Name} {user.LastName}";
+            }
+
             return Ok(patient);
         }
 

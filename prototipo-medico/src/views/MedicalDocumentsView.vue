@@ -46,7 +46,7 @@
     <div v-else-if="error" class="alert alert-danger border-0 rounded-3">{{ error }}</div>
 
     <div v-else-if="documentos.length === 0 && buscado" class="text-center py-5 text-muted">
-      <div class="display-4 mb-3">📄</div>
+      <div class="display-4 mb-3"><FileIcon file-name="doc.pdf" style="width: 64px;" /></div>
       <p>No hay documentos para este paciente.</p>
     </div>
 
@@ -56,13 +56,13 @@
           <div class="card border-0 shadow-sm rounded-4 h-100">
             <div class="card-body p-4">
               <div class="text-center mb-3">
-                <div class="display-5">{{ fileIcon(d.fileName) }}</div>
+                <div style="width: 48px; margin: 0 auto;"><FileIcon :file-name="d.fileName" :file-path="d.filePath" /></div>
               </div>
               <h6 class="fw-bold text-center mb-1">{{ d.fileName }}</h6>
               <p class="text-muted small text-center mb-2">{{ formatDate(d.uploadedAt) }}</p>
               <p class="small text-muted text-center mb-3" v-if="d.description">{{ d.description }}</p>
               <div class="d-flex justify-content-center gap-2">
-                <a :href="d.fileUrl" target="_blank" class="btn btn-sm btn-light border px-3">Ver</a>
+                <button @click="abrirVisor(d)" class="btn btn-sm btn-light border px-3">Ver</button>
                 <button @click="confirmarEliminar(d)" class="btn btn-sm btn-light border text-danger px-3">Eliminar</button>
               </div>
             </div>
@@ -105,18 +105,22 @@
     </div>
 
     <div v-else class="text-center py-5 text-muted">
-      <div class="display-4 mb-3">📄</div>
+      <div class="display-4 mb-3"><FileIcon file-name="doc.pdf" style="width: 64px;" /></div>
       <p>Ingrese un ID de paciente para buscar sus documentos.</p>
     </div>
 
-    <ConfirmDialog
+    <DeleteDocumentModal
       :visible="deleteDialog"
       title="Eliminar Documento"
       :message="`¿Está seguro que desea eliminar el documento ${deleteTarget?.fileName}?`"
-      confirmText="Eliminar"
-      :danger="true"
       @confirm="eliminarDocumento"
       @cancel="deleteDialog = false"
+    />
+
+    <DocumentViewerModal
+      :visible="showViewer"
+      :document="viewerDoc"
+      @close="showViewer = false"
     />
   </div>
 </template>
@@ -125,7 +129,9 @@
 import { ref } from 'vue'
 import { medicalDocumentService } from '@/api/medicalDocuments'
 import { patientService } from '@/api/patients'
-import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import DeleteDocumentModal from '@/components/DeleteDocumentModal.vue'
+import DocumentViewerModal from '@/components/DocumentViewerModal.vue'
+import FileIcon from '@/components/FileIcon.vue'
 
 const loading = ref(false)
 const error = ref('')
@@ -138,6 +144,8 @@ const fileType = ref('')
 const fileInput = ref(null)
 const deleteDialog = ref(false)
 const deleteTarget = ref(null)
+const showViewer = ref(false)
+const viewerDoc = ref(null)
 const searchQuery = ref('')
 const searchResults = ref([])
 const showDropdown = ref(false)
@@ -146,6 +154,11 @@ let searchTimeout = null
 
 const ocultarDropdown = () => {
   setTimeout(() => { showDropdown.value = false }, 200)
+}
+
+const abrirVisor = (doc) => {
+  viewerDoc.value = doc
+  showViewer.value = true
 }
 
 const buscarPacientes = () => {
@@ -183,14 +196,6 @@ const formatDate = (dateStr) => {
       day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
     })
   } catch { return dateStr }
-}
-
-const fileIcon = (name) => {
-  if (!name) return '📄'
-  const ext = name.split('.').pop()?.toLowerCase()
-  if (ext === 'pdf') return '📕'
-  if (['jpg', 'jpeg', 'png'].includes(ext)) return '🖼️'
-  return '📄'
 }
 
 const cargarDocumentos = async () => {

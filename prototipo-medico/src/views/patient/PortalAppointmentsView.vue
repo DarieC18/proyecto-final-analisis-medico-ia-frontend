@@ -119,7 +119,11 @@ const statusVariant = (status) => {
 const cargarCitas = async () => {
   try {
     const res = await portalService.getAppointments()
-    citas.value = res.data || []
+    citas.value = (res.data || []).sort((a, b) => {
+      const dateA = new Date(a.appointmentDate || 0)
+      const dateB = new Date(b.appointmentDate || 0)
+      return dateB - dateA
+    })
   } catch {
     citas.value = []
   }

@@ -1,42 +1,73 @@
 <template>
   <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h3 class="fw-bold mb-0">Reportes Clínicos</h3>
-        <p class="text-muted">Reportes detallados de pacientes y citas</p>
-      </div>
+    <div class="mb-4">
+      <h3 class="fw-bold mb-0">Reportes Clínicos</h3>
+      <p class="text-muted">Reportes detallados de pacientes y citas</p>
     </div>
 
-    <div class="row g-4 mb-4">
-      <div class="col-md-6">
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-body p-4">
-            <h5 class="fw-bold mb-3">📋 Reporte de Cita</h5>
-            <div class="row g-2">
-              <div class="col-8">
-                <input v-model="citaId" type="number" class="form-control bg-light border-0" placeholder="ID de la cita">
-              </div>
-              <div class="col-4">
-                <button @click="cargarReporteCita" class="btn btn-dark w-100" :disabled="!citaId">Ver</button>
-              </div>
-            </div>
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <!-- Pestañas -->
+        <ul class="nav nav-pills mb-4 gap-2">
+          <li class="nav-item">
+            <button
+              class="nav-link"
+              :class="{ active: tab === 'paciente' }"
+              @click="switchTab('paciente')"
+            >
+              📊 Reporte de Paciente
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link"
+              :class="{ active: tab === 'cita' }"
+              @click="switchTab('cita')"
+            >
+              📋 Reporte de Cita
+            </button>
+          </li>
+        </ul>
+
+        <!-- Formulario paciente -->
+        <form v-if="tab === 'paciente'" class="row g-2" @submit.prevent="cargarReportePaciente">
+          <div class="col-8 col-md-9">
+            <input
+              v-model="pacienteId"
+              type="number"
+              min="1"
+              class="form-control bg-light border-0"
+              placeholder="ID del paciente"
+              autofocus
+            >
           </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-body p-4">
-            <h5 class="fw-bold mb-3">📊 Reporte de Paciente</h5>
-            <div class="row g-2">
-              <div class="col-8">
-                <input v-model="pacienteId" type="number" class="form-control bg-light border-0" placeholder="ID del paciente">
-              </div>
-              <div class="col-4">
-                <button @click="cargarReportePaciente" class="btn btn-dark w-100" :disabled="!pacienteId">Ver</button>
-              </div>
-            </div>
+          <div class="col-4 col-md-3">
+            <button type="submit" class="btn btn-dark w-100" :disabled="!pacienteId || loading">
+              <span v-if="loading" class="spinner-border spinner-border-sm me-1"></span>
+              Ver
+            </button>
           </div>
-        </div>
+        </form>
+
+        <!-- Formulario cita -->
+        <form v-else class="row g-2" @submit.prevent="cargarReporteCita">
+          <div class="col-8 col-md-9">
+            <input
+              v-model="citaId"
+              type="number"
+              min="1"
+              class="form-control bg-light border-0"
+              placeholder="ID de la cita"
+              autofocus
+            >
+          </div>
+          <div class="col-4 col-md-3">
+            <button type="submit" class="btn btn-dark w-100" :disabled="!citaId || loading">
+              <span v-if="loading" class="spinner-border spinner-border-sm me-1"></span>
+              Ver
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -44,9 +75,19 @@
       <div class="spinner-border text-primary" role="status"></div>
     </div>
 
-    <div v-else-if="error" class="alert alert-danger border-0 rounded-3">{{ error }}</div>
+    <div v-else-if="error" class="alert alert-danger border-0 rounded-3 d-flex justify-content-between align-items-center">
+      <span>{{ error }}</span>
+      <button class="btn-close" @click="error = ''"></button>
+    </div>
 
-    <div v-else-if="reporte" class="card shadow-sm border-0 rounded-4">
+    <div v-else-if="!reporte" class="text-center text-muted py-5">
+      <div class="fs-1 mb-2">{{ tab === 'paciente' ? '📊' : '📋' }}</div>
+      <p class="mb-0">
+        Escribe el {{ tab === 'paciente' ? 'ID del paciente' : 'ID de la cita' }} y presiona "Ver" para generar el reporte.
+      </p>
+    </div>
+
+    <div v-else class="card shadow-sm border-0 rounded-4">
       <div class="card-body p-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h4 class="fw-bold mb-0">{{ reporteTitulo }}</h4>
@@ -64,10 +105,6 @@
             <div class="col-md-4"><strong>Fecha de nacimiento:</strong> {{ formatDate(reporte.patientDetail.birthDate) }}</div>
             <div class="col-md-4"><strong>Género:</strong> {{ reporte.patientDetail.gender }}</div>
             <div class="col-md-4"><strong>Tipo de paciente:</strong> {{ reporte.patientDetail.patientType }}</div>
-            <div class="col-md-4">
-              <strong>Estado:</strong>
-              <StatusBadge :text="reporte.patientDetail.isActive ? 'Activo' : 'Inactivo'" :variant="reporte.patientDetail.isActive ? 'success' : 'secondary'" />
-            </div>
           </div>
         </div>
 
@@ -94,6 +131,9 @@
             </table>
           </div>
         </div>
+        <div v-else-if="reporte.patientDetail" class="text-muted mb-4">
+          Sin historial de citas para este paciente.
+        </div>
 
         <div v-if="reporte.patientDetail?.documents?.length" class="mb-4">
           <h6 class="fw-bold text-muted text-uppercase mb-3">Documentos Médicos</h6>
@@ -117,6 +157,9 @@
               </tbody>
             </table>
           </div>
+        </div>
+        <div v-else-if="reporte.patientDetail" class="text-muted mb-4">
+          Sin documentos médicos para este paciente.
         </div>
 
         <div v-if="reporte.alerts?.length" class="mb-4">
@@ -155,12 +198,19 @@ import { ref } from 'vue'
 import { reportService } from '@/api/reports'
 import StatusBadge from '@/components/StatusBadge.vue'
 
+const tab = ref('paciente')
 const loading = ref(false)
 const error = ref('')
 const reporte = ref(null)
 const reporteTitulo = ref('')
 const citaId = ref('')
 const pacienteId = ref('')
+
+const switchTab = (nuevaTab) => {
+  tab.value = nuevaTab
+  reporte.value = null
+  error.value = ''
+}
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
@@ -199,7 +249,10 @@ const cargarReportePaciente = async () => {
   try {
     const res = await reportService.getPatientReport(pacienteId.value)
     reporte.value = res.data
-    reporteTitulo.value = `Reporte del Paciente #${pacienteId.value}`
+    const nombre = res.data?.patientDetail?.fullName
+    reporteTitulo.value = nombre
+      ? `Reporte del Paciente #${pacienteId.value} — ${nombre}`
+      : `Reporte del Paciente #${pacienteId.value}`
   } catch (err) {
     if (err.response?.status === 404) {
       error.value = 'Paciente no encontrado.'
@@ -211,3 +264,23 @@ const cargarReportePaciente = async () => {
   }
 }
 </script>
+
+<style scoped>
+.nav-pills .nav-link {
+  color: #495057;
+  background-color: #f1f3f5;
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.nav-pills .nav-link:hover {
+  background-color: #e9ecef;
+}
+
+.nav-pills .nav-link.active {
+  background-color: #212529;
+  color: #fff;
+}
+</style>
