@@ -121,7 +121,7 @@ namespace MedAnalyzer.Infraestructure.Identity.Configurations
             await DefaulRoles.SeedAsync(roleManager);
             await DefaultAdminUser.SeedAsync(userManager);
             await DefaultDoctorUser.SeedAsync(userManager);
-            await DefaultConsultationUser.SeedAsync(userManager);
+            await DefaultPatientUser.SeedAsync(userManager);
         }
 
         private static void GeneralConfiguration(IServiceCollection services, IConfiguration config)

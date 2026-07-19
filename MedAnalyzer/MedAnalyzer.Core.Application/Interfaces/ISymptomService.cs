@@ -6,5 +6,6 @@ namespace MedAnalyzer.Core.Application.Interfaces
     public interface ISymptomService : IBaseServices<Symptom, SymptomDto>
     {
         Task<List<SymptomDto>> GetByAppointmentId(int appointmentId);
+        Task<SymptomDto?> CreateSymptom(SymptomDto dto, string currentUserId);
     }
 }

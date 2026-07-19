@@ -15,4 +15,5 @@
   <Folder Name="/Src/Presentation/">
     <Project Path="MedAnalyzer.Api/MedAnalyzer.Api.csproj" Id="811627e3-ae57-4c01-8d38-47e43f3d87f0" />
   </Folder>
+  <Project Path="MedAnalyzer.Tests/MedAnalyzer.Tests.csproj" />
 </Solution>

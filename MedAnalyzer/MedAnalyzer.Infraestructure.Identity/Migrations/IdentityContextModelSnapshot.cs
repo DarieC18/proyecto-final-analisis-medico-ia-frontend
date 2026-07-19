@@ -86,6 +86,9 @@ namespace MedAnalyzer.Infraestructure.Identity.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
+                    b.Property<string>("Specialty")
+                        .HasColumnType("text");
+
                     b.Property<bool>("Status")
                         .HasColumnType("boolean");
 

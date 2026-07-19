@@ -17,12 +17,7 @@ import RecommendationsView from '../views/RecommendationsView.vue'
 import MedicalDocumentsView from '../views/MedicalDocumentsView.vue'
 import ReportsView from '../views/ReportsView.vue'
 import AiChatView from '../views/AiChatView.vue'
-import PortalProfileView from '../views/patient/PortalProfileView.vue'
-import PortalAppointmentsView from '../views/patient/PortalAppointmentsView.vue'
-import PortalMedicalRecordsView from '../views/patient/PortalMedicalRecordsView.vue'
-import PortalRecommendationsView from '../views/patient/PortalRecommendationsView.vue'
-import PortalDocumentsView from '../views/patient/PortalDocumentsView.vue'
-import PortalResultsView from '../views/patient/PortalResultsView.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -140,42 +135,7 @@ const router = createRouter({
       component: AiChatView,
       meta: { roles: ['Doctor', 'Nurse'] }
     },
-    {
-      path: '/portal/perfil',
-      name: 'portal-perfil',
-      component: PortalProfileView,
-      meta: { roles: ['Patient'] }
-    },
-    {
-      path: '/portal/citas',
-      name: 'portal-citas',
-      component: PortalAppointmentsView,
-      meta: { roles: ['Patient'] }
-    },
-    {
-      path: '/portal/historial',
-      name: 'portal-historial',
-      component: PortalMedicalRecordsView,
-      meta: { roles: ['Patient'] }
-    },
-    {
-      path: '/portal/recomendaciones',
-      name: 'portal-recomendaciones',
-      component: PortalRecommendationsView,
-      meta: { roles: ['Patient'] }
-    },
-    {
-      path: '/portal/documentos',
-      name: 'portal-documentos',
-      component: PortalDocumentsView,
-      meta: { roles: ['Patient'] }
-    },
-    {
-      path: '/portal/resultados',
-      name: 'portal-resultados',
-      component: PortalResultsView,
-      meta: { roles: ['Patient'] }
-    }
+
   ]
 })
 

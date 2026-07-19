@@ -10,7 +10,7 @@ namespace MedAnalyzer.Infraestructure.Identity.Seeds
             await roleManager.CreateAsync(new IdentityRole(Role.Administrator.ToString()));
             await roleManager.CreateAsync(new IdentityRole(Role.Doctor.ToString()));
             await roleManager.CreateAsync(new IdentityRole(Role.Nurse.ToString()));
-            await roleManager.CreateAsync(new IdentityRole(Role.ConsultationUser.ToString()));
+            await roleManager.CreateAsync(new IdentityRole(Role.Patient.ToString()));
 
         }
     }

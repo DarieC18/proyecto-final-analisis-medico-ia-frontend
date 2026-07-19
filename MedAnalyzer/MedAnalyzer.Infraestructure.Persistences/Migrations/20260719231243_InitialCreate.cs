@@ -37,11 +37,10 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    FullName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    UserId = table.Column<string>(type: "character varying(450)", maxLength: 450, nullable: false),
                     BirthDate = table.Column<DateOnly>(type: "date", nullable: false),
                     Gender = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     PhoneNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    IdentificationNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     IdentificationType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     PatientType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
@@ -150,8 +149,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     CreatedByUserId = table.Column<string>(type: "text", nullable: false),
                     DiagnosisInitial = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     Notes = table.Column<string>(type: "text", nullable: false),
-                    Antecedentes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    ObservacionesConsulta = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    Antecedentes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
@@ -201,11 +199,11 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     AppointmentId = table.Column<int>(type: "integer", nullable: false),
-                    Temperature = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
-                    HeartRate = table.Column<int>(type: "integer", nullable: false),
-                    SystolicPressure = table.Column<int>(type: "integer", nullable: false),
-                    DiastolicPressure = table.Column<int>(type: "integer", nullable: false),
-                    OxygenSaturation = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
+                    Temperature = table.Column<decimal>(type: "numeric(5,2)", nullable: true),
+                    HeartRate = table.Column<int>(type: "integer", nullable: true),
+                    SystolicPressure = table.Column<int>(type: "integer", nullable: true),
+                    DiastolicPressure = table.Column<int>(type: "integer", nullable: true),
+                    OxygenSaturation = table.Column<decimal>(type: "numeric(5,2)", nullable: true),
                     Glucose = table.Column<decimal>(type: "numeric(6,2)", nullable: true),
                     MeasuredAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     PatientId = table.Column<int>(type: "integer", nullable: true),
@@ -348,9 +346,9 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                 column: "PatientId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Patients_IdentificationNumber",
+                name: "IX_Patients_UserId",
                 table: "Patients",
-                column: "IdentificationNumber",
+                column: "UserId",
                 unique: true);
 
             migrationBuilder.CreateIndex(

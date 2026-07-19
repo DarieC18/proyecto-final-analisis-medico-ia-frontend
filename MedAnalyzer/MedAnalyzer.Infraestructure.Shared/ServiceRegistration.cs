@@ -12,12 +12,16 @@ namespace MedAnalyzer.Infraestructure.Shared
         {
             #region Configurations
             services.Configure<MailSettings>(confi.GetSection("MailSettings"));
-            
+            services.Configure<GeminiSettings>(confi.GetSection("AiSettings"));
+            services.Configure<AppSettings>(confi.GetSection("AppSettings"));
+
             #endregion
 
             #region Services
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFileStorageService, FileStorageService>();
+            services.AddHttpClient<IAiProviderService, GeminiAiProviderService>();
+            services.AddTransient<IPdfTextExtractor, PdfTextExtractorService>();
             #endregion
         }
     }

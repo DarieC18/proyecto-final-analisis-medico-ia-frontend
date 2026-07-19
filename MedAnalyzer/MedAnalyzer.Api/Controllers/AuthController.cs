@@ -1,4 +1,5 @@
 using MedAnalyzer.Api.Models;
+using MedAnalyzer.Core.Application.Dto.Patient;
 using MedAnalyzer.Core.Application.Dto.User;
 using MedAnalyzer.Core.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -14,16 +15,16 @@ namespace MedAnalyzer.Api.Controllers
     {
         private readonly IAccountServiceForWebApi _accountService;
         private readonly IAuditLogService _auditLogService;
+        private readonly IPatientService _patientService;
 
-        public AuthController(IAccountServiceForWebApi accountService, IAuditLogService auditLogService)
+        public AuthController(IAccountServiceForWebApi accountService, IAuditLogService auditLogService, IPatientService patientService)
         {
             _accountService = accountService;
             _auditLogService = auditLogService;
+            _patientService = patientService;
         }
 
-        /// <summary>Registra un nuevo usuario en el sistema.</summary>
-        /// <param name="dto">Datos de registro del usuario.</param>
-        /// <returns>Resultado del registro con información del usuario creado.</returns>
+        /// <summary>Registra un nuevo usuario. Si no hay sesión activa, el rol asignado es Patient.</summary>
         [HttpPost("register")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(RegisterResponseDto), StatusCodes.Status200OK)]
@@ -39,12 +40,24 @@ namespace MedAnalyzer.Api.Controllers
             if (response.HasError)
                 return BadRequest(response);
 
+            var isPatientRole = response.Roles == null ||
+                                !response.Roles.Any() ||
+                                response.Roles.Contains("Patient");
+
+            if (isPatientRole && !string.IsNullOrWhiteSpace(response.Id))
+            {
+                await _patientService.SaveDtoAsync(new PatientDto
+                {
+                    Id = 0,
+                    UserId = response.Id,
+                    IsActive = true
+                });
+            }
+
             return Ok(response);
         }
 
         /// <summary>Autentica a un usuario y devuelve un token JWT.</summary>
-        /// <param name="dto">Credenciales de acceso.</param>
-        /// <returns>Token de acceso y datos del usuario autenticado.</returns>
         [HttpPost("login")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(LoginResponseForApiDto), StatusCodes.Status200OK)]
@@ -65,9 +78,6 @@ namespace MedAnalyzer.Api.Controllers
         }
 
         /// <summary>Confirma el correo electrónico de un usuario mediante token.</summary>
-        /// <param name="userId">Identificador del usuario.</param>
-        /// <param name="token">Token de confirmación enviado por correo.</param>
-        /// <returns>Mensaje con el resultado de la confirmación.</returns>
         [HttpGet("confirm-account")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status200OK)]
@@ -90,8 +100,6 @@ namespace MedAnalyzer.Api.Controllers
         }
 
         /// <summary>Solicita el envío de un correo para restablecer la contraseña.</summary>
-        /// <param name="dto">Correo electrónico del usuario.</param>
-        /// <returns>Mensaje de confirmación del envío.</returns>
         [HttpPost("forgot-password")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status200OK)]
@@ -110,8 +118,6 @@ namespace MedAnalyzer.Api.Controllers
         }
 
         /// <summary>Restablece la contraseña de un usuario mediante token.</summary>
-        /// <param name="dto">Token de restablecimiento y nueva contraseña.</param>
-        /// <returns>Mensaje de confirmación del restablecimiento.</returns>
         [HttpPost("reset-password")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status200OK)]
@@ -130,7 +136,6 @@ namespace MedAnalyzer.Api.Controllers
         }
 
         /// <summary>Obtiene los datos del usuario actualmente autenticado.</summary>
-        /// <returns>Datos del usuario en sesión.</returns>
         [HttpGet("me")]
         [Authorize]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]

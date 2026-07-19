@@ -5,29 +5,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MedAnalyzer.Infraestructure.Identity.Seeds
 {
-    public class DefaultConsultationUser
+    public class DefaultPatientUser
     {
-        public async static Task SeedAsync(UserManager<AppUser> UserManager)
+        public async static Task SeedAsync(UserManager<AppUser> userManager)
         {
             AppUser user = new()
             {
                 FirstName = "Juan",
                 LastName = "Perez",
-                Email = "consultation@medanalyzer.com",
+                Email = "patient@medanalyzer.com",
                 NumberIdentification = "0000000003",
                 Status = true,
                 EmailConfirmed = true,
                 PhoneNumberConfirmed = true,
-                UserName = "ConsultationUser"
+                UserName = "PatientUser"
             };
 
-            if (await UserManager.Users.AllAsync(u => u.Id != user.Id))
+            if (await userManager.Users.AllAsync(u => u.Email != user.Email))
             {
-                var entityUser = await UserManager.FindByEmailAsync(user.Email);
+                var entityUser = await userManager.FindByEmailAsync(user.Email);
                 if (entityUser == null)
                 {
-                    await UserManager.CreateAsync(user, "123Pas$$word!");
-                    await UserManager.AddToRoleAsync(user, Role.ConsultationUser.ToString());
+                    await userManager.CreateAsync(user, "123Pas$$word!");
+                    await userManager.AddToRoleAsync(user, Role.Patient.ToString());
                 }
             }
         }

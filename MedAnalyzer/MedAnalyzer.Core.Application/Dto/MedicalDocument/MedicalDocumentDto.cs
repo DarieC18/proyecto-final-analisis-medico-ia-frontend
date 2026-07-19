@@ -11,6 +11,7 @@ namespace MedAnalyzer.Core.Application.Dto.MedicalDocument
         public required string FileType { get; set; }
         public required string FilePath { get; set; }
         public string? ExtractedText { get; set; }
+        public string? UploadedByUserName { get; set; }
         public DateTime UploadedAt { get; set; }
     }
 }

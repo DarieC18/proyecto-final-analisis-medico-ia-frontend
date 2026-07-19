@@ -1,6 +1,8 @@
 using MedAnalyzer.Api.Models;
 using MedAnalyzer.Core.Application.Dto.MedicalDocument;
-using MedAnalyzer.Core.Application.Interfaces;
+using MedAnalyzer.Core.Application.Features.MedicalDocuments.Commands;
+using MedAnalyzer.Core.Application.Features.MedicalDocuments.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,48 +15,35 @@ namespace MedAnalyzer.Api.Controllers
     [Authorize(Roles = "Doctor,Nurse")]
     public class MedicalDocumentController : ControllerBase
     {
-        private readonly IMedicalDocumentService _documentService;
-        private readonly IFileStorageService _fileStorage;
+        private readonly ISender _sender;
+        public MedicalDocumentController(ISender sender) => _sender = sender;
 
-        public MedicalDocumentController(IMedicalDocumentService documentService, IFileStorageService fileStorage)
-        {
-            _documentService = documentService;
-            _fileStorage = fileStorage;
-        }
+        /// <summary>Obtiene todos los documentos médicos.</summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(List<MedicalDocumentDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll()
+            => Ok(await _sender.Send(new GetAllMedicalDocumentsQuery()));
 
-        /// <summary>Obtiene los documentos médicos de un paciente.</summary>
-        /// <param name="patientId">Identificador del paciente.</param>
-        /// <returns>Lista de documentos médicos del paciente.</returns>
+        /// <summary>Obtiene los documentos médicos de un paciente, con el nombre del usuario que los subió.</summary>
         [HttpGet("by-patient/{patientId}")]
         [ProducesResponseType(typeof(List<MedicalDocumentDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetByPatient(int patientId)
-        {
-            var docs = await _documentService.GetByPatientId(patientId);
-            return Ok(docs ?? []);
-        }
+            => Ok(await _sender.Send(new GetMedicalDocumentsByPatientQuery(patientId)));
 
         /// <summary>Obtiene los documentos médicos de una cita.</summary>
-        /// <param name="appointmentId">Identificador de la cita.</param>
-        /// <returns>Lista de documentos médicos de la cita.</returns>
         [HttpGet("by-appointment/{appointmentId}")]
         [ProducesResponseType(typeof(List<MedicalDocumentDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetByAppointment(int appointmentId)
-        {
-            var docs = await _documentService.GetByAppointmentId(appointmentId);
-            return Ok(docs ?? []);
-        }
+            => Ok(await _sender.Send(new GetMedicalDocumentsByAppointmentQuery(appointmentId)));
 
         /// <summary>Obtiene un documento médico por su identificador.</summary>
-        /// <param name="id">Identificador del documento.</param>
-        /// <returns>Datos del documento médico.</returns>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MedicalDocumentDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id)
         {
-            var doc = await _documentService.GetDtoById(id);
-            if (doc == null)
-                return NotFound(new ErrorResponse { Message = "Documento no encontrado." });
+            var doc = await _sender.Send(new GetMedicalDocumentByIdQuery(id));
+            if (doc == null) return NotFound(new ErrorResponse { Message = "Documento no encontrado." });
             return Ok(doc);
         }
 
@@ -62,12 +51,6 @@ namespace MedAnalyzer.Api.Controllers
         /// Sube un documento médico (PDF, JPG o PNG, máximo 10 MB).
         /// Tipos válidos: Resultados de laboratorio, Indicaciones médicas, Historial externo, Estudios en PDF, Documentos administrativos.
         /// </summary>
-        /// <param name="file">Archivo a subir.</param>
-        /// <param name="patientId">Identificador del paciente.</param>
-        /// <param name="fileName">Nombre descriptivo del documento.</param>
-        /// <param name="fileType">Categoría del documento.</param>
-        /// <param name="appointmentId">Identificador de la cita asociada (opcional).</param>
-        /// <returns>Datos del documento guardado.</returns>
         [HttpPost("upload")]
         [ProducesResponseType(typeof(MedicalDocumentDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -98,45 +81,37 @@ namespace MedAnalyzer.Api.Controllers
             if (!AllowedExtensions.Contains(ext))
                 return BadRequest(new ErrorResponse { Message = "Formato no válido. Use PDF, JPG o PNG." });
 
-            var storedName = $"{Guid.NewGuid()}{ext}";
-            var relativePath = await _fileStorage.SaveAsync(file.OpenReadStream(), patientId.ToString(), storedName);
+            var uploadedByUserId = User.FindFirstValue("uid");
+            if (string.IsNullOrEmpty(uploadedByUserId))
+                return Unauthorized(new ErrorResponse { Message = "No se pudo identificar al usuario." });
 
-            var uploadedByUserId = User.FindFirstValue("uid") ?? string.Empty;
+            var result = await _sender.Send(new UploadMedicalDocumentCommand(
+                file.OpenReadStream(),
+                file.FileName,
+                patientId,
+                fileName,
+                fileType,
+                appointmentId,
+                uploadedByUserId));
 
-            var dto = new MedicalDocumentDto
-            {
-                PatientId = patientId,
-                AppointmentId = appointmentId,
-                FileName = fileName,
-                FileType = fileType,
-                FilePath = relativePath,
-                UploadedByUserId = uploadedByUserId,
-                UploadedAt = DateTime.UtcNow,
-                ExtractedText = null
-            };
-
-            var result = await _documentService.SaveDtoAsync(dto);
             if (result == null)
                 return BadRequest(new ErrorResponse { Message = "Error al guardar el documento." });
 
             return StatusCode(StatusCodes.Status201Created, result);
         }
 
-        /// <summary>Elimina un documento médico y su archivo físico.</summary>
-        /// <param name="id">Identificador del documento.</param>
-        /// <returns>Sin contenido si la operación fue exitosa.</returns>
+        /// <summary>Elimina un documento médico por su identificador.</summary>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
-            var doc = await _documentService.GetDtoById(id);
-            if (doc == null)
-                return NotFound(new ErrorResponse { Message = "Documento no encontrado." });
+            var uploadedByUserId = User.FindFirstValue("uid");
+            if (string.IsNullOrEmpty(uploadedByUserId))
+                return Unauthorized(new ErrorResponse { Message = "No se pudo identificar al usuario." });
 
-            _fileStorage.Delete(doc.FilePath);
-
-            await _documentService.DeleteHardDtoAsync(id);
+            var success = await _sender.Send(new DeleteMedicalDocumentCommand(id, uploadedByUserId));
+            if (!success) return NotFound(new ErrorResponse { Message = "Documento no encontrado." });
             return NoContent();
         }
 

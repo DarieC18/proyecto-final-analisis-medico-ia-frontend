@@ -1,8 +1,10 @@
-﻿using MedAnalyzer.Core.Application.Dto.User;
+using MedAnalyzer.Core.Application.Dto.User;
 using MedAnalyzer.Core.Application.Interfaces;
+using MedAnalyzer.Core.Domain.Enum;
 using MedAnalyzer.Core.Domain.Setting;
 using MedAnalyzer.Infraestructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,13 +19,45 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
         private readonly SignInManager<AppUser> _signInManager;
         private readonly JwtSettings _jwtSettings;
 
-        public AccountServiceForWebApi(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService, 
+        public AccountServiceForWebApi(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService,
             IOptions<JwtSettings> jwtSettings, IOptions<AppSettings> appSettings)
             : base(userManager, emailService, appSettings)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtSettings = jwtSettings.Value;
+        }
+
+        public async Task<(string UserId, string ResetToken)> RegisterPatientAccountAsync(
+            string email, string firstName, string lastName, string numberIdentification)
+        {
+            var userName = email.Split('@')[0].Replace(".", "").Replace("-", "").ToLower();
+            var existing = await _userManager.FindByNameAsync(userName);
+            if (existing != null)
+                userName = userName + new Random().Next(100, 999).ToString();
+
+            AppUser user = new()
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                UserName = userName,
+                NumberIdentification = numberIdentification,
+                EmailConfirmed = false,
+                Status = false
+            };
+
+            var tempPassword = $"Temp{Guid.NewGuid().ToString("N")[..8]}!1";
+            var result = await _userManager.CreateAsync(user, tempPassword);
+            if (!result.Succeeded)
+                throw new InvalidOperationException(string.Join(", ", result.Errors.Select(e => e.Description)));
+
+            await _userManager.AddToRoleAsync(user, Role.Patient.ToString());
+
+            var rawToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(rawToken));
+
+            return (user.Id, encodedToken);
         }
 
         public async Task<LoginResponseForApiDto> AuthenticateAsync(LoginDto loginDto)
@@ -37,7 +71,8 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
                 Errors = []
             };
 
-            var user = await _userManager.FindByNameAsync(loginDto.UserName);
+            var user = await _userManager.FindByNameAsync(loginDto.UserName)
+                       ?? await _userManager.FindByEmailAsync(loginDto.UserName);
 
             if (user == null)
             {
@@ -60,7 +95,7 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
                 response.HasError = true;
                 if (result.IsLockedOut)
                 {
-                    response.Errors.Add($"La cuenta {loginDto.UserName} ha sido bloqueada por múltiples intentos fallidos. Intenta de nuevo en 10 minutos.");
+                    response.Errors.Add($"La cuenta {loginDto.UserName} ha sido bloqueada por múltiples intentos fallidos. Intenta de nuevo en 5 minutos.");
                 }
                 else
                 {
@@ -106,10 +141,10 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
             }
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub,user.UserName ?? ""),
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? ""),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
-                new Claim("uid",user.Id ?? "")
+                new Claim("uid", user.Id ?? "")
             }.Union(userClaims).Union(rolesClaims);
 
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));

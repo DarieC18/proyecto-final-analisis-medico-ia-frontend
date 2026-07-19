@@ -46,8 +46,6 @@
                 <label class="form-label text-muted small fw-bold text-uppercase">Rol</label>
                 <select v-model="form.role" class="form-select bg-light border-0">
                   <option value="">Seleccione un rol...</option>
-                  <option value="Doctor">Médico</option>
-                  <option value="Nurse">Enfermera</option>
                   <option value="ConsultationUser">Usuario de consulta</option>
                 </select>
               </div>

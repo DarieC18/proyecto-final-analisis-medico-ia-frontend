@@ -1,9 +1,10 @@
-﻿using MedAnalyzer.Core.Application.Dto.Email;
+using MedAnalyzer.Core.Application.Dto.Email;
 
 namespace MedAnalyzer.Core.Application.Interfaces
 {
     public interface IEmailService
     {
         Task SendEmailAsync(EmailRequestDto emailRequest);
+        Task SendPatientActivationEmailAsync(string toEmail, string firstName, string userId, string resetToken);
     }
 }

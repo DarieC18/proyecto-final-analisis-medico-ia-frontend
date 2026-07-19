@@ -7,5 +7,6 @@ namespace MedAnalyzer.Core.Application.Interfaces
     {
         Task<List<MedicalRecordDto>> GetByAppointmentId(int appointmentId);
         Task<List<MedicalRecordDto>> GetByPatientId(int patientId);
+        Task<List<MedicalRecordSummaryDto>> GetSummariesByPatientId(int patientId);
     }
 }

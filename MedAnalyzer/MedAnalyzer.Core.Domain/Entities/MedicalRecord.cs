@@ -10,7 +10,6 @@ namespace MedAnalyzer.Core.Domain.Entities
         public required string DiagnosisInitial { get; set; }
         public required string Notes { get; set; }
         public string? Antecedentes { get; set; }
-        public string? ObservacionesConsulta { get; set; }
 
         public Appointment? Appointment { get; set; }
         public Patient? Patient { get; set; }

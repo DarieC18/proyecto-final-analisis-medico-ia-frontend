@@ -1,7 +1,8 @@
 using MedAnalyzer.Api.Models;
-using MedAnalyzer.Core.Application.Dto.Patient;
 using MedAnalyzer.Core.Application.Dto.User;
-using MedAnalyzer.Core.Application.Interfaces;
+using MedAnalyzer.Core.Application.Features.Account.Commands;
+using MedAnalyzer.Core.Application.Features.Account.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -14,80 +15,37 @@ namespace MedAnalyzer.Api.Controllers
     [Authorize(Roles = "Administrator")]
     public class AccountController : ControllerBase
     {
-        private readonly IAccountServiceForWebApi _accountService;
-        private readonly IAuditLogService _auditLogService;
-        private readonly IPatientService _patientService;
+        private readonly ISender _sender;
+        public AccountController(ISender sender) => _sender = sender;
 
-        public AccountController(IAccountServiceForWebApi accountService, IAuditLogService auditLogService, IPatientService patientService)
-        {
-            _accountService = accountService;
-            _auditLogService = auditLogService;
-            _patientService = patientService;
-        }
-
-        /// <summary>Obtiene la lista de todos los usuarios del sistema.</summary>
-        /// <returns>Lista de usuarios registrados.</returns>
         [HttpGet]
         [ProducesResponseType(typeof(List<UserDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
-        {
-            var users = await _accountService.GetAllUser(null);
-            return Ok(users);
-        }
+            => Ok(await _sender.Send(new GetAllUsersQuery()));
 
-        /// <summary>Crea un nuevo usuario en el sistema.</summary>
-        /// <param name="dto">Datos del nuevo usuario.</param>
-        /// <returns>Datos del usuario creado.</returns>
         [HttpPost]
         [ProducesResponseType(typeof(RegisterResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(RegisterResponseDto), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] RegisterDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             var currentUserId = User.FindFirstValue("uid");
-            var response = await _accountService.RegisterAsync(dto, currentUserId);
-
-            if (response.HasError)
-                return BadRequest(response);
-
-            if (response.Roles?.Contains("Patient") == true && !string.IsNullOrWhiteSpace(response.Id))
-            {
-                await _patientService.SaveDtoAsync(new PatientDto
-                {
-                    Id = 0,
-                    UserId = response.Id,
-                    IsActive = true
-                });
-            }
-
+            var response = await _sender.Send(new CreateUserCommand(dto, currentUserId));
+            if (response.HasError) return BadRequest(response);
             return StatusCode(StatusCodes.Status201Created, response);
         }
 
-        /// <summary>Actualiza los datos de un usuario existente.</summary>
-        /// <param name="id">Identificador del usuario.</param>
-        /// <param name="dto">Nuevos datos del usuario.</param>
-        /// <returns>Datos del usuario actualizado.</returns>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Update(string id, [FromBody] UpdateUserDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var response = await _accountService.UpdateUserAsync(id, dto);
-
-            if (response.HasError)
-                return BadRequest(response);
-
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var response = await _sender.Send(new UpdateUserCommand(id, dto));
+            if (response.HasError) return BadRequest(response);
             return Ok(response);
         }
 
-        /// <summary>Activa o desactiva la cuenta de un usuario.</summary>
-        /// <param name="id">Identificador del usuario.</param>
-        /// <returns>Estado actualizado del usuario.</returns>
         [HttpPatch("{id}/status")]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -96,33 +54,19 @@ namespace MedAnalyzer.Api.Controllers
             var currentUserId = User.FindFirstValue("uid");
             if (currentUserId == id)
                 return BadRequest(new ErrorResponse { Message = "No puedes inactivar tu propia cuenta." });
-
-            var response = await _accountService.CambiarEstadoAsync(id);
-
-            if (response.HasError)
-                return BadRequest(response);
-
-            await _auditLogService.LogAsync(currentUserId!, "ToggleStatus", "AppUser", id);
-
+            var response = await _sender.Send(new ToggleUserStatusCommand(id, currentUserId!));
+            if (response.HasError) return BadRequest(response);
             return Ok(response);
         }
 
-        /// <summary>Elimina un usuario del sistema.</summary>
-        /// <param name="id">Identificador del usuario.</param>
-        /// <returns>Resultado de la operación.</returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Delete(string id)
         {
             var currentUserId = User.FindFirstValue("uid");
-            var response = await _accountService.DeleteAsync(id);
-
-            if (response.HasError)
-                return BadRequest(response);
-
-            await _auditLogService.LogAsync(currentUserId!, "Delete", "AppUser", id);
-
+            var response = await _sender.Send(new DeleteUserCommand(id, currentUserId!));
+            if (response.HasError) return BadRequest(response);
             return Ok(response);
         }
     }

@@ -14,7 +14,7 @@
             <form @submit.prevent="iniciarSesion">
               <div class="mb-3">
                 <label class="form-label text-muted small fw-bold text-uppercase">Nombre de Usuario</label>
-                <input v-model="userName" type="text" class="form-control form-control-lg bg-light border-0" placeholder="Administrator" required>
+                <input v-model="userName" type="text" class="form-control form-control-lg bg-light border-0" placeholder="Usuario" required>
               </div>
               <div class="mb-4">
                 <label class="form-label text-muted small fw-bold text-uppercase">Contraseña</label>

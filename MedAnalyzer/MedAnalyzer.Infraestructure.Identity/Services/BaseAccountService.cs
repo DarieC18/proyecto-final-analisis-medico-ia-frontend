@@ -7,8 +7,8 @@ using MedAnalyzer.Infraestructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace MedAnalyzer.Infraestructure.Identity.Services
@@ -155,7 +155,6 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
                 response.LastName = user.LastName;
                 response.Email = user.Email ?? "";
                 response.UserName = user.UserName ?? "";
-                response.Roles = [role];
 
                 return response;
             }

@@ -12,8 +12,7 @@ namespace MedAnalyzer.Infraestructure.Persistences.EntitiesConfiguration
             builder.HasKey(m => m.Id);
             builder.Property(m => m.DiagnosisInitial).IsRequired().HasMaxLength(500);
             builder.Property(m => m.Notes).IsRequired();
-            builder.Property(m => m.Antecedentes).HasMaxLength(1000);
-            builder.Property(m => m.ObservacionesConsulta).HasMaxLength(1000);
+            builder.Property(m => m.Antecedentes).HasMaxLength(2000);
             builder.Property(m => m.CreatedAt).IsRequired();
 
             builder.HasOne<Appointment>(m => m.Appointment)

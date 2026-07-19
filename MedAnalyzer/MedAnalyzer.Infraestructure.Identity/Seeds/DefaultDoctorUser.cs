@@ -19,8 +19,8 @@ namespace MedAnalyzer.Infraestructure.Identity.Seeds
                 EmailConfirmed = true,
                 PhoneNumberConfirmed = true,
                 UserName = "Doctor",
-              
-                
+                Specialty = "General",
+
             };
 
             if (await UserManager.Users.AllAsync(u => u.Id != user.Id))

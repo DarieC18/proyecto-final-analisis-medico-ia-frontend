@@ -6,6 +6,6 @@ namespace MedAnalyzer.Core.Application.Interfaces
     public interface IVitalSignService : IBaseServices<VitalSign, VitalSignDto>
     {
         Task<List<VitalSignDto>> GetByAppointmentId(int appointmentId);
-        Task<VitalSignDto?> RegisterWithAlerts(VitalSignDto dto);
+        Task<VitalSignDto?> RegisterWithAlerts(VitalSignDto dto, string currentUserId);
     }
 }

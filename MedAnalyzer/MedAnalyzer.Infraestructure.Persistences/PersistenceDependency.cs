@@ -15,14 +15,19 @@ namespace MedAnalyzer.Infraestructure.Persistences
             #region Contexts
             var connectionString = config.GetConnectionString("ConnectionDb");
             services.AddDbContext<MedAnalyzerContextDb>(opt =>
+            {
                 opt.UseNpgsql(connectionString,
-                m => m.MigrationsAssembly(typeof(MedAnalyzerContextDb).Assembly.FullName)),
-                ServiceLifetime.Scoped);
+                    m => m.MigrationsAssembly(typeof(MedAnalyzerContextDb).Assembly.FullName));
+            }, ServiceLifetime.Scoped);
 
             #endregion
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository< >));
 
             services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+            services.AddScoped<IPatientRepository, PatientRepository>();
+            services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
+            services.AddScoped<IMedicalDocumentRepository, MedicalDocumentRepository>();
+            services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 
 
         }
