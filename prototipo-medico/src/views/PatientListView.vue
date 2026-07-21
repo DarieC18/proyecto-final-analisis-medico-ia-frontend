@@ -75,59 +75,97 @@
           <h3 class="fw-bold mb-0">{{ vistaActual === 'crear' ? 'Nuevo Paciente' : 'Editar Paciente' }}</h3>
           <p v-if="vistaActual === 'editar'" class="text-muted">Modificando datos de: <strong class="text-dark">{{ form.fullName }}</strong></p>
         </div>
-        <button @click="cancelarForm" class="btn btn-light border text-muted shadow-sm">Volver al listado</button>
+        <button @click="cancelarForm" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
+          ← Volver
+        </button>
       </div>
 
-      <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-5">
+      <div class="card shadow border-0 rounded-4 form-card">
+        <div class="card-body p-4 p-lg-5">
           <div v-if="formError" class="alert alert-danger border-0 rounded-3 py-2 small mb-4">{{ formError }}</div>
           <form @submit.prevent="guardarPaciente">
-            <div class="row g-4">
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Nombre Completo</label>
-                <input v-model="form.fullName" type="text" class="form-control bg-light border-0 py-2" required>
+
+            <div class="form-section mb-4">
+              <div class="section-header">
+                <span class="section-icon">🆔</span>
+                <span>Identificación</span>
               </div>
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Identificación</label>
-                <input v-model="form.identificationNumber" type="text" class="form-control bg-light border-0 py-2" required>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label text-muted small fw-bold text-uppercase">Tipo ID</label>
-                <select v-model="form.identificationType" class="form-select bg-light border-0 py-2" required>
-                  <option value="Cédula">Cédula</option>
-                  <option value="Pasaporte">Pasaporte</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label text-muted small fw-bold text-uppercase">Fecha de Nacimiento</label>
-                <input v-model="form.birthDate" type="date" class="form-control bg-light border-0 py-2" required>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label text-muted small fw-bold text-uppercase">Género</label>
-                <select v-model="form.gender" class="form-select bg-light border-0 py-2" required>
-                  <option value="Masculino">Masculino</option>
-                  <option value="Femenino">Femenino</option>
-                  <option value="Otro">Otro</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label text-muted small fw-bold text-uppercase">Teléfono</label>
-                <input v-model="form.phoneNumber" type="text" class="form-control bg-light border-0 py-2" required>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label text-muted small fw-bold text-uppercase">Tipo Paciente</label>
-                <select v-model="form.patientType" class="form-select bg-light border-0 py-2" required>
-                  <option value="General">General</option>
-                  <option value="Crónico">Crónico</option>
-                  <option value="Emergencia">Emergencia</option>
-                </select>
+              <div class="section-body">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">Tipo ID</label>
+                    <select v-model="form.identificationType" class="form-select" required>
+                      <option value="Cédula">Cédula</option>
+                      <option value="Pasaporte">Pasaporte</option>
+                    </select>
+                  </div>
+                  <div class="col-md-8">
+                    <label class="form-label fw-medium">Número de Identificación</label>
+                    <input v-model="form.identificationNumber" type="text" class="form-control" placeholder="Ej: 001-1234567-8" required>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="d-flex justify-content-end gap-3 mt-5">
-              <button type="button" @click="cancelarForm" class="btn btn-light border px-4 py-2">Cancelar</button>
-              <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm" :disabled="saving">
+
+            <div class="form-section mb-4">
+              <div class="section-header">
+                <span class="section-icon">👤</span>
+                <span>Datos Personales</span>
+              </div>
+              <div class="section-body">
+                <div class="row g-3">
+                  <div class="col-12">
+                    <label class="form-label fw-medium">Nombre Completo</label>
+                    <input v-model="form.fullName" type="text" class="form-control" placeholder="Nombre y apellidos del paciente" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-medium">Fecha de Nacimiento</label>
+                    <input v-model="form.birthDate" type="date" class="form-control" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-medium">Género</label>
+                    <select v-model="form.gender" class="form-select" required>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Femenino">Femenino</option>
+                      <option value="Otro">Otro</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section mb-4">
+              <div class="section-header">
+                <span class="section-icon">📞</span>
+                <span>Contacto y Clasificación</span>
+              </div>
+              <div class="section-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-medium">Teléfono</label>
+                    <input v-model="form.phoneNumber" type="tel" class="form-control" placeholder="(809) 555-1234" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-medium">Tipo de Paciente</label>
+                    <select v-model="form.patientType" class="form-select" required>
+                      <option value="General">General</option>
+                      <option value="Crónico">Crónico</option>
+                      <option value="Emergencia">Emergencia</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-end gap-3">
+              <button type="button" @click="cancelarForm" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                {{ saving ? 'Guardando...' : 'Guardar Cambios' }}
+                {{ saving ? 'Guardando...' : '💾 Guardar Paciente' }}
               </button>
             </div>
           </form>
@@ -366,5 +404,64 @@ onMounted(cargarPacientes)
 <style scoped>
 .animation-fade { animation: fadeIn 0.3s ease-in-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-input:focus, select:focus { background-color: #fff !important; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25); }
+
+.form-card {
+  border-top: 4px solid #0d6efd !important;
+}
+
+.form-section {
+  background: #f8fafc;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.form-section:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.section-icon {
+  font-size: 1.2rem;
+}
+
+.section-body {
+  padding: 16px;
+}
+
+.form-section .form-label {
+  font-size: 0.85rem;
+  color: #334155;
+  margin-bottom: 4px;
+}
+
+.form-section .form-control,
+.form-section .form-select {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.form-section .form-control:focus,
+.form-section .form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+  background: #fff;
+}
+.form-section .form-control::placeholder {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
 </style>

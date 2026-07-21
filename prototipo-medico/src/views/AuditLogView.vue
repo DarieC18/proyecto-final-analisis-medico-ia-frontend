@@ -51,7 +51,6 @@
               <th class="py-3 fw-medium">Usuario</th>
               <th class="py-3 fw-medium">Rol</th>
               <th class="py-3 fw-medium">Acción</th>
-              <th class="py-3 fw-medium">Entidad</th>
               <th class="pe-4 py-3 fw-medium">ID Entidad</th>
             </tr>
           </thead>
@@ -79,7 +78,6 @@
                         <div class="col-md-4"><strong>Usuario ID:</strong> {{ log.userId }}</div>
                         <div class="col-md-4"><strong>Rol:</strong> {{ log.userRole }}</div>
                         <div class="col-md-4"><strong>Acción:</strong> {{ log.action }}</div>
-                        <div class="col-md-4"><strong>Entidad:</strong> {{ log.entityName }}</div>
                         <div class="col-md-4"><strong>ID Entidad:</strong> {{ log.entityId }}</div>
                         <div class="col-md-12" v-if="log.details">
                           <strong>Detalles adicionales:</strong>
