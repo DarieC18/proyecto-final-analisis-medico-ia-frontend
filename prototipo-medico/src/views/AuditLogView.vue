@@ -65,11 +65,12 @@
                 <td class="py-3">
                   <StatusBadge :text="log.action" variant="info" />
                 </td>
-                <td class="py-3 text-muted">{{ log.entityName }}</td>
-                <td class="pe-4 py-3 text-muted small">{{ log.entityId }}</td>
+                <td class="pe-4 py-3">
+                  <code class="small text-muted" :title="log.entityId">{{ log.entityId?.slice(0, 8) }}…</code>
+                </td>
               </tr>
               <tr v-if="detalleId === log.id">
-                <td colspan="6" class="p-4 bg-light">
+                <td colspan="5" class="p-4 bg-light">
                   <div class="d-flex justify-content-between align-items-start">
                     <div>
                       <h6 class="fw-bold mb-3">Detalle completo del registro</h6>

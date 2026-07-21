@@ -126,34 +126,40 @@
               </button>
             </div>
 
-            <div v-if="showSintomaForm" class="card bg-light border-0 p-4 rounded-4 mb-4">
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Síntoma</label>
-                  <input v-model="sintomaForm.name" type="text" class="form-control bg-white border-0" placeholder="Ej: Fiebre">
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Severidad</label>
-                  <select v-model="sintomaForm.severity" class="form-select bg-white border-0">
-                    <option value="Leve">Leve</option>
-                    <option value="Moderado">Moderado</option>
-                    <option value="Severo">Severo</option>
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Inicio</label>
-                  <input v-model="sintomaForm.startedAt" type="date" class="form-control bg-white border-0">
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                  <button @click="guardarSintoma" class="btn btn-success w-100" :disabled="guardandoSintoma">
-                    <span v-if="guardandoSintoma" class="spinner-border spinner-border-sm"></span>
-                    <span v-else>Agregar</span>
-                  </button>
-                </div>
+            <div v-if="showSintomaForm" class="form-section mb-4">
+              <div class="section-header">
+                <span class="section-icon">🩺</span>
+                <span>Nuevo Síntoma</span>
               </div>
-              <div class="mt-3">
-                <label class="form-label text-muted small fw-bold text-uppercase">Notas</label>
-                <textarea v-model="sintomaForm.notes" class="form-control bg-white border-0" rows="2" placeholder="Notas adicionales..."></textarea>
+              <div class="section-body">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">Síntoma</label>
+                    <input v-model="sintomaForm.name" type="text" class="form-control" placeholder="Ej: Fiebre">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label fw-medium">Severidad</label>
+                    <select v-model="sintomaForm.severity" class="form-select">
+                      <option value="Leve">Leve</option>
+                      <option value="Moderado">Moderado</option>
+                      <option value="Severo">Severo</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label fw-medium">Inicio</label>
+                    <input v-model="sintomaForm.startedAt" type="date" class="form-control">
+                  </div>
+                  <div class="col-md-2 d-flex align-items-end">
+                    <button @click="guardarSintoma" class="btn btn-success w-100 rounded-pill" :disabled="guardandoSintoma">
+                      <span v-if="guardandoSintoma" class="spinner-border spinner-border-sm"></span>
+                      <span v-else>+ Agregar</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <label class="form-label fw-medium">Notas</label>
+                  <textarea v-model="sintomaForm.notes" class="form-control" rows="2" placeholder="Notas adicionales..."></textarea>
+                </div>
               </div>
             </div>
 
@@ -177,36 +183,41 @@
               </div>
             </div>
 
-            <div v-if="editSintomaId" class="card bg-light border-0 p-4 rounded-4 mt-4">
-              <h6 class="fw-bold mb-3">Editar Síntoma</h6>
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Síntoma</label>
-                  <input v-model="editSintomaForm.name" type="text" class="form-control bg-white border-0">
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Severidad</label>
-                  <select v-model="editSintomaForm.severity" class="form-select bg-white border-0">
-                    <option value="Leve">Leve</option>
-                    <option value="Moderado">Moderado</option>
-                    <option value="Severo">Severo</option>
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Inicio</label>
-                  <input v-model="editSintomaForm.startedAt" type="date" class="form-control bg-white border-0">
-                </div>
-                <div class="col-md-2 d-flex align-items-end gap-2">
-                  <button @click="actualizarSintoma" class="btn btn-success w-100" :disabled="guardandoSintoma">
-                    <span v-if="guardandoSintoma" class="spinner-border spinner-border-sm"></span>
-                    <span v-else>Guardar</span>
-                  </button>
-                  <button @click="cancelarEditSintoma" class="btn btn-light border w-100">Cancelar</button>
-                </div>
+            <div v-if="editSintomaId" class="form-section mt-4">
+              <div class="section-header">
+                <span class="section-icon">✏️</span>
+                <span>Editar Síntoma</span>
               </div>
-              <div class="mt-3">
-                <label class="form-label text-muted small fw-bold text-uppercase">Notas</label>
-                <textarea v-model="editSintomaForm.notes" class="form-control bg-white border-0" rows="2"></textarea>
+              <div class="section-body">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">Síntoma</label>
+                    <input v-model="editSintomaForm.name" type="text" class="form-control">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label fw-medium">Severidad</label>
+                    <select v-model="editSintomaForm.severity" class="form-select">
+                      <option value="Leve">Leve</option>
+                      <option value="Moderado">Moderado</option>
+                      <option value="Severo">Severo</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label fw-medium">Inicio</label>
+                    <input v-model="editSintomaForm.startedAt" type="date" class="form-control">
+                  </div>
+                  <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button @click="actualizarSintoma" class="btn btn-success w-100 rounded-pill" :disabled="guardandoSintoma">
+                      <span v-if="guardandoSintoma" class="spinner-border spinner-border-sm"></span>
+                      <span v-else>💾 Guardar</span>
+                    </button>
+                    <button @click="cancelarEditSintoma" class="btn btn-outline-secondary rounded-pill w-100">Cancelar</button>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <label class="form-label fw-medium">Notas</label>
+                  <textarea v-model="editSintomaForm.notes" class="form-control" rows="2"></textarea>
+                </div>
               </div>
             </div>
 
@@ -233,38 +244,44 @@
               </button>
             </div>
 
-            <div v-if="showSignosForm" class="card bg-light border-0 p-4 rounded-4 mb-4">
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Temperatura (°C)</label>
-                  <input v-model.number="signosForm.temperature" type="number" step="0.1" class="form-control bg-white border-0" placeholder="36.5">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Frec. Cardíaca (lpm)</label>
-                  <input v-model.number="signosForm.heartRate" type="number" class="form-control bg-white border-0" placeholder="72">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Presión Sistólica</label>
-                  <input v-model.number="signosForm.systolicPressure" type="number" class="form-control bg-white border-0" placeholder="120">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Presión Diastólica</label>
-                  <input v-model.number="signosForm.diastolicPressure" type="number" class="form-control bg-white border-0" placeholder="80">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Saturación O2 (%)</label>
-                  <input v-model.number="signosForm.oxygenSaturation" type="number" step="0.1" class="form-control bg-white border-0" placeholder="98">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Glucosa (mg/dL)</label>
-                  <input v-model.number="signosForm.glucose" type="number" class="form-control bg-white border-0" placeholder="95">
-                </div>
+            <div v-if="showSignosForm" class="form-section mb-4">
+              <div class="section-header">
+                <span class="section-icon">❤️</span>
+                <span>Nueva Medición</span>
               </div>
-              <div class="d-flex justify-content-end mt-4">
-                <button @click="guardarSignos" class="btn btn-success px-4 shadow-sm" :disabled="guardandoSignos">
-                  <span v-if="guardandoSignos" class="spinner-border spinner-border-sm me-2"></span>
-                  Guardar Medición
-                </button>
+              <div class="section-body">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">🌡️ Temperatura (°C)</label>
+                    <input v-model.number="signosForm.temperature" type="number" step="0.1" class="form-control" placeholder="36.5">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">💓 Frec. Cardíaca (lpm)</label>
+                    <input v-model.number="signosForm.heartRate" type="number" class="form-control" placeholder="72">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">🩸 Presión Sistólica</label>
+                    <input v-model.number="signosForm.systolicPressure" type="number" class="form-control" placeholder="120">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">🩸 Presión Diastólica</label>
+                    <input v-model.number="signosForm.diastolicPressure" type="number" class="form-control" placeholder="80">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">🫁 Saturación O2 (%)</label>
+                    <input v-model.number="signosForm.oxygenSaturation" type="number" step="0.1" class="form-control" placeholder="98">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">🍬 Glucosa (mg/dL)</label>
+                    <input v-model.number="signosForm.glucose" type="number" class="form-control" placeholder="95">
+                  </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                  <button @click="guardarSignos" class="btn btn-success rounded-pill px-4 shadow-sm" :disabled="guardandoSignos">
+                    <span v-if="guardandoSignos" class="spinner-border spinner-border-sm me-2"></span>
+                    💾 Guardar Medición
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -344,40 +361,45 @@
               </div>
             </div>
 
-            <div v-if="editSignoId" class="card bg-light border-0 p-4 rounded-4 mt-4">
-              <h6 class="fw-bold mb-3">Editar Medición</h6>
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Temperatura (°C)</label>
-                  <input v-model.number="editSignoForm.temperature" type="number" step="0.1" class="form-control bg-white border-0">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Frec. Cardíaca (lpm)</label>
-                  <input v-model.number="editSignoForm.heartRate" type="number" class="form-control bg-white border-0">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Presión Sistólica</label>
-                  <input v-model.number="editSignoForm.systolicPressure" type="number" class="form-control bg-white border-0">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Presión Diastólica</label>
-                  <input v-model.number="editSignoForm.diastolicPressure" type="number" class="form-control bg-white border-0">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Saturación O2 (%)</label>
-                  <input v-model.number="editSignoForm.oxygenSaturation" type="number" step="0.1" class="form-control bg-white border-0">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Glucosa (mg/dL)</label>
-                  <input v-model.number="editSignoForm.glucose" type="number" class="form-control bg-white border-0">
-                </div>
+            <div v-if="editSignoId" class="form-section mt-4">
+              <div class="section-header">
+                <span class="section-icon">✏️</span>
+                <span>Editar Medición</span>
               </div>
-              <div class="d-flex justify-content-end gap-2 mt-4">
-                <button @click="cancelarEditSigno" class="btn btn-light border px-4">Cancelar</button>
-                <button @click="actualizarSigno" class="btn btn-success px-4 shadow-sm" :disabled="guardandoSignos">
-                  <span v-if="guardandoSignos" class="spinner-border spinner-border-sm me-2"></span>
-                  Guardar Cambios
-                </button>
+              <div class="section-body">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">🌡️ Temperatura (°C)</label>
+                    <input v-model.number="editSignoForm.temperature" type="number" step="0.1" class="form-control">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">💓 Frec. Cardíaca (lpm)</label>
+                    <input v-model.number="editSignoForm.heartRate" type="number" class="form-control">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">🩸 Presión Sistólica</label>
+                    <input v-model.number="editSignoForm.systolicPressure" type="number" class="form-control">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">🩸 Presión Diastólica</label>
+                    <input v-model.number="editSignoForm.diastolicPressure" type="number" class="form-control">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">🫁 Saturación O2 (%)</label>
+                    <input v-model.number="editSignoForm.oxygenSaturation" type="number" step="0.1" class="form-control">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-medium">🍬 Glucosa (mg/dL)</label>
+                    <input v-model.number="editSignoForm.glucose" type="number" class="form-control">
+                  </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                  <button @click="cancelarEditSigno" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</button>
+                  <button @click="actualizarSigno" class="btn btn-success rounded-pill px-4 shadow-sm" :disabled="guardandoSignos">
+                    <span v-if="guardandoSignos" class="spinner-border spinner-border-sm me-2"></span>
+                    💾 Guardar Cambios
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -391,32 +413,37 @@
               </button>
             </div>
 
-            <div v-if="showRecordForm" class="card bg-light border-0 p-4 rounded-4 mb-4">
-              <h6 class="fw-bold mb-3">{{ editRecordId ? 'Editar' : 'Nuevo' }} Registro Médico</h6>
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Diagnóstico Inicial</label>
-                  <input v-model="recordForm.diagnosisInitial" type="text" class="form-control bg-white border-0" placeholder="Diagnóstico principal">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Antecedentes</label>
-                  <input v-model="recordForm.antecedentes" type="text" class="form-control bg-white border-0" placeholder="Antecedentes del paciente">
-                </div>
-                <div class="col-md-12">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Notas</label>
-                  <textarea v-model="recordForm.notes" class="form-control bg-white border-0" rows="3" placeholder="Notas del registro médico"></textarea>
-                </div>
-                <div class="col-md-12">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Observaciones de Consulta</label>
-                  <textarea v-model="recordForm.observacionesConsulta" class="form-control bg-white border-0" rows="2" placeholder="Observaciones adicionales"></textarea>
-                </div>
+            <div v-if="showRecordForm" class="form-section mb-4">
+              <div class="section-header">
+                <span class="section-icon">📋</span>
+                <span>{{ editRecordId ? 'Editar' : 'Nuevo' }} Registro Médico</span>
               </div>
-              <div class="d-flex justify-content-end gap-2 mt-4">
-                <button type="button" @click="cancelarFormRecord" class="btn btn-light border px-4">Cancelar</button>
-                <button @click="guardarRecord" class="btn btn-success px-4 shadow-sm" :disabled="guardandoRecord">
-                  <span v-if="guardandoRecord" class="spinner-border spinner-border-sm me-2"></span>
-                  {{ editRecordId ? 'Actualizar' : 'Guardar' }}
-                </button>
+              <div class="section-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-medium">🩺 Diagnóstico Inicial</label>
+                    <input v-model="recordForm.diagnosisInitial" type="text" class="form-control" placeholder="Diagnóstico principal">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-medium">📋 Antecedentes</label>
+                    <input v-model="recordForm.antecedentes" type="text" class="form-control" placeholder="Antecedentes del paciente">
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label fw-medium">📝 Notas</label>
+                    <textarea v-model="recordForm.notes" class="form-control" rows="3" placeholder="Notas del registro médico"></textarea>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label fw-medium">👁️ Observaciones de Consulta</label>
+                    <textarea v-model="recordForm.observacionesConsulta" class="form-control" rows="2" placeholder="Observaciones adicionales"></textarea>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                  <button type="button" @click="cancelarFormRecord" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</button>
+                  <button @click="guardarRecord" class="btn btn-success rounded-pill px-4 shadow-sm" :disabled="guardandoRecord">
+                    <span v-if="guardandoRecord" class="spinner-border spinner-border-sm me-2"></span>
+                    💾 {{ editRecordId ? 'Actualizar' : 'Guardar' }}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -489,22 +516,28 @@
               </button>
             </div>
 
-            <div v-if="showDocUpload" class="card bg-light border-0 p-4 rounded-4 mb-4">
-              <form @submit.prevent="subirDocumento">
-                <div class="row g-3">
-                  <div class="col-md-8">
-                    <label class="form-label text-muted small fw-bold text-uppercase">Archivo</label>
-                    <input ref="docFileInput" type="file" class="form-control bg-white border-0" accept=".pdf,.jpg,.jpeg,.png" required>
-                    <small class="text-muted">PDF, JPG o PNG. Máximo 10MB.</small>
+            <div v-if="showDocUpload" class="form-section mb-4">
+              <div class="section-header">
+                <span class="section-icon">📎</span>
+                <span>Subir Documento</span>
+              </div>
+              <div class="section-body">
+                <form @submit.prevent="subirDocumento">
+                  <div class="row g-3">
+                    <div class="col-md-8">
+                      <label class="form-label fw-medium">📄 Archivo</label>
+                      <input ref="docFileInput" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                      <small class="text-muted">PDF, JPG o PNG. Máximo 10MB.</small>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                      <button type="submit" class="btn btn-success w-100 rounded-pill shadow-sm" :disabled="subiendoDoc">
+                        <span v-if="subiendoDoc" class="spinner-border spinner-border-sm me-2"></span>
+                        📤 Subir
+                      </button>
+                    </div>
                   </div>
-                  <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-success w-100 shadow-sm" :disabled="subiendoDoc">
-                      <span v-if="subiendoDoc" class="spinner-border spinner-border-sm me-2"></span>
-                      Subir
-                    </button>
-                  </div>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
 
             <div v-if="cargandoDocs" class="text-center py-4">
@@ -1089,5 +1122,58 @@ onMounted(() => {
 <style scoped>
 .animation-fade { animation: fadeIn 0.3s ease-in-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-input:focus, select:focus, textarea:focus { background-color: #fff !important; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25); }
+
+.form-section {
+  background: #f8fafc;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.form-section:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+.section-icon {
+  font-size: 1.2rem;
+}
+.section-body {
+  padding: 16px;
+}
+.form-section .form-label {
+  font-size: 0.85rem;
+  color: #334155;
+  margin-bottom: 4px;
+}
+.form-section .form-control,
+.form-section .form-select,
+.form-section textarea {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.form-section .form-control:focus,
+.form-section .form-select:focus,
+.form-section textarea:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+  background: #fff;
+}
+.form-section .form-control::placeholder,
+.form-section textarea::placeholder {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
 </style>

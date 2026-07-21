@@ -64,20 +64,20 @@
           <form @submit.prevent="subirDocumento">
             <div class="row g-3">
               <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Archivo</label>
-                <input ref="fileInput" type="file" class="form-control bg-light border-0" accept=".pdf,.jpg,.jpeg,.png" required>
+                <label class="form-label fw-medium">📄 Archivo</label>
+                <input ref="fileInput" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
                 <small class="text-muted">PDF, JPG o PNG. Máximo 10MB.</small>
               </div>
               <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Descripción (opcional)</label>
-                <input v-model="uploadDescription" type="text" class="form-control bg-light border-0" placeholder="Descripción del documento">
+                <label class="form-label fw-medium">📝 Descripción <span class="text-muted fw-normal">(opcional)</span></label>
+                <input v-model="uploadDescription" type="text" class="form-control" placeholder="Descripción del documento">
               </div>
             </div>
             <div class="d-flex justify-content-end gap-3 mt-4">
-              <button type="button" @click="showUpload = false" class="btn btn-light border px-4">Cancelar</button>
-              <button type="submit" class="btn btn-success px-4 shadow-sm" :disabled="subiendo">
+              <button type="button" @click="showUpload = false" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</button>
+              <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm" :disabled="subiendo">
                 <span v-if="subiendo" class="spinner-border spinner-border-sm me-2"></span>
-                Subir Documento
+                📤 Subir Documento
               </button>
             </div>
           </form>
@@ -198,3 +198,27 @@ const eliminarDocumento = async () => {
   }
 }
 </script>
+
+<style scoped>
+.form-control {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+  background: #fff;
+}
+.form-control::placeholder {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+.form-label {
+  font-size: 0.85rem;
+  color: #334155;
+  margin-bottom: 4px;
+}
+</style>

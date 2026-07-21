@@ -11,12 +11,12 @@
           <div class="card-body">
             <div v-if="successMsg" class="alert alert-success border-0 rounded-3 py-2 small">{{ successMsg }}</div>
             <div v-if="errorMsg" class="alert alert-danger border-0 rounded-3 py-2 small">{{ errorMsg }}</div>
-            <form @submit.prevent="enviarSolicitud">
+            <form @submit.prevent="enviarSolicitud" class="form-card">
               <div class="mb-4">
-                <label class="form-label text-muted small fw-bold text-uppercase">Nombre de Usuario</label>
-                <input v-model="userName" type="text" class="form-control form-control-lg bg-light border-0" placeholder="Tu nombre de usuario" required>
+                <label class="form-label fw-medium">👤 Nombre de Usuario</label>
+                <input v-model="userName" type="text" class="form-control form-control-lg" placeholder="Tu nombre de usuario" required>
               </div>
-              <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm mb-3" :disabled="loading">
+              <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm rounded-pill mb-3" :disabled="loading">
                 <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
                 {{ loading ? 'Enviando...' : 'Enviar enlace' }}
               </button>
@@ -62,8 +62,21 @@ const enviarSolicitud = async () => {
 </script>
 
 <style scoped>
-input:focus {
-  background-color: #fff !important;
-  box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25);
+.form-card .form-control-lg {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  padding: 12px 16px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+.form-card .form-control-lg:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+  background: #fff;
+}
+.form-card .form-label {
+  font-size: 0.9rem;
+  color: #334155;
+  margin-bottom: 6px;
 }
 </style>
