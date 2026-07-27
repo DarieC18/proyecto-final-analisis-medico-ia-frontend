@@ -37,22 +37,6 @@ namespace MedAnalyzer.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, result);
         }
 
-        /// <summary>Genera un nuevo análisis de IA para una cita médica usando Gemini.</summary>
-        /// <param name="request">Cita y tipo de análisis a generar.</param>
-        /// <returns>El análisis de IA generado.</returns>
-        [HttpPost("generate")]
-        [ProducesResponseType(typeof(AiAnalisysDto), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Generate([FromBody] GenerateAiAnalysisRequestDto request)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var currentUserId = User.FindFirstValue("uid") ?? string.Empty;
-            var result = await _aiService.GenerateAnalysisAsync(request, currentUserId);
-            return StatusCode(StatusCodes.Status201Created, result);
-        }
-
         /// <summary>Obtiene los análisis de IA asociados a una cita médica.</summary>
         [HttpGet("by-appointment/{appointmentId}")]
         [ProducesResponseType(typeof(List<AiAnalisysDto>), StatusCodes.Status200OK)]

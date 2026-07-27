@@ -18,18 +18,13 @@ namespace MedAnalyzer.Api.Controllers
         private readonly ISender _sender;
         public AlertController(ISender sender) => _sender = sender;
 
-        public AlertController(IAlertService alertService)
-        {
-            _alertService = alertService;
-        }
-
         /// <summary>Obtiene todas las alertas registradas.</summary>
         /// <returns>Lista de todas las alertas.</returns>
         [HttpGet]
         [ProducesResponseType(typeof(List<AlertDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
         {
-            var alerts = await _alertService.GetAllListDto();
+            var alerts = await _sender.Send(new GetActiveAlertsQuery());
             return Ok(alerts);
         }
 

@@ -2,6 +2,7 @@ using MedAnalyzer.Api.Models;
 using MedAnalyzer.Core.Application.Dto.MedicalDocument;
 using MedAnalyzer.Core.Application.Features.MedicalDocuments.Commands;
 using MedAnalyzer.Core.Application.Features.MedicalDocuments.Queries;
+using MedAnalyzer.Core.Application.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,12 +19,14 @@ namespace MedAnalyzer.Api.Controllers
         private readonly IMedicalDocumentService _documentService;
         private readonly IFileStorageService _fileStorage;
         private readonly IAccountServiceForWebApi _accountService;
+        private readonly ISender _sender;
 
-        public MedicalDocumentController(IMedicalDocumentService documentService, IFileStorageService fileStorage, IAccountServiceForWebApi accountService)
+        public MedicalDocumentController(IMedicalDocumentService documentService, IFileStorageService fileStorage, IAccountServiceForWebApi accountService, ISender sender)
         {
             _documentService = documentService;
             _fileStorage = fileStorage;
             _accountService = accountService;
+            _sender = sender;
         }
 
         /// <summary>Obtiene los documentos médicos de un paciente, con el nombre del usuario que los subió.</summary>
@@ -131,6 +134,7 @@ namespace MedAnalyzer.Api.Controllers
             if (!string.IsNullOrWhiteSpace(doc.FilePath))
                 _fileStorage.Delete(doc.FilePath);
 
+            var uploadedByUserId = User.FindFirstValue("uid") ?? "";
             var success = await _sender.Send(new DeleteMedicalDocumentCommand(id, uploadedByUserId));
             if (!success) return NotFound(new ErrorResponse { Message = "Documento no encontrado." });
             return NoContent();

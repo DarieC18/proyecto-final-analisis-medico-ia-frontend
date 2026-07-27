@@ -149,12 +149,11 @@ namespace MedAnalyzer.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _patientService.UpdatePatientAsync(dto, id);
+            var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+            var result = await _patientService.UpdatePatientAsync(dto, id, currentUser);
             if (result == null)
                 return BadRequest(new ErrorResponse { Message = "Error al actualizar el paciente." });
 
-            var result = await _sender.Send(new UpdatePatientCommand(dto, id, currentUser));
-            if (result == null) return BadRequest(new ErrorResponse { Message = "Error al actualizar el paciente." });
             return Ok(result);
         }
 
@@ -166,7 +165,8 @@ namespace MedAnalyzer.Api.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Deactivate(int id)
         {
-            var result = await _patientService.DeactivatePatient(id);
+            var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+            var result = await _patientService.DeactivatePatient(id, currentUser);
 
             if (result == DesactivatePatient.NotFound)
                 return NotFound(new ErrorResponse { Message = "Paciente no encontrado." });

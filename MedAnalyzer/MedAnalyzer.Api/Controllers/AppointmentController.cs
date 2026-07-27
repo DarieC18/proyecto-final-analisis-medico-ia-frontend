@@ -2,6 +2,7 @@ using MedAnalyzer.Api.Models;
 using MedAnalyzer.Core.Application.Dto.Appointment;
 using MedAnalyzer.Core.Application.Features.Appointments.Commands;
 using MedAnalyzer.Core.Application.Features.Appointments.Queries;
+using MedAnalyzer.Core.Application.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +16,15 @@ namespace MedAnalyzer.Api.Controllers
     [Authorize(Roles = "Doctor,Nurse")]
     public class AppointmentController : ControllerBase
     {
+        private readonly ISender _sender;
         private readonly IAppointmentService _appointmentService;
-        private readonly IAccountServiceForWebApi _accountService; 
+        private readonly IAccountServiceForWebApi _accountService;
 
-        public AppointmentController(IAppointmentService appointmentService, IAccountServiceForWebApi accountService)
+        private string? CurrentUserId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        public AppointmentController(ISender sender, IAppointmentService appointmentService, IAccountServiceForWebApi accountService)
         {
+            _sender = sender;
             _appointmentService = appointmentService;
             _accountService = accountService;
         }

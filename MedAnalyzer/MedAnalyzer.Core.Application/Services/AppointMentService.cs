@@ -76,7 +76,7 @@ namespace MedAnalyzer.Core.Application.Services
             return await base.UpdateDtoAsync(dto, id);
         }
 
-        public async Task<AppointmentDto?> ChangeStatusAsync(int id, string status)
+        public async Task<AppointmentDto?> ChangeStatusAsync(int id, string status, string currentUserId)
         {
             if (!Enum.TryParse<AppointmentStatus>(status, true, out _))
                 throw new DomainValidationException("Estado no válido. Use: Pending, InProgress, Completed, Cancelled.");
@@ -86,6 +86,10 @@ namespace MedAnalyzer.Core.Application.Services
 
             appointment.Status = status;
             var updated = await _appointmentRepository.UpdateEntityAsync(id, appointment);
+
+            if (updated != null)
+                await _auditLogService.LogAsync(currentUserId, "ChangeStatusAppointment", "Appointment", id.ToString());
+
             return updated == null ? null : _mapper.Map<AppointmentDto>(updated);
         }
 
@@ -155,6 +159,59 @@ namespace MedAnalyzer.Core.Application.Services
                 Documents = _mapper.Map<List<MedicalDocumentDto>>(
                     allDocuments.Where(d => d.AppointmentId == appointmentId).ToList())
             };
+        }
+
+        public async Task<AppointmentDto?> CreateAppointment(AppointmentDto dto, string currentUserId)
+        {
+            var result = await base.SaveDtoAsync(dto);
+            if (result != null)
+                await _auditLogService.LogAsync(currentUserId, "CreateAppointment", "Appointment", result.Id.ToString());
+            return result;
+        }
+
+        public async Task<AppointmentDto?> UpdateAppointment(AppointmentDto dto, int id, string currentUserId)
+        {
+            var result = await base.UpdateDtoAsync(dto, id);
+            if (result != null)
+                await _auditLogService.LogAsync(currentUserId, "UpdateAppointment", "Appointment", result.Id.ToString());
+            return result;
+        }
+
+        public async Task<bool> DeleteAppointmentAsync(int id)
+        {
+            var appointment = await _appointmentRepository.GetEntityByIdAsync(id);
+            if (appointment == null) return false;
+
+            try
+            {
+                await _appointmentRepository.RemoveAsync(id);
+                return true;
+            }
+            catch (DbUpdateException)
+            {
+                return false;
+            }
+        }
+
+        public async Task<List<AppointmentListItemDto>> GetAllByDoctorAsync(string doctorId)
+        {
+            var all = await _appointmentRepository.GetAllListAsync();
+            var filtered = all.Where(a => a.DoctorId == doctorId).OrderBy(a => a.AppointmentDate).ToList();
+            return _mapper.Map<List<AppointmentListItemDto>>(filtered);
+        }
+
+        public async Task<List<AppointmentListItemDto>> GetFilteredAsync(string doctorId, int? patientId, string? status)
+        {
+            var all = await _appointmentRepository.GetAllListAsync();
+            var query = all.Where(a => a.DoctorId == doctorId);
+
+            if (patientId.HasValue)
+                query = query.Where(a => a.PatientId == patientId.Value);
+
+            if (!string.IsNullOrEmpty(status))
+                query = query.Where(a => a.Status == status);
+
+            return _mapper.Map<List<AppointmentListItemDto>>(query.OrderBy(a => a.AppointmentDate).ToList());
         }
 
     }
