@@ -20,32 +20,54 @@
           <h5 class="fw-bold mb-4">Nueva Cita Médica</h5>
           <div v-if="formError" class="alert alert-danger border-0 rounded-3 py-2 small mb-4">{{ formError }}</div>
           <form @submit.prevent="crearCita">
-            <div class="row g-4">
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Paciente</label>
-                <select v-model="form.patientId" class="form-select bg-light border-0 py-2" required>
-                  <option value="">Seleccione un paciente...</option>
-                  <option v-for="p in pacientes" :key="p.id" :value="p.id">{{ p.fullName }} - {{ p.identificationNumber }}</option>
-                </select>
+            <div class="form-section mb-4">
+              <div class="section-header">
+                <span class="section-icon">📋</span>
+                <span>Información de la Cita</span>
               </div>
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Fecha de la Cita</label>
-                <input v-model="form.appointmentDate" type="datetime-local" class="form-control bg-light border-0 py-2" required>
-              </div>
-              <div class="col-md-12">
-                <label class="form-label text-muted small fw-bold text-uppercase">Motivo de Consulta</label>
-                <input v-model="form.reason" type="text" class="form-control bg-light border-0 py-2" placeholder="Razón principal de la consulta" required>
-              </div>
-              <div class="col-md-12">
-                <label class="form-label text-muted small fw-bold text-uppercase">Notas (opcional)</label>
-                <textarea v-model="form.notes" class="form-control bg-light border-0 p-3" rows="3" placeholder="Notas adicionales..."></textarea>
+              <div class="section-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-medium">Paciente</label>
+                    <select v-model="form.patientId" class="form-select" required>
+                      <option value="">Seleccione un paciente...</option>
+                      <option v-for="p in pacientes" :key="p.id" :value="p.id">{{ p.fullName }} - {{ p.identificationNumber }}</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-medium">Fecha de la Cita</label>
+                    <input v-model="form.appointmentDate" type="datetime-local" class="form-control" required>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="d-flex justify-content-end gap-3 mt-5">
-              <button type="button" @click="cancelarForm" class="btn btn-light border px-4 py-2">Cancelar</button>
-              <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm" :disabled="saving">
+
+            <div class="form-section mb-4">
+              <div class="section-header">
+                <span class="section-icon">📝</span>
+                <span>Detalle de la Consulta</span>
+              </div>
+              <div class="section-body">
+                <div class="row g-3">
+                  <div class="col-12">
+                    <label class="form-label fw-medium">Motivo de Consulta</label>
+                    <input v-model="form.reason" type="text" class="form-control" placeholder="Razón principal de la consulta" required>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label fw-medium">Notas <span class="text-muted fw-normal">(opcional)</span></label>
+                    <textarea v-model="form.notes" class="form-control" rows="3" placeholder="Notas adicionales..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-end gap-3">
+              <button type="button" @click="cancelarForm" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancelar</button>
+              <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                {{ saving ? 'Guardando...' : 'Crear Cita' }}
+                {{ saving ? 'Guardando...' : '📅 Crear Cita' }}
               </button>
             </div>
           </form>
@@ -233,5 +255,57 @@ onMounted(cargarCitas)
 <style scoped>
 .animation-fade { animation: fadeIn 0.3s ease-in-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-input:focus, select:focus, textarea:focus { background-color: #fff !important; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25); }
+
+.form-section {
+  background: #f8fafc;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.form-section:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+.section-icon {
+  font-size: 1.2rem;
+}
+.section-body {
+  padding: 16px;
+}
+.form-section .form-label {
+  font-size: 0.85rem;
+  color: #334155;
+  margin-bottom: 4px;
+}
+.form-section .form-control,
+.form-section .form-select {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.form-section .form-control:focus,
+.form-section .form-select:focus,
+.form-section textarea:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+  background: #fff;
+}
+.form-section .form-control::placeholder,
+.form-section textarea::placeholder {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
 </style>

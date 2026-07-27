@@ -12,12 +12,14 @@ namespace MedAnalyzer.Core.Application.Services
     {
         private readonly IBaseRepository<Symptom> _repository;
         private readonly IMapper _mapper;
+        private readonly IAuditLogService _auditLogService;
 
-        public SymptomService(IMapper mapper, IBaseRepository<Symptom> repository)
+        public SymptomService(IMapper mapper, IBaseRepository<Symptom> repository, IAuditLogService auditLogService)
             : base(mapper, repository)
         {
             _repository = repository;
             _mapper = mapper;
+            _auditLogService = auditLogService;
         }
 
         public async Task<List<SymptomDto>> GetByAppointmentId(int appointmentId)
@@ -31,6 +33,18 @@ namespace MedAnalyzer.Core.Application.Services
         {
             Validate(dto);
             return await base.SaveDtoAsync(dto);
+        }
+
+        public async Task<SymptomDto?> CreateSymptom(SymptomDto dto, string currentUserId)
+        {
+            var result = await SaveDtoAsync(dto);
+
+            if (result != null)
+            {
+                await _auditLogService.LogAsync(currentUserId, "CreateSymptom", "Symptom", result.Id.ToString());
+            }
+
+            return result;
         }
 
         public override async Task<SymptomDto?> UpdateDtoAsync(SymptomDto dto, int id)
@@ -50,5 +64,6 @@ namespace MedAnalyzer.Core.Application.Services
             if (!ValidSeverities.Contains(dto.Severity))
                 throw new DomainValidationException("Severidad no válida. Use: Leve, Moderado o Severo.");
         }
+
     }
 }

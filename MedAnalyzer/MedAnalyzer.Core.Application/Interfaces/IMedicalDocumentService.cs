@@ -7,5 +7,7 @@ namespace MedAnalyzer.Core.Application.Interfaces
     {
         Task<List<MedicalDocumentDto>> GetByPatientId(int patientId);
         Task<List<MedicalDocumentDto>> GetByAppointmentId(int appointmentId);
+        Task<MedicalDocumentDto?> UploadDocument(MedicalDocumentDto dto, string currentUserId);
+        Task<bool> DeleteDocumentAsync(int id, string currentUserId);
     }
 }

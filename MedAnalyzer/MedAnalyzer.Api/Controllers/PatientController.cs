@@ -4,6 +4,7 @@ using MedAnalyzer.Core.Application.Interfaces;
 using MedAnalyzer.Core.Domain.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace MedAnalyzer.Api.Controllers
 {
@@ -54,7 +55,7 @@ namespace MedAnalyzer.Api.Controllers
         [HttpGet("{id}")]
         [Authorize(Roles = "Doctor,Nurse")]
         [ProducesResponseType(typeof(PatientDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id)
         {
             var patient = await _patientService.GetDtoById(id);
@@ -152,6 +153,8 @@ namespace MedAnalyzer.Api.Controllers
             if (result == null)
                 return BadRequest(new ErrorResponse { Message = "Error al actualizar el paciente." });
 
+            var result = await _sender.Send(new UpdatePatientCommand(dto, id, currentUser));
+            if (result == null) return BadRequest(new ErrorResponse { Message = "Error al actualizar el paciente." });
             return Ok(result);
         }
 

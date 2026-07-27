@@ -11,6 +11,7 @@ using MedAnalyzer.Core.Domain.Entities;
 using MedAnalyzer.Core.Domain.Enum;
 using MedAnalyzer.Core.Domain.Exceptions;
 using MedAnalyzer.Core.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace MedAnalyzer.Core.Application.Services
 {
@@ -22,6 +23,9 @@ namespace MedAnalyzer.Core.Application.Services
         private readonly IBaseRepository<VitalSign> _vitalSignRepository;
         private readonly IBaseRepository<MedicalDocument> _medicalDocumentRepository;
         private readonly IBaseRepository<AiAnalysis> _aiAnalysisRepository;
+        private readonly IPatientRepository _patientRepository;
+        private readonly IBaseAccountService _accountService;
+        private readonly IAuditLogService _auditLogService;
         private readonly IMapper _mapper;
 
         public AppointMentService(
@@ -31,7 +35,10 @@ namespace MedAnalyzer.Core.Application.Services
             IBaseRepository<Symptom> symptomRepository,
             IBaseRepository<VitalSign> vitalSignRepository,
             IBaseRepository<MedicalDocument> medicalDocumentRepository,
-            IBaseRepository<AiAnalysis> aiAnalysisRepository) : base(mapper, repository)
+            IAuditLogService auditLogService,
+            IBaseRepository<AiAnalysis> aiAnalysisRepository,
+            IPatientRepository patientRepository,
+            IBaseAccountService accountService) : base(mapper, repository)
         {
             _appointmentRepository = repository;
             _medicalRecordRepository = medicalRecordRepository;
@@ -39,6 +46,9 @@ namespace MedAnalyzer.Core.Application.Services
             _vitalSignRepository = vitalSignRepository;
             _medicalDocumentRepository = medicalDocumentRepository;
             _aiAnalysisRepository = aiAnalysisRepository;
+            _patientRepository = patientRepository;
+            _accountService = accountService;
+            _auditLogService = auditLogService;
             _mapper = mapper;
         }
 

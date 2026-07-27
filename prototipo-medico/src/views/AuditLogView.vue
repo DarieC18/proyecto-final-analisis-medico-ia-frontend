@@ -9,26 +9,26 @@
 
     <div class="card shadow-sm mb-4 border-0">
       <div class="card-body p-3">
-        <div class="row g-2">
+        <div class="row g-2 align-items-end">
           <div class="col-md-3">
-            <label class="form-label text-muted small fw-bold text-uppercase">Usuario</label>
-            <input v-model="filtros.userId" type="text" class="form-control bg-light border-0" placeholder="ID de usuario">
+            <label class="form-label fw-medium">👤 Usuario ID</label>
+            <input v-model="filtros.userId" type="text" class="form-control form-filter" placeholder="ID del usuario">
           </div>
           <div class="col-md-2">
-            <label class="form-label text-muted small fw-bold text-uppercase">Acción</label>
-            <input v-model="filtros.action" type="text" class="form-control bg-light border-0" placeholder="Ej: Login">
+            <label class="form-label fw-medium">⚡ Acción</label>
+            <input v-model="filtros.action" type="text" class="form-control form-filter" placeholder="Ej: Login">
           </div>
           <div class="col-md-2">
-            <label class="form-label text-muted small fw-bold text-uppercase">Desde</label>
-            <input v-model="filtros.from" type="date" class="form-control bg-light border-0">
+            <label class="form-label fw-medium">📅 Desde</label>
+            <input v-model="filtros.from" type="date" class="form-control form-filter">
           </div>
           <div class="col-md-2">
-            <label class="form-label text-muted small fw-bold text-uppercase">Hasta</label>
-            <input v-model="filtros.to" type="date" class="form-control bg-light border-0">
+            <label class="form-label fw-medium">📅 Hasta</label>
+            <input v-model="filtros.to" type="date" class="form-control form-filter">
           </div>
-          <div class="col-md-3 d-flex align-items-end gap-2">
-            <button @click="cargarLogs" class="btn btn-dark px-4">Filtrar</button>
-            <button @click="limpiarFiltros" class="btn btn-light border px-3">Limpiar</button>
+          <div class="col-md-3 d-flex gap-2">
+            <button @click="cargarLogs" class="btn btn-dark rounded-pill px-4">🔍 Filtrar</button>
+            <button @click="limpiarFiltros" class="btn btn-outline-secondary rounded-pill px-3">Limpiar</button>
           </div>
         </div>
       </div>
@@ -51,8 +51,7 @@
               <th class="py-3 fw-medium">Usuario</th>
               <th class="py-3 fw-medium">Rol</th>
               <th class="py-3 fw-medium">Acción</th>
-              <th class="py-3 fw-medium">Entidad</th>
-              <th class="pe-4 py-3 fw-medium">ID Entidad</th>
+              <th class="pe-4 py-3 fw-medium">Recurso</th>
             </tr>
           </thead>
           <tbody class="border-top-0">
@@ -66,28 +65,48 @@
                 <td class="py-3">
                   <StatusBadge :text="log.action" variant="info" />
                 </td>
-                <td class="py-3 text-muted">{{ log.entityName }}</td>
-                <td class="pe-4 py-3 text-muted small">{{ log.entityId }}</td>
+                <td class="pe-4 py-3">
+                  <span v-if="log.action === 'Login'" class="text-muted small">Cuenta de {{ log.userName }}</span>
+                  <code v-else class="small text-muted" :title="log.entityId">{{ log.entityId?.slice(0, 8) }}…</code>
+                </td>
               </tr>
               <tr v-if="detalleId === log.id">
-                <td colspan="6" class="p-4 bg-light">
+                <td colspan="5" class="p-4 bg-light">
                   <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h6 class="fw-bold mb-3">Detalle completo del registro</h6>
-                      <div class="row g-3">
-                        <div class="col-md-4"><strong>ID Registro:</strong> {{ log.id }}</div>
-                        <div class="col-md-4"><strong>Usuario ID:</strong> {{ log.userId }}</div>
-                        <div class="col-md-4"><strong>Rol:</strong> {{ log.userRole }}</div>
-                        <div class="col-md-4"><strong>Acción:</strong> {{ log.action }}</div>
-                        <div class="col-md-4"><strong>Entidad:</strong> {{ log.entityName }}</div>
-                        <div class="col-md-4"><strong>ID Entidad:</strong> {{ log.entityId }}</div>
-                        <div class="col-md-12" v-if="log.details">
-                          <strong>Detalles adicionales:</strong>
-                          <pre class="mt-2 mb-0 p-3 bg-white rounded-3 small">{{ JSON.stringify(log.details, null, 2) }}</pre>
+                    <div class="w-100">
+                      <h6 class="fw-bold mb-3">📋 Detalle de la acción</h6>
+                      <div class="detail-grid">
+                        <div class="detail-item">
+                          <span class="detail-label">🆔 Registro</span>
+                          <span class="detail-value">#{{ log.id }}</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">👤 Usuario</span>
+                          <span class="detail-value">{{ log.userName }}</span>
+                          <span class="detail-raw-id">{{ log.userId }}</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">🎭 Rol</span>
+                          <span class="detail-value">{{ log.userRole }}</span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">⚡ Acción</span>
+                          <span class="detail-value">
+                            <StatusBadge :text="log.action" variant="info" />
+                          </span>
+                        </div>
+                        <div class="detail-item">
+                          <span class="detail-label">📎 Recurso afectado</span>
+                          <span class="detail-value">{{ descripcionEntidad(log) }}</span>
+                          <span v-if="log.entityId" class="detail-raw-id">{{ log.entityId }}</span>
+                        </div>
+                        <div class="detail-item col-12" v-if="log.details">
+                          <span class="detail-label">📄 Detalles adicionales</span>
+                          <pre class="mt-2 mb-0 p-3 bg-white border rounded-3 small">{{ JSON.stringify(log.details, null, 2) }}</pre>
                         </div>
                       </div>
                     </div>
-                    <button @click.stop="detalleId = null" class="btn btn-sm btn-light border px-3">Cerrar</button>
+                    <button @click.stop="detalleId = null" class="btn btn-outline-secondary rounded-pill px-3 ms-3">✕ Cerrar</button>
                   </div>
                 </td>
               </tr>
@@ -150,6 +169,15 @@ const limpiarFiltros = () => {
   cargarLogs()
 }
 
+const descripcionEntidad = (log) => {
+  if (log.action === 'Login') return `Inicio de sesión de ${log.userName}`
+  if (log.action === 'Create') return `Registro creado`
+  if (log.action === 'Update') return `Registro actualizado`
+  if (log.action === 'Delete') return `Registro eliminado`
+  if (log.entityId) return log.entityId.slice(0, 20) + '…'
+  return '—'
+}
+
 const formatFecha = (dateStr) => {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleString('es-ES', {
@@ -159,3 +187,54 @@ const formatFecha = (dateStr) => {
 
 onMounted(cargarLogs)
 </script>
+
+<style scoped>
+.form-filter {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.form-filter:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+  background: #fff;
+}
+.form-filter::placeholder {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+.form-label {
+  font-size: 0.85rem;
+  color: #334155;
+  margin-bottom: 4px;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.detail-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.detail-value {
+  font-weight: 500;
+  color: #1e293b;
+}
+.detail-raw-id {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-family: monospace;
+  word-break: break-all;
+}
+</style>

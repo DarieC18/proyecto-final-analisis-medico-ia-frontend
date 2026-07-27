@@ -21,51 +21,73 @@
             <h5 class="fw-bold mb-4">Nuevo Usuario</h5>
             <div v-if="formError" class="alert alert-danger border-0 rounded-3 py-2 small">{{ formError }}</div>
             <form @submit.prevent="crearUsuario">
-              <div class="row g-4">
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Nombre</label>
-                  <input v-model="form.name" type="text" class="form-control bg-light border-0 py-2" required>
+              <div class="form-section mb-4">
+                <div class="section-header">
+                  <span class="section-icon">👤</span>
+                  <span>Datos del Usuario</span>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Apellido</label>
-                  <input v-model="form.lastName" type="text" class="form-control bg-light border-0 py-2" required>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Usuario</label>
-                  <input v-model="form.userName" type="text" class="form-control bg-light border-0 py-2" required>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Identificación</label>
-                  <input v-model="form.numberIdentification" type="text" class="form-control bg-light border-0 py-2" maxlength="10" required>
-                  <small v-if="form.numberIdentification.length === 10" class="text-danger">Máximo 10 caracteres</small>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Email</label>
-                  <input v-model="form.email" type="email" class="form-control bg-light border-0 py-2" required>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Rol</label>
-                    <select v-model="form.role" class="form-select bg-light border-0 py-2" required>
-                    <option value="Doctor">Médico</option>
-                    <option value="Nurse">Enfermera</option>
-                    <option value="Patient">Paciente</option>
-                    <option value="Administrator">Administrador</option>
-                  </select>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Contraseña</label>
-                  <input v-model="form.password" type="password" class="form-control bg-light border-0 py-2" required>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Confirmar contraseña</label>
-                  <input v-model="form.confirmPassword" type="password" class="form-control bg-light border-0 py-2" required>
+                <div class="section-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Nombre</label>
+                      <input v-model="form.name" type="text" class="form-control" placeholder="Nombre del usuario" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Apellido</label>
+                      <input v-model="form.lastName" type="text" class="form-control" placeholder="Apellido del usuario" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Usuario</label>
+                      <input v-model="form.userName" type="text" class="form-control" placeholder="Nombre de usuario" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Identificación</label>
+                      <input v-model="form.numberIdentification" type="text" class="form-control" maxlength="10" placeholder="Ej: 001-1234567-8" required>
+                      <small v-if="form.numberIdentification.length === 10" class="text-danger">Máximo 10 caracteres</small>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Email</label>
+                      <input v-model="form.email" type="email" class="form-control" placeholder="correo@ejemplo.com" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Rol</label>
+                      <select v-model="form.role" class="form-select" required>
+                        <option value="Doctor">Médico</option>
+                        <option value="Nurse">Enfermera</option>
+                        <option value="Patient">Paciente</option>
+                        <option value="Administrator">Administrador</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="d-flex justify-content-end gap-3 mt-5">
-                <button type="button" @click="cancelarForm" class="btn btn-light border px-4 py-2">Cancelar</button>
-                <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm" :disabled="saving">
+
+              <div class="form-section mb-4">
+                <div class="section-header">
+                  <span class="section-icon">🔐</span>
+                  <span>Contraseña</span>
+                </div>
+                <div class="section-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Contraseña</label>
+                      <input v-model="form.password" type="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Confirmar contraseña</label>
+                      <input v-model="form.confirmPassword" type="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="my-4">
+
+              <div class="d-flex justify-content-end gap-3">
+                <button type="button" @click="cancelarForm" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancelar</button>
+                <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow" :disabled="saving">
                   <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                  {{ saving ? 'Guardando...' : vista === 'editar' ? 'Actualizar Usuario' : 'Crear Usuario' }}
+                  {{ saving ? 'Guardando...' : vista === 'editar' ? '💾 Actualizar Usuario' : '👤 Crear Usuario' }}
                 </button>
               </div>
             </form>
@@ -252,15 +274,57 @@ onMounted(cargarUsuarios)
 </script>
 
 <style scoped>
-.animation-fade {
-  animation: fadeIn 0.3s ease-in-out;
+.animation-fade { animation: fadeIn 0.3s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.form-section {
+  background: #f8fafc;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
 }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.form-section:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
-input:focus, select:focus {
-  background-color: #fff !important;
-  box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25);
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+.section-icon {
+  font-size: 1.2rem;
+}
+.section-body {
+  padding: 16px;
+}
+.form-section .form-label {
+  font-size: 0.85rem;
+  color: #334155;
+  margin-bottom: 4px;
+}
+.form-section .form-control,
+.form-section .form-select {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.form-section .form-control:focus,
+.form-section .form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+  background: #fff;
+}
+.form-section .form-control::placeholder {
+  color: #94a3b8;
+  font-size: 0.9rem;
 }
 </style>

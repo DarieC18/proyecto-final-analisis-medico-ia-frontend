@@ -1,7 +1,6 @@
-using MedAnalyzer.Api.Models;
+using MedAnalyzer.Api.Middleware;
 using MedAnalyzer.Core.Application;
 using MedAnalyzer.Core.Application.Interfaces;
-using MedAnalyzer.Core.Domain.Exceptions;
 using MedAnalyzer.Infraestructure.Identity.Configurations;
 using MedAnalyzer.Infraestructure.Persistences;
 using MedAnalyzer.Infraestructure.Shared;
@@ -64,6 +63,9 @@ builder.Services.AddIdentityLayerIocForWebApi(builder.Configuration);
 builder.Services.AddApplicationLayer();
 builder.Services.AddSharedLayer(builder.Configuration);
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -75,19 +77,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.Use(async (context, next) =>
-{
-    try
-    {
-        await next();
-    }
-    catch (DomainValidationException ex)
-    {
-        context.Response.StatusCode = 400;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(new ErrorResponse { Message = ex.Message });
-    }
-});
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

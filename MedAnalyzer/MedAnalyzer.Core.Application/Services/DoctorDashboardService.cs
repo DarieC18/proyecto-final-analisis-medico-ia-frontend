@@ -11,14 +11,19 @@ namespace MedAnalyzer.Core.Application.Services
         private readonly IAiAnalisysServices _aiAnalysis;
         private readonly IAppointmentService _appointment;
         private readonly IPatientService _patient;
+        private readonly IVitalSignService _vitalSignService;
+        private readonly ISymptomService _symptomService;
+
         public DoctorDashboardService(IAlertService alert, IAiAnalisysServices aiAnalysis,
-            IAppointmentService appointment, IPatientService patient)
+            IAppointmentService appointment, IPatientService patient,
+            IVitalSignService vitalSignService, ISymptomService symptomService)
         {
             _alertService = alert;
             _aiAnalysis = aiAnalysis;
             _appointment = appointment;
             _patient = patient;
-
+            _vitalSignService = vitalSignService;
+            _symptomService = symptomService;
         }
 
         public async Task<DoctorDashboardDto> GetDashboard(string id)
@@ -34,34 +39,44 @@ namespace MedAnalyzer.Core.Application.Services
                     && a.AppointmentDate.Date == DateTime.Now.Date);
 
                 var totalAiAnalysesByDoctor = totalAiAnalyses.Where(a => a.RequestedByUserId == id);
-                
-                
+
+                var nurseAppointmentIds = totalAppointments
+                    .Where(a => a.DoctorId == id)
+                    .Select(a => a.Id)
+                    .ToHashSet();
+
+                var allVitalSigns = await _vitalSignService.GetAllListDto();
+                var latestVitalSigns = allVitalSigns
+                    .Where(v => nurseAppointmentIds.Contains(v.AppointmentId))
+                    .OrderByDescending(v => v.MeasuredAt)
+                    .Take(5)
+                    .ToList();
+
+                var allSymptoms = await _symptomService.GetAllListDto();
+                var latestSymptoms = allSymptoms
+                    .Where(s => nurseAppointmentIds.Contains(s.AppointmentId))
+                    .OrderByDescending(s => s.StartedAt)
+                    .Take(5)
+                    .ToList();
 
                 return new DoctorDashboardDto
                 {
                     TotalPatients = totalPatients.Count(),
-
                     ActiveAlerts = allAlerts.Count(a => !a.IsResolved),
-
                     TotalAppointmentsToday = totalAppointmentsToday.Count(),
-
                     CompletedAppointmentsToday = totalAppointmentsToday
-                        .Where(a => a.Status == AppointmentStatus.Completed.ToString()).Count(),
-
+                        .Count(a => a.Status == AppointmentStatus.Completed.ToString()),
                     PendingAppointmentsToday = totalAppointmentsToday
-                        .Where(a => a.Status == AppointmentStatus.Pending.ToString()).Count(),
-
+                        .Count(a => a.Status == AppointmentStatus.Pending.ToString()),
                     TotalAiAnalyses = totalAiAnalysesByDoctor.Count(),
-
                     ApprovedAiAnalyses = totalAiAnalysesByDoctor
-                        .Where(a => a.Status == AiAnalysisStatus.Approved.ToString()).Count(),
-
+                        .Count(a => a.Status == AiAnalysisStatus.Approved.ToString()),
                     PendingAiAnalyses = totalAiAnalysesByDoctor
-                        .Where(a => a.Status == AiAnalysisStatus.Pending.ToString()).Count(),
-
+                        .Count(a => a.Status == AiAnalysisStatus.Pending.ToString()),
                     RejectedAiAnalyses = totalAiAnalysesByDoctor
-                        .Where(a => a.Status == AiAnalysisStatus.Rejected.ToString()).Count()
-
+                        .Count(a => a.Status == AiAnalysisStatus.Rejected.ToString()),
+                    LatestVitalSigns = latestVitalSigns,
+                    LatestSymptoms = latestSymptoms
                 };
 
             }

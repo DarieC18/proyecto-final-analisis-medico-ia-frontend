@@ -1,7 +1,10 @@
-﻿using MedAnalyzer.Core.Application.Base;
+﻿using FluentValidation;
+using MedAnalyzer.Core.Application.Base;
+using MedAnalyzer.Core.Application.Behaviours;
 using MedAnalyzer.Core.Application.Dto.Dashboard;
 using MedAnalyzer.Core.Application.Interfaces;
 using MedAnalyzer.Core.Application.Services;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
 
@@ -12,6 +15,9 @@ namespace MedAnalyzer.Core.Application
         public static void AddApplicationLayer(this IServiceCollection service)
         {
             service.AddAutoMapper(cfg => cfg.AddMaps(typeof(ApplicationDependency).Assembly));
+            service.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ApplicationDependency).Assembly));
+            service.AddValidatorsFromAssembly(typeof(ApplicationDependency).Assembly);
+            service.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 
             #region Services IOC
             service.AddTransient(typeof(IBaseServices<,>), typeof(BaseServices<,>));
