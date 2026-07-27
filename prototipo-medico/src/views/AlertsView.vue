@@ -92,7 +92,7 @@ const cargarAlertas = async () => {
     } else if (filtro.value === 'paciente') {
       res = await alertService.getByPatient(filtroPaciente.value)
     } else {
-      res = await alertService.getActive()
+      res = await alertService.getAll()
     }
     alertas.value = res.data || []
   } catch (err) {

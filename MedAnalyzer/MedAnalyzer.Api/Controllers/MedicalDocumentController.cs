@@ -15,20 +15,36 @@ namespace MedAnalyzer.Api.Controllers
     [Authorize(Roles = "Doctor,Nurse")]
     public class MedicalDocumentController : ControllerBase
     {
-        private readonly ISender _sender;
-        public MedicalDocumentController(ISender sender) => _sender = sender;
+        private readonly IMedicalDocumentService _documentService;
+        private readonly IFileStorageService _fileStorage;
+        private readonly IAccountServiceForWebApi _accountService;
 
-        /// <summary>Obtiene todos los documentos médicos.</summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(List<MedicalDocumentDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAll()
-            => Ok(await _sender.Send(new GetAllMedicalDocumentsQuery()));
+        public MedicalDocumentController(IMedicalDocumentService documentService, IFileStorageService fileStorage, IAccountServiceForWebApi accountService)
+        {
+            _documentService = documentService;
+            _fileStorage = fileStorage;
+            _accountService = accountService;
+        }
 
         /// <summary>Obtiene los documentos médicos de un paciente, con el nombre del usuario que los subió.</summary>
         [HttpGet("by-patient/{patientId}")]
         [ProducesResponseType(typeof(List<MedicalDocumentDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetByPatient(int patientId)
-            => Ok(await _sender.Send(new GetMedicalDocumentsByPatientQuery(patientId)));
+        {
+            var docs = await _documentService.GetByPatientId(patientId) ?? [];
+
+            var userIds = docs.Select(d => d.UploadedByUserId).Distinct();
+            foreach (var userId in userIds)
+            {
+                var user = await _accountService.GetUserById(userId);
+                if (user == null) continue;
+
+                foreach (var doc in docs.Where(d => d.UploadedByUserId == userId))
+                    doc.UploadedByUserName = $"{user.Name} {user.LastName}";
+            }
+
+            return Ok(docs);
+        }
 
         /// <summary>Obtiene los documentos médicos de una cita.</summary>
         [HttpGet("by-appointment/{appointmentId}")]
@@ -100,15 +116,20 @@ namespace MedAnalyzer.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, result);
         }
 
-        /// <summary>Elimina un documento médico por su identificador.</summary>
+        /// <summary>Elimina un documento médico y su archivo del almacenamiento.</summary>
+        /// <param name="id">Identificador del documento.</param>
+        /// <returns>Sin contenido si la operación fue exitosa.</returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
-            var uploadedByUserId = User.FindFirstValue("uid");
-            if (string.IsNullOrEmpty(uploadedByUserId))
-                return Unauthorized(new ErrorResponse { Message = "No se pudo identificar al usuario." });
+            var doc = await _documentService.GetDtoById(id);
+            if (doc == null)
+                return NotFound(new ErrorResponse { Message = "Documento no encontrado." });
+
+            if (!string.IsNullOrWhiteSpace(doc.FilePath))
+                _fileStorage.Delete(doc.FilePath);
 
             var success = await _sender.Send(new DeleteMedicalDocumentCommand(id, uploadedByUserId));
             if (!success) return NotFound(new ErrorResponse { Message = "Documento no encontrado." });

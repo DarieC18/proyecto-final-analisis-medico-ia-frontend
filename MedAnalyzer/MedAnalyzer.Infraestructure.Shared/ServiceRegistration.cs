@@ -21,7 +21,6 @@ namespace MedAnalyzer.Infraestructure.Shared
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFileStorageService, FileStorageService>();
             services.AddHttpClient<IAiProviderService, GeminiAiProviderService>();
-            services.AddTransient<IPdfTextExtractor, PdfTextExtractorService>();
             #endregion
         }
     }

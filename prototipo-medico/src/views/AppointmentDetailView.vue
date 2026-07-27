@@ -73,7 +73,7 @@
             <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'recomendaciones', 'text-muted': tabActual !== 'recomendaciones' }" @click="tabActual = 'recomendaciones'" href="#">💡 Recomendaciones</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'documentos', 'text-muted': tabActual !== 'documentos' }" @click="tabActual = 'documentos'" href="#">📄 Documentos</a>
+            <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'documentos', 'text-muted': tabActual !== 'documentos' }" @click="tabActual = 'documentos'" href="#">Documentos</a>
           </li>
         </ul>
       </div>
@@ -468,14 +468,18 @@
           <div v-if="tabActual === 'alertas'" class="animation-fade">
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h5 class="fw-bold text-dark mb-0">Alertas de la Cita</h5>
+              <div class="btn-group btn-group-sm" v-if="alertas.length">
+                <button @click="filtroAlertas = 'activas'" class="btn" :class="filtroAlertas === 'activas' ? 'btn-dark' : 'btn-light border'">Activas</button>
+                <button @click="filtroAlertas = 'todas'" class="btn" :class="filtroAlertas === 'todas' ? 'btn-dark' : 'btn-light border'">Todas</button>
+              </div>
             </div>
             <div v-if="cargandoAlertas" class="text-center py-4">
               <div class="spinner-border text-primary" role="status"></div>
             </div>
-            <div v-else-if="alertas.length === 0" class="text-muted text-center py-4">
-              <p>No hay alertas asociadas a esta cita.</p>
+            <div v-else-if="alertasFiltradas.length === 0" class="text-muted text-center py-4">
+              <p>{{ filtroAlertas === 'activas' ? 'No hay alertas activas.' : 'No hay alertas asociadas a esta cita.' }}</p>
             </div>
-            <div v-for="a in alertas" :key="a.id" class="card mb-3 border-0 shadow-sm rounded-4" :class="a.isResolved ? 'bg-light' : 'border-start border-4 border-danger'">
+            <div v-for="a in alertasFiltradas" :key="a.id" class="card mb-3 border-0 shadow-sm rounded-4" :class="a.isResolved ? 'bg-light' : 'border-start border-4 border-danger'">
               <div class="card-body p-4">
                 <div class="d-flex justify-content-between mb-2">
                   <h6 class="fw-bold mb-0">{{ a.alertType || 'Alerta' }}</h6>
@@ -484,7 +488,12 @@
                   </span>
                 </div>
                 <p class="text-muted mb-2" v-if="a.description">{{ a.description }}</p>
-                <small class="text-muted">{{ formatDate(a.createdAt) }}</small>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <small class="text-muted">{{ formatDate(a.createdAt) }}</small>
+                  <button v-if="!a.isResolved" @click="resolverAlerta(a)" class="btn btn-sm btn-success px-3 rounded-pill">
+                    Marcar como Resuelta
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -516,25 +525,33 @@
               </button>
             </div>
 
-            <div v-if="showDocUpload" class="form-section mb-4">
-              <div class="section-header">
-                <span class="section-icon">📎</span>
-                <span>Subir Documento</span>
-              </div>
-              <div class="section-body">
-                <form @submit.prevent="subirDocumento">
-                  <div class="row g-3">
-                    <div class="col-md-8">
-                      <label class="form-label fw-medium">📄 Archivo</label>
-                      <input ref="docFileInput" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
-                      <small class="text-muted">PDF, JPG o PNG. Máximo 10MB.</small>
-                    </div>
-                    <div class="col-md-4 d-flex align-items-end">
-                      <button type="submit" class="btn btn-success w-100 rounded-pill shadow-sm" :disabled="subiendoDoc">
-                        <span v-if="subiendoDoc" class="spinner-border spinner-border-sm me-2"></span>
-                        📤 Subir
-                      </button>
-                    </div>
+            <div v-if="showDocUpload" class="card bg-light border-0 p-4 rounded-4 mb-4">
+              <form @submit.prevent="subirDocumento">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label text-muted small fw-bold text-uppercase">Nombre del documento</label>
+                    <input v-model="docFileName" type="text" class="form-control bg-white border-0" placeholder="Ej: Resultado examen sangre" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label text-muted small fw-bold text-uppercase">Tipo</label>
+                    <select v-model="docFileType" class="form-select bg-white border-0">
+                      <option>Resultados de laboratorio</option>
+                      <option>Indicaciones médicas</option>
+                      <option>Historial externo</option>
+                      <option>Estudios en PDF</option>
+                      <option>Documentos administrativos</option>
+                    </select>
+                  </div>
+                  <div class="col-md-8">
+                    <label class="form-label text-muted small fw-bold text-uppercase">Archivo</label>
+                    <input ref="docFileInput" type="file" class="form-control bg-white border-0" accept=".pdf,.jpg,.jpeg,.png" required>
+                    <small class="text-muted">PDF, JPG o PNG. Máximo 10MB.</small>
+                  </div>
+                  <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100 shadow-sm" :disabled="subiendoDoc">
+                      <span v-if="subiendoDoc" class="spinner-border spinner-border-sm me-2"></span>
+                      Subir
+                    </button>
                   </div>
                 </form>
               </div>
@@ -550,11 +567,11 @@
               <div class="col-md-4 col-sm-6" v-for="d in documentos" :key="d.id">
                 <div class="card border-0 shadow-sm rounded-4 h-100">
                   <div class="card-body p-4 text-center">
-                    <div class="display-5 mb-2">{{ fileIcon(d.fileName) }}</div>
+                    <div style="width: 48px; margin: 0 auto;"><FileIcon :file-name="d.fileName" :file-path="d.filePath" /></div>
                     <h6 class="fw-bold small mb-1">{{ d.fileName }}</h6>
                     <small class="text-muted d-block mb-2">{{ formatDate(d.uploadedAt) }}</small>
                     <div class="d-flex justify-content-center gap-2">
-                      <a :href="d.fileUrl" target="_blank" class="btn btn-sm btn-light border px-3">Ver</a>
+                      <button @click="abrirVisor(d)" class="btn btn-sm btn-light border px-3">Ver</button>
                       <button @click="confirmarEliminarDoc(d)" class="btn btn-sm btn-light border text-danger px-3">Eliminar</button>
                     </div>
                   </div>
@@ -581,6 +598,12 @@
               <p class="text-muted">Generando análisis con inteligencia artificial...</p>
             </div>
 
+            <div v-if="analisisIA.length > 0" class="text-center mb-4">
+              <button @click="solicitarAnalisisIA" class="btn btn-outline-dark px-4" :disabled="solicitandoIA">
+                <span v-if="solicitandoIA" class="spinner-border spinner-border-sm me-2"></span>
+                {{ solicitandoIA ? 'Generando...' : '+ Nuevo Análisis IA' }}
+              </button>
+            </div>
             <div v-for="(ia, idx) in analisisIA" :key="ia.id || idx">
               <div class="bg-light p-4 rounded-4 border-start border-5 position-relative mb-4" :class="ia.isReviewed ? 'border-success' : 'border-info'">
                 <span v-if="ia.isReviewed" class="badge bg-success position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill">✅ Revisado</span>
@@ -613,14 +636,17 @@
         </div>
       </div>
     </template>
-    <ConfirmDialog
+    <DeleteDocumentModal
       :visible="deleteDocDialog"
       title="Eliminar Documento"
       :message="`¿Está seguro que desea eliminar el documento ${deleteDocTarget?.fileName}?`"
-      confirmText="Eliminar"
-      :danger="true"
       @confirm="eliminarDoc"
       @cancel="deleteDocDialog = false"
+    />
+    <DocumentViewerModal
+      :visible="showDocViewer"
+      :document="docViewerDoc"
+      @close="showDocViewer = false"
     />
   </div>
 </template>
@@ -639,12 +665,17 @@ import { recommendationService } from '@/api/recommendations'
 import { medicalDocumentService } from '@/api/medicalDocuments'
 import StatusBadge from '@/components/StatusBadge.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import DeleteDocumentModal from '@/components/DeleteDocumentModal.vue'
+import DocumentViewerModal from '@/components/DocumentViewerModal.vue'
+import FileIcon from '@/components/FileIcon.vue'
+import { authStore } from '@/stores/auth'
 
 const props = defineProps({
   id: { type: String, required: true }
 })
 
 const router = useRouter()
+const auth = authStore
 
 const loading = ref(true)
 const error = ref('')
@@ -694,6 +725,7 @@ const recordForm = reactive({ diagnosisInitial: '', notes: '', antecedentes: '',
 
 const alertas = ref([])
 const cargandoAlertas = ref(false)
+const filtroAlertas = ref('todas')
 
 const recomendaciones = ref([])
 const cargandoRecomendaciones = ref(false)
@@ -703,8 +735,12 @@ const cargandoDocs = ref(false)
 const showDocUpload = ref(false)
 const subiendoDoc = ref(false)
 const docFileInput = ref(null)
+const docFileName = ref('')
+const docFileType = ref('Resultados de laboratorio')
 const deleteDocDialog = ref(false)
 const deleteDocTarget = ref(null)
+const showDocViewer = ref(false)
+const docViewerDoc = ref(null)
 
 const statusVariant = (status) => {
   const map = { Pending: 'pending', InProgress: 'inprogress', Completed: 'completed', Cancelled: 'cancelled' }
@@ -714,6 +750,11 @@ const statusVariant = (status) => {
 const ultimoSigno = computed(() => {
   if (!signos.value.length) return { temperature: 0, heartRate: 0, systolicPressure: 0, diastolicPressure: 0, oxygenSaturation: 0, glucose: null }
   return signos.value[signos.value.length - 1]
+})
+
+const alertasFiltradas = computed(() => {
+  if (filtroAlertas.value === 'activas') return alertas.value.filter(a => !a.isResolved)
+  return alertas.value
 })
 
 const formatDateTime = (dateStr) => {
@@ -780,6 +821,7 @@ const guardarNotas = async () => {
   notasGuardadas.value = false
   try {
     await appointmentService.update(Number(props.id), {
+      id: Number(props.id),
       patientId: cita.value.patientId,
       doctorId: cita.value.doctorId,
       appointmentDate: cita.value.appointmentDate,
@@ -875,22 +917,23 @@ const guardarSignos = async () => {
 
 const solicitarAnalisisIA = async () => {
   solicitandoIA.value = true
+  generandoIA.value = true
   try {
-    await aiAnalysisService.getByAppointment(props.id)
-    generandoIA.value = true
+    await aiAnalysisService.generate({ appointmentId: props.id, analysisType: 'Clinical' })
     setTimeout(async () => {
       try {
-        const res = await appointmentService.getDetail(props.id)
-        analisisIA.value = res.data.aiAnalyses || []
+        const res = await aiAnalysisService.getByAppointment(props.id)
+        analisisIA.value = res.data || []
       } catch {
         analisisIA.value = []
       }
       generandoIA.value = false
       solicitandoIA.value = false
-    }, 2000)
-  } catch {
+    }, 3000)
+  } catch (err) {
+    generandoIA.value = false
     solicitandoIA.value = false
-    error.value = 'Error al solicitar análisis IA'
+    error.value = 'Error al solicitar análisis IA: ' + (err.response?.data?.message || err.message)
   }
 }
 
@@ -918,7 +961,10 @@ const cancelarEditSintoma = () => {
 const actualizarSintoma = async () => {
   guardandoSintoma.value = true
   try {
-    const res = await symptomService.update(editSintomaId.value, { ...editSintomaForm })
+    const res = await symptomService.update(editSintomaId.value, {
+      ...editSintomaForm,
+      appointmentId: Number(props.id)
+    })
     const idx = sintomas.value.findIndex(s => s.id === editSintomaId.value)
     if (idx !== -1) sintomas.value[idx] = res.data
     editSintomaId.value = null
@@ -964,7 +1010,10 @@ const cancelarEditSigno = () => {
 const actualizarSigno = async () => {
   guardandoSignos.value = true
   try {
-    const res = await vitalSignService.update(editSignoId.value, { ...editSignoForm })
+    const res = await vitalSignService.update(editSignoId.value, {
+      ...editSignoForm,
+      appointmentId: Number(props.id)
+    })
     const idx = signos.value.findIndex(s => s.id === editSignoId.value)
     if (idx !== -1) signos.value[idx] = res.data
     editSignoId.value = null
@@ -993,10 +1042,12 @@ const guardarRecord = async () => {
   guardandoRecord.value = true
   try {
     const payload = {
+      id: 0,
       appointmentId: Number(props.id),
       patientId: cita.value.patientId,
-      diagnosisInitial: recordForm.diagnosisInitial || null,
-      notes: recordForm.notes || null,
+      createdByUserId: auth.user?.id || '',
+      diagnosisInitial: recordForm.diagnosisInitial || '',
+      notes: recordForm.notes || '',
       antecedentes: recordForm.antecedentes || null,
       observacionesConsulta: recordForm.observacionesConsulta || null
     }
@@ -1025,12 +1076,9 @@ const editarRecord = (r) => {
   showRecordForm.value = true
 }
 
-const fileIcon = (name) => {
-  if (!name) return '📄'
-  const ext = name.split('.').pop()?.toLowerCase()
-  if (ext === 'pdf') return '📕'
-  if (['jpg', 'jpeg', 'png'].includes(ext)) return '🖼️'
-  return '📄'
+const abrirVisor = (doc) => {
+  docViewerDoc.value = doc
+  showDocViewer.value = true
 }
 
 const confirmarEliminarDoc = (d) => {
@@ -1040,16 +1088,19 @@ const confirmarEliminarDoc = (d) => {
 
 const subirDocumento = async () => {
   const file = docFileInput.value?.files?.[0]
-  if (!file) return
+  if (!file || !docFileName.value) return
   subiendoDoc.value = true
   try {
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('appointmentId', props.id)
     formData.append('patientId', cita.value.patientId)
+    formData.append('fileName', docFileName.value)
+    formData.append('fileType', docFileType.value)
+    formData.append('appointmentId', props.id)
     await medicalDocumentService.upload(formData)
     showDocUpload.value = false
     docFileInput.value.value = ''
+    docFileName.value = ''
     await cargarDocumentos()
   } catch (err) {
     error.value = 'Error al subir el documento'
@@ -1070,6 +1121,15 @@ const cargarAlertas = async () => {
   }
 }
 
+const resolverAlerta = async (a) => {
+  try {
+    await alertService.resolve(a.id)
+    a.isResolved = true
+  } catch (err) {
+    error.value = 'Error al resolver la alerta'
+  }
+}
+
 const cargarRecomendaciones = async () => {
   cargandoRecomendaciones.value = true
   try {
@@ -1085,8 +1145,14 @@ const cargarRecomendaciones = async () => {
 const cargarDocumentos = async () => {
   cargandoDocs.value = true
   try {
-    const res = await medicalDocumentService.getByAppointment(props.id)
-    documentos.value = res.data || []
+    const [apptRes, patientRes] = await Promise.all([
+      medicalDocumentService.getByAppointment(props.id),
+      cita.value?.patientId ? medicalDocumentService.getByPatient(cita.value.patientId) : Promise.resolve({ data: [] })
+    ])
+    const apptDocs = apptRes.data || []
+    const patientDocs = patientRes.data || []
+    const merged = [...apptDocs, ...patientDocs.filter(pd => !apptDocs.some(ad => ad.id === pd.id))]
+    documentos.value = merged
   } catch {
     documentos.value = []
   } finally {
@@ -1106,7 +1172,7 @@ const eliminarDoc = async () => {
 }
 
 watch(tabActual, (tab) => {
-  if (tab === 'alertas' && alertas.value.length === 0) cargarAlertas()
+  if (tab === 'alertas') cargarAlertas()
   if (tab === 'recomendaciones' && recomendaciones.value.length === 0) cargarRecomendaciones()
   if (tab === 'documentos' && documentos.value.length === 0) cargarDocumentos()
   if (tab === 'records' && recordsMedicos.value.length === 0 && cita.value?.medicalRecords) {

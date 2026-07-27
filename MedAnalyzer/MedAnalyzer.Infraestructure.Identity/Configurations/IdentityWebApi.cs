@@ -127,11 +127,19 @@ namespace MedAnalyzer.Infraestructure.Identity.Configurations
         private static void GeneralConfiguration(IServiceCollection services, IConfiguration config)
         {
             var connectionString = config.GetConnectionString("ConnectionDb");
+            var useInMemoryDatabase = bool.TryParse(config["UseInMemoryDatabase"], out var useInMemory) && useInMemory;
             services.AddDbContext<IdentityContext>((sp, opt) =>
             {
                 opt.EnableSensitiveDataLogging();
-                opt.UseNpgsql(connectionString,
-                    m => m.MigrationsAssembly(typeof(IdentityContext).Assembly.FullName));
+                if (useInMemoryDatabase)
+                {
+                    opt.UseInMemoryDatabase("MedAnalyzerIdentityDb");
+                }
+                else
+                {
+                    opt.UseNpgsql(connectionString,
+                        m => m.MigrationsAssembly(typeof(IdentityContext).Assembly.FullName));
+                }
                 opt.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             }, ServiceLifetime.Scoped, ServiceLifetime.Scoped);
         }

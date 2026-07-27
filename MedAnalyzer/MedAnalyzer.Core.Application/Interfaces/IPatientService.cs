@@ -9,11 +9,9 @@ namespace MedAnalyzer.Core.Application.Interfaces
         Task<List<PatientDto>> GetActivePatients();
         Task<List<PatientDto>> SearchPatients(string search);
         Task<PatientDetailDto?> GetPatientDetail(int id);
-        Task<DesactivatePatient> DeactivatePatient(int id, string userCurrentId);
-
-        Task<PatientDto?> CreatePatient(PatientDto patient, string currentUserId);
-        Task<PatientDto?> UpdatePatient(PatientDto patient, int id, string currentUserId);
+        Task<DesactivatePatient> DeactivatePatient(int id);
         Task<bool> DeletePatient(int id);
+        Task<PatientDto?> UpdatePatientAsync(PatientDto dto, int id);
         Task<PatientDto?> GetByUserId(string userId);
         Task LinkUserAsync(int patientId, string userId);
     }

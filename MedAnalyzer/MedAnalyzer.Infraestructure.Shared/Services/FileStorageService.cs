@@ -9,7 +9,7 @@ namespace MedAnalyzer.Infraestructure.Shared.Services
 
         public FileStorageService(IWebHostEnvironment env)
         {
-            _webRootPath = env.WebRootPath;
+            _webRootPath = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
         }
 
         public async Task<string> SaveAsync(Stream content, string subfolder, string fileName)
