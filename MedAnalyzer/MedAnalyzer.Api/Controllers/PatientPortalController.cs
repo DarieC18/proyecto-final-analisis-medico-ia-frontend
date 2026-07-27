@@ -199,7 +199,8 @@ namespace MedAnalyzer.Api.Controllers
             if (appointment.Status != "Pending")
                 return BadRequest(new ErrorResponse { Message = $"No se puede cancelar una cita en estado '{appointment.Status}'. Solo se pueden cancelar citas en estado Pending." });
 
-            await _appointmentService.ChangeStatusAsync(id, "Cancelled");
+            var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+            await _appointmentService.ChangeStatusAsync(id, "Cancelled", currentUser);
 
             return Ok(new MessageResponse { Message = "Cita cancelada exitosamente." });
         }

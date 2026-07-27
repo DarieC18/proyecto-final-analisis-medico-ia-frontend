@@ -269,10 +269,6 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Antecedentes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
                     b.Property<int>("AppointmentId")
                         .HasColumnType("integer");
 

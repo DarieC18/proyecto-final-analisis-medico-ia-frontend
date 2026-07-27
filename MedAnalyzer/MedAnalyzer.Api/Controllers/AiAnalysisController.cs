@@ -61,6 +61,8 @@ namespace MedAnalyzer.Api.Controllers
         }
 
         /// <summary>Marca un análisis de IA como revisado por el médico.</summary>
+        /// <param name="id">Identificador del análisis.</param>
+        /// <returns>Sin contenido si la operación fue exitosa.</returns>
         [Authorize(Roles = "Doctor")]
         [HttpPatch("{id}/review")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

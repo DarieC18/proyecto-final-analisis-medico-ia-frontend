@@ -10,19 +10,31 @@
     <div class="card shadow-sm mb-4 border-0">
       <div class="card-body p-3">
         <div class="row g-2 align-items-end">
-          <div class="col-md-4">
-            <label class="form-label text-muted small fw-bold text-uppercase">Paciente ID</label>
-            <input v-model="pacienteId" type="number" class="form-control bg-light border-0" placeholder="Ingrese ID del paciente">
+          <div class="col-md-5 position-relative">
+            <label class="form-label text-muted small fw-bold text-uppercase">Buscar Paciente</label>
+            <input v-model="searchQuery" @input="buscarPacientes" @blur="ocultarDropdown" type="text" class="form-control bg-light border-0" placeholder="Nombre, identificación o ID del paciente" autocomplete="off">
+            <ul v-if="searchResults.length && showDropdown" class="list-group position-absolute w-100 shadow-sm rounded-3 mt-1" style="z-index: 1050; max-height: 250px; overflow-y: auto;">
+              <li v-for="p in searchResults" :key="p.id" @click="seleccionarPaciente(p)" class="list-group-item list-group-item-action py-2 px-3 d-flex justify-content-between align-items-center">
+                <span class="fw-medium">{{ p.fullName }}</span>
+                <small class="text-muted">#{{ p.id }} · {{ p.numberIdentification || p.identificationNumber }}</small>
+              </li>
+            </ul>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
             <button @click="cargarDocumentos" class="btn btn-dark px-4 w-100">Buscar</button>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
             <button @click="limpiarBusqueda" class="btn btn-light border px-4 w-100">Limpiar</button>
           </div>
           <div class="col-md-2" v-if="documentos.length">
             <button @click="showUpload = true" class="btn btn-primary px-4 w-100">+ Subir</button>
           </div>
+        </div>
+        <div v-if="pacienteSeleccionado" class="mt-2">
+          <span class="badge bg-dark bg-opacity-10 text-dark rounded-pill px-3 py-2">
+            Paciente: <strong>{{ pacienteSeleccionado.fullName }}</strong> · #{{ pacienteSeleccionado.id }}
+            <button @click="limpiarBusqueda" class="btn-close btn-close-dark ms-2" style="font-size: 0.6rem;"></button>
+          </span>
         </div>
       </div>
     </div>
@@ -34,7 +46,7 @@
     <div v-else-if="error" class="alert alert-danger border-0 rounded-3">{{ error }}</div>
 
     <div v-else-if="documentos.length === 0 && buscado" class="text-center py-5 text-muted">
-      <div class="display-4 mb-3">📄</div>
+      <div class="display-4 mb-3"><FileIcon file-name="doc.pdf" style="width: 64px;" /></div>
       <p>No hay documentos para este paciente.</p>
     </div>
 
@@ -44,13 +56,13 @@
           <div class="card border-0 shadow-sm rounded-4 h-100">
             <div class="card-body p-4">
               <div class="text-center mb-3">
-                <div class="display-5">{{ fileIcon(d.fileName) }}</div>
+                <div style="width: 48px; margin: 0 auto;"><FileIcon :file-name="d.fileName" :file-path="d.filePath" /></div>
               </div>
               <h6 class="fw-bold text-center mb-1">{{ d.fileName }}</h6>
               <p class="text-muted small text-center mb-2">{{ formatDate(d.uploadedAt) }}</p>
               <p class="small text-muted text-center mb-3" v-if="d.description">{{ d.description }}</p>
               <div class="d-flex justify-content-center gap-2">
-                <a :href="d.fileUrl" target="_blank" class="btn btn-sm btn-light border px-3">Ver</a>
+                <button @click="abrirVisor(d)" class="btn btn-sm btn-light border px-3">Ver</button>
                 <button @click="confirmarEliminar(d)" class="btn btn-sm btn-light border text-danger px-3">Eliminar</button>
               </div>
             </div>
@@ -69,8 +81,15 @@
                 <small class="text-muted">PDF, JPG o PNG. Máximo 10MB.</small>
               </div>
               <div class="col-md-6">
-                <label class="form-label fw-medium">📝 Descripción <span class="text-muted fw-normal">(opcional)</span></label>
-                <input v-model="uploadDescription" type="text" class="form-control" placeholder="Descripción del documento">
+                <label class="form-label text-muted small fw-bold text-uppercase">Tipo de Documento</label>
+                <select v-model="fileType" class="form-select bg-light border-0" required>
+                  <option value="" disabled>Seleccione un tipo</option>
+                  <option value="Resultados de laboratorio">Resultados de laboratorio</option>
+                  <option value="Indicaciones médicas">Indicaciones médicas</option>
+                  <option value="Historial externo">Historial externo</option>
+                  <option value="Estudios en PDF">Estudios en PDF</option>
+                  <option value="Documentos administrativos">Documentos administrativos</option>
+                </select>
               </div>
             </div>
             <div class="d-flex justify-content-end gap-3 mt-4">
@@ -86,18 +105,22 @@
     </div>
 
     <div v-else class="text-center py-5 text-muted">
-      <div class="display-4 mb-3">📄</div>
+      <div class="display-4 mb-3"><FileIcon file-name="doc.pdf" style="width: 64px;" /></div>
       <p>Ingrese un ID de paciente para buscar sus documentos.</p>
     </div>
 
-    <ConfirmDialog
+    <DeleteDocumentModal
       :visible="deleteDialog"
       title="Eliminar Documento"
       :message="`¿Está seguro que desea eliminar el documento ${deleteTarget?.fileName}?`"
-      confirmText="Eliminar"
-      :danger="true"
       @confirm="eliminarDocumento"
       @cancel="deleteDialog = false"
+    />
+
+    <DocumentViewerModal
+      :visible="showViewer"
+      :document="viewerDoc"
+      @close="showViewer = false"
     />
   </div>
 </template>
@@ -105,7 +128,10 @@
 <script setup>
 import { ref } from 'vue'
 import { medicalDocumentService } from '@/api/medicalDocuments'
-import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { patientService } from '@/api/patients'
+import DeleteDocumentModal from '@/components/DeleteDocumentModal.vue'
+import DocumentViewerModal from '@/components/DocumentViewerModal.vue'
+import FileIcon from '@/components/FileIcon.vue'
 
 const loading = ref(false)
 const error = ref('')
@@ -114,10 +140,54 @@ const pacienteId = ref('')
 const buscado = ref(false)
 const showUpload = ref(false)
 const subiendo = ref(false)
-const uploadDescription = ref('')
+const fileType = ref('')
 const fileInput = ref(null)
 const deleteDialog = ref(false)
 const deleteTarget = ref(null)
+const showViewer = ref(false)
+const viewerDoc = ref(null)
+const searchQuery = ref('')
+const searchResults = ref([])
+const showDropdown = ref(false)
+const pacienteSeleccionado = ref(null)
+let searchTimeout = null
+
+const ocultarDropdown = () => {
+  setTimeout(() => { showDropdown.value = false }, 200)
+}
+
+const abrirVisor = (doc) => {
+  viewerDoc.value = doc
+  showViewer.value = true
+}
+
+const buscarPacientes = () => {
+  clearTimeout(searchTimeout)
+  const q = searchQuery.value.trim()
+  if (!q) {
+    searchResults.value = []
+    showDropdown.value = false
+    return
+  }
+  searchTimeout = setTimeout(async () => {
+    try {
+      const res = await patientService.search(q)
+      searchResults.value = res.data || []
+      showDropdown.value = searchResults.value.length > 0
+    } catch {
+      searchResults.value = []
+      showDropdown.value = false
+    }
+  }, 300)
+}
+
+const seleccionarPaciente = (p) => {
+  pacienteSeleccionado.value = p
+  searchQuery.value = p.fullName
+  showDropdown.value = false
+  pacienteId.value = p.id
+  cargarDocumentos()
+}
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
@@ -128,15 +198,11 @@ const formatDate = (dateStr) => {
   } catch { return dateStr }
 }
 
-const fileIcon = (name) => {
-  if (!name) return '📄'
-  const ext = name.split('.').pop()?.toLowerCase()
-  if (ext === 'pdf') return '📕'
-  if (['jpg', 'jpeg', 'png'].includes(ext)) return '🖼️'
-  return '📄'
-}
-
 const cargarDocumentos = async () => {
+  if (!pacienteId.value && searchQuery.value) {
+    const numId = parseInt(searchQuery.value)
+    if (!isNaN(numId)) pacienteId.value = numId
+  }
   if (!pacienteId.value) return
   loading.value = true
   error.value = ''
@@ -157,8 +223,13 @@ const cargarDocumentos = async () => {
 
 const limpiarBusqueda = () => {
   pacienteId.value = ''
+  searchQuery.value = ''
+  searchResults.value = []
+  showDropdown.value = false
+  pacienteSeleccionado.value = null
   documentos.value = []
   buscado.value = false
+  fileType.value = ''
   showUpload.value = false
 }
 
@@ -170,10 +241,11 @@ const subirDocumento = async () => {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('patientId', pacienteId.value)
-    if (uploadDescription.value) formData.append('description', uploadDescription.value)
+    formData.append('fileName', file.name)
+    formData.append('fileType', fileType.value)
     await medicalDocumentService.upload(formData)
     showUpload.value = false
-    uploadDescription.value = ''
+    fileType.value = ''
     fileInput.value.value = ''
     await cargarDocumentos()
   } catch (err) {

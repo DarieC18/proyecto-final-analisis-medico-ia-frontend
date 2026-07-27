@@ -1,9 +1,7 @@
 using MedAnalyzer.Api.Models;
 using MedAnalyzer.Core.Application.Dto.Patient;
-using MedAnalyzer.Core.Application.Features.Patients.Commands;
-using MedAnalyzer.Core.Application.Features.Patients.Queries;
+using MedAnalyzer.Core.Application.Interfaces;
 using MedAnalyzer.Core.Domain.Enum;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -16,8 +14,16 @@ namespace MedAnalyzer.Api.Controllers
     [Authorize]
     public class PatientController : ControllerBase
     {
-        private readonly ISender _sender;
-        public PatientController(ISender sender) => _sender = sender;
+        private readonly IPatientService _patientService;
+        private readonly IAccountServiceForWebApi _accountService;
+        private readonly IEmailService _emailService;
+
+        public PatientController(IPatientService patientService, IAccountServiceForWebApi accountService, IEmailService emailService)
+        {
+            _patientService = patientService;
+            _accountService = accountService;
+            _emailService = emailService;
+        }
 
         /// <summary>Obtiene todos los pacientes activos.</summary>
         [HttpGet]
@@ -26,9 +32,10 @@ namespace MedAnalyzer.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _sender.Send(new GetAllPatientsQuery());
-            if (result == null || result.Count == 0) return NoContent();
-            return Ok(result);
+            var patients = await _patientService.GetActivePatients();
+            if (patients == null || patients.Count == 0)
+                return NoContent();
+            return Ok(patients);
         }
 
         /// <summary>Busca pacientes por teléfono, tipo o UserId.</summary>
@@ -38,9 +45,10 @@ namespace MedAnalyzer.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> Search([FromQuery] string query)
         {
-            var result = await _sender.Send(new SearchPatientsQuery(query));
-            if (result == null || result.Count == 0) return NoContent();
-            return Ok(result);
+            var patients = await _patientService.SearchPatients(query);
+            if (patients == null || patients.Count == 0)
+                return NoContent();
+            return Ok(patients);
         }
 
         /// <summary>Obtiene un paciente por ID.</summary>
@@ -50,9 +58,18 @@ namespace MedAnalyzer.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _sender.Send(new GetPatientByIdQuery(id));
-            if (result == null) return NotFound(new ErrorResponse { Message = "Paciente no encontrado." });
-            return Ok(result);
+            var patient = await _patientService.GetDtoById(id);
+            if (patient == null)
+                return NotFound(new ErrorResponse { Message = "Paciente no encontrado." });
+
+            if (!string.IsNullOrWhiteSpace(patient.UserId))
+            {
+                var user = await _accountService.GetUserById(patient.UserId);
+                if (user != null)
+                    patient.FullName = $"{user.Name} {user.LastName}";
+            }
+
+            return Ok(patient);
         }
 
         /// <summary>Obtiene el detalle completo del paciente incluyendo historial y documentos.</summary>
@@ -62,9 +79,18 @@ namespace MedAnalyzer.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetDetails(int id)
         {
-            var result = await _sender.Send(new GetPatientDetailQuery(id));
-            if (result == null) return NotFound(new ErrorResponse { Message = "Paciente no encontrado." });
-            return Ok(result);
+            var detail = await _patientService.GetPatientDetail(id);
+            if (detail == null)
+                return NotFound(new ErrorResponse { Message = "Paciente no encontrado." });
+
+            if (!string.IsNullOrWhiteSpace(detail.UserId))
+            {
+                var user = await _accountService.GetUserById(detail.UserId);
+                if (user != null)
+                    detail.FullName = $"{user.Name} {user.LastName}";
+            }
+
+            return Ok(detail);
         }
 
         /// <summary>El doctor crea un paciente. Se crea automáticamente su cuenta de portal y se envían credenciales por correo.</summary>
@@ -74,13 +100,42 @@ namespace MedAnalyzer.Api.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] CreatePatientByDoctorDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var currentUser = User.FindFirstValue("uid");
-            if (string.IsNullOrEmpty(currentUser))
-                return Unauthorized(new ErrorResponse { Message = "No se pudo identificar al usuario." });
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            var result = await _sender.Send(new CreatePatientCommand(dto, currentUser));
-            if (result == null) return BadRequest(new ErrorResponse { Message = "Error al crear el expediente del paciente." });
+            string userId;
+            string resetToken;
+            try
+            {
+                (userId, resetToken) = await _accountService.RegisterPatientAccountAsync(
+                    dto.Email, dto.FirstName, dto.LastName, dto.NumberIdentification);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new ErrorResponse { Message = ex.Message });
+            }
+
+            var patientDto = new PatientDto
+            {
+                Id = 0,
+                UserId = userId,
+                PhoneNumber = dto.PhoneNumber,
+                Gender = dto.Gender,
+                BirthDate = dto.BirthDate,
+                IdentificationType = dto.IdentificationType,
+                PatientType = dto.PatientType,
+                IsActive = true
+            };
+
+            var result = await _patientService.SaveDtoAsync(patientDto);
+            if (result == null)
+            {
+                await _accountService.DeleteAsync(userId);
+                return BadRequest(new ErrorResponse { Message = "Error al crear el expediente del paciente." });
+            }
+
+            await _emailService.SendPatientActivationEmailAsync(dto.Email, dto.FirstName, userId, resetToken);
+
             return StatusCode(201, result);
         }
 
@@ -91,13 +146,14 @@ namespace MedAnalyzer.Api.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Update(int id, [FromBody] PatientDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var currentUser = User.FindFirstValue("uid");
-            if (string.IsNullOrEmpty(currentUser))
-                return Unauthorized(new ErrorResponse { Message = "No se pudo identificar al usuario." });
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            var result = await _sender.Send(new UpdatePatientCommand(dto, id, currentUser));
-            if (result == null) return BadRequest(new ErrorResponse { Message = "Error al actualizar el paciente." });
+            var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+            var result = await _patientService.UpdatePatientAsync(dto, id, currentUser);
+            if (result == null)
+                return BadRequest(new ErrorResponse { Message = "Error al actualizar el paciente." });
+
             return Ok(result);
         }
 
@@ -109,14 +165,16 @@ namespace MedAnalyzer.Api.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Deactivate(int id)
         {
-            var currentUserId = User.FindFirstValue("uid");
-            if (string.IsNullOrEmpty(currentUserId))
-                return Unauthorized(new ErrorResponse { Message = "No se pudo identificar al usuario." });
+            var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+            var result = await _patientService.DeactivatePatient(id, currentUser);
 
-            var result = await _sender.Send(new DeactivatePatientCommand(id, currentUserId));
-            if (result == DesactivatePatient.NotFound) return NotFound(new ErrorResponse { Message = "Paciente no encontrado." });
-            if (result == DesactivatePatient.HasActiveAppointments) return BadRequest(new ErrorResponse { Message = "El paciente tiene citas activas." });
-            if (result == DesactivatePatient.Failed) return BadRequest(new ErrorResponse { Message = "Error al desactivar el paciente." });
+            if (result == DesactivatePatient.NotFound)
+                return NotFound(new ErrorResponse { Message = "Paciente no encontrado." });
+            if (result == DesactivatePatient.HasActiveAppointments)
+                return BadRequest(new ErrorResponse { Message = "El paciente tiene citas activas." });
+            if (result == DesactivatePatient.Failed)
+                return BadRequest(new ErrorResponse { Message = "Error al desactivar el paciente." });
+
             return Ok(new MessageResponse { Message = "Paciente desactivado exitosamente." });
         }
 
@@ -127,9 +185,10 @@ namespace MedAnalyzer.Api.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Delete(int id)
         {
-            var currentUserId = User.FindFirstValue("uid") ?? "";
-            var result = await _sender.Send(new DeletePatientCommand(id, currentUserId));
-            if (!result) return BadRequest(new ErrorResponse { Message = "No se puede eliminar el paciente. Verifique que no tenga citas o documentos asociados." });
+            var result = await _patientService.DeletePatient(id);
+            if (!result)
+                return BadRequest(new ErrorResponse { Message = "No se puede eliminar el paciente. Verifique que no tenga citas o documentos asociados." });
+
             return NoContent();
         }
     }

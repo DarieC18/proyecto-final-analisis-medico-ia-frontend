@@ -61,7 +61,7 @@ namespace MedAnalyzer.Core.Application.Features.Patients.Commands
         private readonly IPatientService _service;
         public UpdatePatientCommandHandler(IPatientService service) => _service = service;
         public async Task<PatientDto?> Handle(UpdatePatientCommand req, CancellationToken ct)
-            => await _service.UpdatePatient(req.Dto, req.Id, req.CurrentUserId);
+            => await _service.UpdatePatientAsync(req.Dto, req.Id, req.CurrentUserId);
     }
 
     public record DeactivatePatientCommand(int Id, string CurrentUserId) : IRequest<DesactivatePatient>;
