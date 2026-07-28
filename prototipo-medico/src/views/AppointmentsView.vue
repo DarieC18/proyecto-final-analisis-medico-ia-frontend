@@ -174,11 +174,7 @@ const cargarCitas = async () => {
       appointmentService.getAll(),
       patientService.getAll()
     ])
-    citas.value = (citasRes.data || []).sort((a, b) => {
-      const dateA = new Date(a.appointmentDate || 0)
-      const dateB = new Date(b.appointmentDate || 0)
-      return dateB - dateA
-    })
+    citas.value = citasRes.data || []
     pacientes.value = pacientesRes.data || []
 
     const userData = localStorage.getItem('user')
@@ -215,11 +211,8 @@ const crearCita = async () => {
   formError.value = ''
   try {
     const payload = {
-      id: 0,
       patientId: Number(form.patientId),
-      doctorId: auth.user?.id || '',
       appointmentDate: form.appointmentDate,
-      status: 'Pending',
       reason: form.reason,
       notes: form.notes || null
     }
@@ -228,13 +221,7 @@ const crearCita = async () => {
     await cargarCitas()
   } catch (err) {
     const data = err.response?.data
-    if (data?.errors && typeof data.errors === 'object') {
-      formError.value = Object.values(data.errors).flat().join(', ')
-    } else if (Array.isArray(data?.errors)) {
-      formError.value = data.errors.join(', ')
-    } else {
-      formError.value = data?.message || 'Error al crear la cita'
-    }
+    formError.value = data?.errors?.join(', ') || data?.message || 'Error al crear la cita'
   } finally {
     saving.value = false
   }

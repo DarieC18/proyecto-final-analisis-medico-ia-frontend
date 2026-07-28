@@ -21,6 +21,8 @@ namespace MedAnalyzer.Core.Application.Services
         private readonly IRecommendationService _recommendationService;
         private readonly IAiProviderService _aiProvider;
         private readonly IBaseAccountService _accountService;
+        private readonly IAuditLogService _auditLogService;
+        private readonly IAlertService _alertService;
 
         public AiAnalisysServices(
             IMapper mapper,
@@ -29,7 +31,9 @@ namespace MedAnalyzer.Core.Application.Services
             IPatientService patientService,
             IRecommendationService recommendationService,
             IAiProviderService aiProvider,
-            IBaseAccountService accountService) : base(mapper, repository)
+            IBaseAccountService accountService,
+            IAuditLogService auditLogService,
+            IAlertService alertService) : base(mapper, repository)
         {
             _repository = repository;
             _mapper = mapper;
@@ -38,6 +42,8 @@ namespace MedAnalyzer.Core.Application.Services
             _recommendationService = recommendationService;
             _aiProvider = aiProvider;
             _accountService = accountService;
+            _auditLogService = auditLogService;
+            _alertService = alertService;
         }
 
         public async Task<List<AiAnalisysDto>> GetByAppointmentIdAsync(int appointmentId)
@@ -88,10 +94,9 @@ namespace MedAnalyzer.Core.Application.Services
                 result = JsonSerializer.Deserialize<GeminiAnalysisResult>(rawResponse, JsonOptions);
                 aiAnalysis.Status = AiAnalysisStatus.Approved.ToString();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 aiAnalysis.Status = AiAnalysisStatus.Rejected.ToString();
-                aiAnalysis.AiResponse = $"Error: {ex.Message}";
             }
 
             var saved = await _repository.SaveEntityAsync(aiAnalysis);
@@ -111,6 +116,22 @@ namespace MedAnalyzer.Core.Application.Services
                     });
                 }
             }
+
+            if (result?.RiskLevel is "Medio" or "Alto")
+            {
+                await _alertService.SaveDtoAsync(new Dto.Alert.AlertDto
+                {
+                    Id = 0,
+                    PatientId = saved.PatientId,
+                    AppointmentId = saved.AppointmentId,
+                    Title = $"Riesgo {result.RiskLevel} detectado por análisis IA",
+                    Description = result.Summary ?? "El análisis de IA identificó un nivel de riesgo que requiere revisión médica.",
+                    Severity = result.RiskLevel == "Alto" ? "Crítico" : "Moderado",
+                    IsResolved = false
+                });
+            }
+
+            await _auditLogService.LogAsync(requestedByUserId, "GenerateAiAnalysis", "AiAnalysis", saved.Id.ToString());
 
             return _mapper.Map<AiAnalisysDto>(saved);
         }

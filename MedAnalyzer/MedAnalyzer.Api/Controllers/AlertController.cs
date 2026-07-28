@@ -18,19 +18,6 @@ namespace MedAnalyzer.Api.Controllers
         private readonly ISender _sender;
         public AlertController(ISender sender) => _sender = sender;
 
-        /// <summary>Obtiene todas las alertas registradas.</summary>
-        /// <returns>Lista de todas las alertas.</returns>
-        [HttpGet]
-        [ProducesResponseType(typeof(List<AlertDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAll()
-        {
-            var alerts = await _sender.Send(new GetActiveAlertsQuery());
-            return Ok(alerts);
-        }
-
-        /// <summary>Obtiene las alertas asociadas a un paciente.</summary>
-        /// <param name="patientId">Identificador del paciente.</param>
-        /// <returns>Lista de alertas del paciente.</returns>
         [HttpGet("by-patient/{patientId}")]
         [ProducesResponseType(typeof(List<AlertDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetByPatient(int patientId)

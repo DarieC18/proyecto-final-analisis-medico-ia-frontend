@@ -14,14 +14,10 @@ namespace MedAnalyzer.Infraestructure.Persistences
         {
             #region Contexts
             var connectionString = config.GetConnectionString("ConnectionDb");
-            var useInMemoryDatabase = bool.TryParse(config["UseInMemoryDatabase"], out var useInMemory) && useInMemory;
             services.AddDbContext<MedAnalyzerContextDb>(opt =>
             {
-                if (useInMemoryDatabase)
-                    opt.UseInMemoryDatabase("MedAnalyzerDb");
-                else
-                    opt.UseNpgsql(connectionString,
-                        m => m.MigrationsAssembly(typeof(MedAnalyzerContextDb).Assembly.FullName));
+                opt.UseNpgsql(connectionString,
+                    m => m.MigrationsAssembly(typeof(MedAnalyzerContextDb).Assembly.FullName));
             }, ServiceLifetime.Scoped);
 
             #endregion

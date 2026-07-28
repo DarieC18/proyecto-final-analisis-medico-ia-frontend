@@ -50,10 +50,6 @@ export const authStore = reactive({
     return this.hasRole('Doctor')
   },
 
-  isPatient() {
-    return this.hasRole('Patient')
-  },
-
   logout() {
     this.token = ''
     this.user = null
