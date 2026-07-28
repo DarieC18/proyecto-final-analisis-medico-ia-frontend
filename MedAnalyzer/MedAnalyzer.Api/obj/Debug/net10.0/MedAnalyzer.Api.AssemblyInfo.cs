@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MedAnalyzer.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0b13f9ecd035bcdd122c9f23684ba5606f294a30")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+43efcd77b04faea46e808044c22ea16fcf5cc8f2")]
 [assembly: System.Reflection.AssemblyProductAttribute("MedAnalyzer.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MedAnalyzer.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
