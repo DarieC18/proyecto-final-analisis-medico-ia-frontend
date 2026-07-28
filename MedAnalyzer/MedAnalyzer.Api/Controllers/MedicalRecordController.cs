@@ -38,9 +38,6 @@ namespace MedAnalyzer.Api.Controllers
             return Ok(result);
         }
 
-        /// <summary>Crea un nuevo registro clínico asociado a una cita.</summary>
-        /// <param name="dto">Datos del registro clínico.</param>
-        /// <returns>Datos del registro clínico creado.</returns>
         [Authorize(Roles = "Doctor")]
         [HttpPost]
         [ProducesResponseType(typeof(MedicalRecordDto), StatusCodes.Status201Created)]

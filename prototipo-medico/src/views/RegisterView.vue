@@ -38,25 +38,11 @@
                   </div>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Nombre de usuario</label>
-                  <input v-model="form.userName" type="text" class="form-control bg-light border-0" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Cédula / Identificación</label>
-                  <input v-model="form.numberIdentification" type="text" class="form-control bg-light border-0" maxlength="10" required>
-                  <small v-if="form.numberIdentification.length === 10" class="text-danger">Máximo 10 caracteres</small>
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label text-muted small fw-bold text-uppercase">Correo electrónico</label>
-                <input v-model="form.email" type="email" class="form-control bg-light border-0" required>
-              </div>
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label text-muted small fw-bold text-uppercase">Contraseña</label>
-                  <input v-model="form.password" type="password" class="form-control bg-light border-0" required>
+
+              <div class="form-section mb-4">
+                <div class="section-header">
+                  <span class="section-icon">🔐</span>
+                  <span>Credenciales</span>
                 </div>
                 <div class="section-body">
                   <div class="row g-3">

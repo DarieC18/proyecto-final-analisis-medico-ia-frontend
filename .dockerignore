@@ -1,9 +1,0 @@
-prototipo-medico/node_modules
-prototipo-medico/dist
-prototipo-medico/.git
-prototipo-medico/.env
-prototipo-medico/.env.*
-**/*.log
-.git
-.dockerignore
-Dockerfile

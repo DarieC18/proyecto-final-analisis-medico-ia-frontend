@@ -2,7 +2,6 @@ using MedAnalyzer.Api.Models;
 using MedAnalyzer.Core.Application.Dto.Appointment;
 using MedAnalyzer.Core.Application.Features.Appointments.Commands;
 using MedAnalyzer.Core.Application.Features.Appointments.Queries;
-using MedAnalyzer.Core.Application.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,17 +16,9 @@ namespace MedAnalyzer.Api.Controllers
     public class AppointmentController : ControllerBase
     {
         private readonly ISender _sender;
-        private readonly IAppointmentService _appointmentService;
-        private readonly IAccountServiceForWebApi _accountService;
+        public AppointmentController(ISender sender) => _sender = sender;
 
-        private string? CurrentUserId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        public AppointmentController(ISender sender, IAppointmentService appointmentService, IAccountServiceForWebApi accountService)
-        {
-            _sender = sender;
-            _appointmentService = appointmentService;
-            _accountService = accountService;
-        }
+        private string? CurrentUserId => User.FindFirstValue("uid");
 
         /// <summary>Obtiene las citas del médico autenticado.</summary>
         [HttpGet]
@@ -121,21 +112,27 @@ namespace MedAnalyzer.Api.Controllers
             return Ok(new MessageResponse { Message = $"Estado actualizado a '{dto.Status}' correctamente." });
         }
 
+        /// <summary>Elimina una cita médica por su identificador.</summary>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var currentUserId = User.FindFirstValue("uid") ?? "";
+            var result = await _sender.Send(new DeleteAppointmentCommand(id, currentUserId));
+            if (!result) return NotFound(new ErrorResponse { Message = "Cita no encontrada o no se pudo eliminar." });
+            return NoContent();
+        }
+
+        /// <summary>Obtiene el detalle de consulta de una cita con el nombre del médico resuelto.</summary>
         [HttpGet("{id}/consult")]
-        [Authorize(Roles = "Doctor,Nurse")]
         [ProducesResponseType(typeof(AppointmentConsultDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetConsultDetail(int id)
         {
-            var consult = await _appointmentService.GetConsultDetail(id);
-            if (consult == null)
-                return NotFound(new ErrorResponse { Message = "Cita no encontrada." });
-
-            var doctor = await _accountService.GetUserById(consult.DoctorId);
-            if (doctor != null)
-                consult.DoctorName = $"{doctor.Name} {doctor.LastName}";
-
-            return Ok(consult);
+            var result = await _sender.Send(new GetAppointmentConsultQuery(id));
+            if (result == null) return NotFound(new ErrorResponse { Message = "Cita no encontrada." });
+            return Ok(result);
         }
     }
 }

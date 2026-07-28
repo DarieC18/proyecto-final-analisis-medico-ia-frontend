@@ -76,7 +76,7 @@ namespace MedAnalyzer.Core.Application.Services
             return await base.UpdateDtoAsync(dto, id);
         }
 
-        public async Task<AppointmentDto?> ChangeStatusAsync(int id, string status, string currentUserId)
+        public async Task<AppointmentDto?> ChangeStatusAsync(int id, string status)
         {
             if (!Enum.TryParse<AppointmentStatus>(status, true, out _))
                 throw new DomainValidationException("Estado no válido. Use: Pending, InProgress, Completed, Cancelled.");
@@ -86,10 +86,6 @@ namespace MedAnalyzer.Core.Application.Services
 
             appointment.Status = status;
             var updated = await _appointmentRepository.UpdateEntityAsync(id, appointment);
-
-            if (updated != null)
-                await _auditLogService.LogAsync(currentUserId, "ChangeStatusAppointment", "Appointment", id.ToString());
-
             return updated == null ? null : _mapper.Map<AppointmentDto>(updated);
         }
 
@@ -163,25 +159,77 @@ namespace MedAnalyzer.Core.Application.Services
 
         public async Task<AppointmentDto?> CreateAppointment(AppointmentDto dto, string currentUserId)
         {
-            var result = await base.SaveDtoAsync(dto);
+            var result = await SaveDtoAsync(dto); 
+
             if (result != null)
+            {
                 await _auditLogService.LogAsync(currentUserId, "CreateAppointment", "Appointment", result.Id.ToString());
+            }
+
             return result;
         }
 
         public async Task<AppointmentDto?> UpdateAppointment(AppointmentDto dto, int id, string currentUserId)
         {
-            var result = await base.UpdateDtoAsync(dto, id);
+            var result = await UpdateDtoAsync(dto, id); 
+
             if (result != null)
+            {
                 await _auditLogService.LogAsync(currentUserId, "UpdateAppointment", "Appointment", result.Id.ToString());
+            }
+
             return result;
+        }
+
+        public async Task<AppointmentDto?> ChangeStatusAsync(int id, string status, string currentUserId)
+        {
+            if (!Enum.TryParse<AppointmentStatus>(status, true, out var parsedStatus))
+                throw new DomainValidationException("Estado no válido. Use: Pending, InProgress, Completed, Cancelled.");
+
+            var appointment = await _appointmentRepository.GetEntityByIdAsync(id);
+            if (appointment == null) return null;
+
+            appointment.Status = status;
+            var updated = await _appointmentRepository.UpdateEntityAsync(id, appointment);
+            if (updated == null) return null;
+
+            var action = parsedStatus switch
+            {
+                AppointmentStatus.Cancelled => "CancelAppointment",
+                AppointmentStatus.Completed => "CompleteAppointment",
+                _ => null
+            };
+
+            if (action != null)
+            {
+                await _auditLogService.LogAsync(currentUserId, action, "Appointment", id.ToString());
+            }
+
+            return _mapper.Map<AppointmentDto>(updated);
+        }
+
+        public async Task<List<AppointmentListItemDto>> GetAllByDoctorAsync(string doctorId)
+        {
+            var all = await _appointmentRepository.GetAllListAsync();
+            var filtered = all.Where(a => a.DoctorId == doctorId)
+                              .OrderByDescending(a => a.AppointmentDate)
+                              .ToList();
+            return await EnrichAppointmentListAsync(filtered);
+        }
+
+        public async Task<List<AppointmentListItemDto>> GetFilteredAsync(string doctorId, int? patientId, string? status)
+        {
+            var all = await _appointmentRepository.GetAllListAsync();
+            var query = all.Where(a => a.DoctorId == doctorId);
+            if (patientId.HasValue) query = query.Where(a => a.PatientId == patientId.Value);
+            if (!string.IsNullOrWhiteSpace(status)) query = query.Where(a => a.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
+            return await EnrichAppointmentListAsync(query.OrderByDescending(a => a.AppointmentDate).ToList());
         }
 
         public async Task<bool> DeleteAppointmentAsync(int id)
         {
-            var appointment = await _appointmentRepository.GetEntityByIdAsync(id);
-            if (appointment == null) return false;
-
+            var entity = await _appointmentRepository.GetEntityByIdAsync(id);
+            if (entity == null) return false;
             try
             {
                 await _appointmentRepository.RemoveAsync(id);
@@ -193,25 +241,40 @@ namespace MedAnalyzer.Core.Application.Services
             }
         }
 
-        public async Task<List<AppointmentListItemDto>> GetAllByDoctorAsync(string doctorId)
+        private async Task<List<AppointmentListItemDto>> EnrichAppointmentListAsync(List<Appointment> appointments)
         {
-            var all = await _appointmentRepository.GetAllListAsync();
-            var filtered = all.Where(a => a.DoctorId == doctorId).OrderBy(a => a.AppointmentDate).ToList();
-            return _mapper.Map<List<AppointmentListItemDto>>(filtered);
-        }
+            // Resolver nombres de doctores únicos en batch
+            var doctorIds = appointments.Select(a => a.DoctorId).Distinct().ToList();
+            var doctorNames = new Dictionary<string, string>();
+            foreach (var id in doctorIds)
+            {
+                var user = await _accountService.GetUserById(id);
+                if (user != null) doctorNames[id] = $"{user.Name} {user.LastName}";
+            }
 
-        public async Task<List<AppointmentListItemDto>> GetFilteredAsync(string doctorId, int? patientId, string? status)
-        {
-            var all = await _appointmentRepository.GetAllListAsync();
-            var query = all.Where(a => a.DoctorId == doctorId);
+            // Resolver nombres de pacientes únicos en batch
+            var patientIds = appointments.Select(a => a.PatientId).Distinct().ToList();
+            var patients = await _patientRepository.GetAllListAsync();
+            var relevantPatients = patients.Where(p => patientIds.Contains(p.Id)).ToList();
+            var patientNames = new Dictionary<int, string>();
+            foreach (var patient in relevantPatients)
+            {
+                var user = await _accountService.GetUserById(patient.UserId);
+                if (user != null) patientNames[patient.Id] = $"{user.Name} {user.LastName}";
+            }
 
-            if (patientId.HasValue)
-                query = query.Where(a => a.PatientId == patientId.Value);
-
-            if (!string.IsNullOrEmpty(status))
-                query = query.Where(a => a.Status == status);
-
-            return _mapper.Map<List<AppointmentListItemDto>>(query.OrderBy(a => a.AppointmentDate).ToList());
+            return appointments.Select(a => new AppointmentListItemDto
+            {
+                Id = a.Id,
+                PatientId = a.PatientId,
+                PatientName = patientNames.GetValueOrDefault(a.PatientId, $"Paciente #{a.PatientId}"),
+                DoctorId = a.DoctorId,
+                DoctorName = doctorNames.GetValueOrDefault(a.DoctorId, a.DoctorId),
+                AppointmentDate = a.AppointmentDate,
+                Status = a.Status,
+                Reason = a.Reason,
+                Notes = a.Notes
+            }).ToList();
         }
 
     }

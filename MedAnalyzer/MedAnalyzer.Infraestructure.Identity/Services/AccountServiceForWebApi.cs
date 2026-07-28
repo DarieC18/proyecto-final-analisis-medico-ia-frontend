@@ -88,13 +88,6 @@ namespace MedAnalyzer.Infraestructure.Identity.Services
                 return response;
             }
 
-            if (!user.Status)
-            {
-                response.HasError = true;
-                response.Errors.Add($"La cuenta {loginDto.UserName} ha sido desactivada. Contacta al administrador.");
-                return response;
-            }
-
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, lockoutOnFailure: true);
 
             if (!result.Succeeded)

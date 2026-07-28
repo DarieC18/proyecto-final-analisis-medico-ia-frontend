@@ -20,8 +20,8 @@ namespace MedAnalyzer.Infraestructure.Shared
             #region Services
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFileStorageService, FileStorageService>();
-            services.AddScoped<IPdfTextExtractor, PdfTextExtractorService>();
             services.AddHttpClient<IAiProviderService, GeminiAiProviderService>();
+            services.AddTransient<IPdfTextExtractor, PdfTextExtractorService>();
             #endregion
         }
     }

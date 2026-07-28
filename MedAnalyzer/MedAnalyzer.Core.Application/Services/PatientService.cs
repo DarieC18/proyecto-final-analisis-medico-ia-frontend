@@ -165,7 +165,7 @@ namespace MedAnalyzer.Core.Application.Services
             }
         }
 
-        public async Task<PatientDto?> UpdatePatientAsync(PatientDto patient, int id, string currentUserId)
+        public async Task<PatientDto?> UpdatePatient(PatientDto patient, int id, string currentUserId)
         {
             var result = await base.UpdateDtoAsync(patient, id);
 
