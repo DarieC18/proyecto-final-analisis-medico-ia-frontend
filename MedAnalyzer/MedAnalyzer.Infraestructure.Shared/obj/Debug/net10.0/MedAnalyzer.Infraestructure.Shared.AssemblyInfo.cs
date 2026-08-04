@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MedAnalyzer.Infraestructure.Shared")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+43efcd77b04faea46e808044c22ea16fcf5cc8f2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+39a9f8c1d334332c3e2ca81da8ece808c91b80d3")]
 [assembly: System.Reflection.AssemblyProductAttribute("MedAnalyzer.Infraestructure.Shared")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MedAnalyzer.Infraestructure.Shared")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

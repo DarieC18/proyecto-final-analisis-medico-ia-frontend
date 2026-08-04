@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MedAnalyzer.Infraestructure.Persistences.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialLocalDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -149,7 +149,6 @@ namespace MedAnalyzer.Infraestructure.Persistences.Migrations
                     CreatedByUserId = table.Column<string>(type: "text", nullable: false),
                     DiagnosisInitial = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     Notes = table.Column<string>(type: "text", nullable: false),
-                    Antecedentes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>

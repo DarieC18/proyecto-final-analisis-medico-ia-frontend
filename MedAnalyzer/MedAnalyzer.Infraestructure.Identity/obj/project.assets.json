@@ -20,6 +20,36 @@
           }
         }
       },
+      "FluentValidation/12.1.1": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/FluentValidation.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/FluentValidation.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "FluentValidation.DependencyInjectionExtensions/12.1.1": {
+        "type": "package",
+        "dependencies": {
+          "FluentValidation": "12.1.1",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "2.1.0"
+        },
+        "compile": {
+          "lib/net8.0/FluentValidation.DependencyInjectionExtensions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/FluentValidation.DependencyInjectionExtensions.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Humanizer.Core/2.14.1": {
         "type": "package",
         "compile": {
@@ -1603,6 +1633,8 @@
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
           "AutoMapper": "16.1.1",
+          "FluentValidation": "12.1.1",
+          "FluentValidation.DependencyInjectionExtensions": "12.1.1",
           "MedAnalyzer.Core.Domain": "1.0.0",
           "MediatR": "14.1.0",
           "Microsoft.EntityFrameworkCore": "10.0.9",
@@ -1651,6 +1683,36 @@
         "lib/net9.0/AutoMapper.xml",
         "lib/netstandard2.0/AutoMapper.dll",
         "lib/netstandard2.0/AutoMapper.xml"
+      ]
+    },
+    "FluentValidation/12.1.1": {
+      "sha512": "EPpkIe1yh1a0OXyC100oOA8WMbZvqUu5plwhvYcb7oSELfyUZzfxV48BLhvs3kKo4NwG7MGLNgy1RJiYtT8Dpw==",
+      "type": "package",
+      "path": "fluentvalidation/12.1.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "fluent-validation-icon.png",
+        "fluentvalidation.12.1.1.nupkg.sha512",
+        "fluentvalidation.nuspec",
+        "lib/net8.0/FluentValidation.dll",
+        "lib/net8.0/FluentValidation.xml"
+      ]
+    },
+    "FluentValidation.DependencyInjectionExtensions/12.1.1": {
+      "sha512": "D0VXh4dtjjX2aQizuaa0g6R8X3U1JaVqJPfGCvLwZX9t/O2h7tkpbitbadQMfwcgSPdDbI2vDxuwRMv/Uf9dHA==",
+      "type": "package",
+      "path": "fluentvalidation.dependencyinjectionextensions/12.1.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "fluent-validation-icon.png",
+        "fluentvalidation.dependencyinjectionextensions.12.1.1.nupkg.sha512",
+        "fluentvalidation.dependencyinjectionextensions.nuspec",
+        "lib/net8.0/FluentValidation.DependencyInjectionExtensions.dll",
+        "lib/net8.0/FluentValidation.DependencyInjectionExtensions.xml"
       ]
     },
     "Humanizer.Core/2.14.1": {
@@ -4362,23 +4424,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Admin\\.nuget\\packages\\": {},
+    "C:\\Users\\Ashlee Ramirez\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Admin\\Desktop\\Proyecto final\\Proyecto\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Infraestructure.Identity\\MedAnalyzer.Infraestructure.Identity.csproj",
+      "projectUniqueName": "C:\\Users\\Ashlee Ramirez\\source\\repos\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Infraestructure.Identity\\MedAnalyzer.Infraestructure.Identity.csproj",
       "projectName": "MedAnalyzer.Infraestructure.Identity",
-      "projectPath": "C:\\Users\\Admin\\Desktop\\Proyecto final\\Proyecto\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Infraestructure.Identity\\MedAnalyzer.Infraestructure.Identity.csproj",
-      "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Admin\\Desktop\\Proyecto final\\Proyecto\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Infraestructure.Identity\\obj\\",
+      "projectPath": "C:\\Users\\Ashlee Ramirez\\source\\repos\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Infraestructure.Identity\\MedAnalyzer.Infraestructure.Identity.csproj",
+      "packagesPath": "C:\\Users\\Ashlee Ramirez\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Ashlee Ramirez\\source\\repos\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Infraestructure.Identity\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Ashlee Ramirez\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -4387,7 +4449,6 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -4395,11 +4456,11 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\Admin\\Desktop\\Proyecto final\\Proyecto\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Core.Application\\MedAnalyzer.Core.Application.csproj": {
-              "projectPath": "C:\\Users\\Admin\\Desktop\\Proyecto final\\Proyecto\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Core.Application\\MedAnalyzer.Core.Application.csproj"
+            "C:\\Users\\Ashlee Ramirez\\source\\repos\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Core.Application\\MedAnalyzer.Core.Application.csproj": {
+              "projectPath": "C:\\Users\\Ashlee Ramirez\\source\\repos\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Core.Application\\MedAnalyzer.Core.Application.csproj"
             },
-            "C:\\Users\\Admin\\Desktop\\Proyecto final\\Proyecto\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Core.Domain\\MedAnalyzer.Core.Domain.csproj": {
-              "projectPath": "C:\\Users\\Admin\\Desktop\\Proyecto final\\Proyecto\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Core.Domain\\MedAnalyzer.Core.Domain.csproj"
+            "C:\\Users\\Ashlee Ramirez\\source\\repos\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Core.Domain\\MedAnalyzer.Core.Domain.csproj": {
+              "projectPath": "C:\\Users\\Ashlee Ramirez\\source\\repos\\proyecto-final-analisis-medico-ia-frontend\\MedAnalyzer\\MedAnalyzer.Core.Domain\\MedAnalyzer.Core.Domain.csproj"
             }
           }
         }
@@ -4472,7 +4533,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -4749,5 +4810,57 @@
         }
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "El paquete \"System.Security.Cryptography.Xml\" 8.0.3 tiene una vulnerabilidad de gravedad alta conocida, https://github.com/advisories/GHSA-23rf-6693-g89p",
+      "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "El paquete \"System.Security.Cryptography.Xml\" 8.0.3 tiene una vulnerabilidad de gravedad alta conocida, https://github.com/advisories/GHSA-8q5v-6pqq-x66h",
+      "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "El paquete \"System.Security.Cryptography.Xml\" 8.0.3 tiene una vulnerabilidad de gravedad alta conocida, https://github.com/advisories/GHSA-cvvh-rhrc-wg4q",
+      "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "El paquete \"System.Security.Cryptography.Xml\" 8.0.3 tiene una vulnerabilidad de gravedad alta conocida, https://github.com/advisories/GHSA-g8r8-53c2-pm3f",
+      "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "El paquete \"System.Security.Cryptography.Xml\" 8.0.3 tiene una vulnerabilidad de gravedad alta conocida, https://github.com/advisories/GHSA-mmjf-rqrv-855v",
+      "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }

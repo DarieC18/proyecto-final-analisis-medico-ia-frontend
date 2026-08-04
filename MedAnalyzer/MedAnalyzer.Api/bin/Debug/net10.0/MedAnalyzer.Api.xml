@@ -7,53 +7,23 @@
         <member name="T:MedAnalyzer.Api.Controllers.AccountController">
             <summary>Gestión de cuentas de usuario (solo administradores).</summary>
         </member>
-        <member name="M:MedAnalyzer.Api.Controllers.AccountController.GetAll">
-            <summary>Obtiene la lista de todos los usuarios del sistema.</summary>
-            <returns>Lista de usuarios registrados.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.AccountController.Create(MedAnalyzer.Core.Application.Dto.User.RegisterDto)">
-            <summary>Crea un nuevo usuario en el sistema.</summary>
-            <param name="dto">Datos del nuevo usuario.</param>
-            <returns>Datos del usuario creado.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.AccountController.Update(System.String,MedAnalyzer.Core.Application.Dto.User.UpdateUserDto)">
-            <summary>Actualiza los datos de un usuario existente.</summary>
-            <param name="id">Identificador del usuario.</param>
-            <param name="dto">Nuevos datos del usuario.</param>
-            <returns>Datos del usuario actualizado.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.AccountController.ToggleStatus(System.String)">
-            <summary>Activa o desactiva la cuenta de un usuario.</summary>
-            <param name="id">Identificador del usuario.</param>
-            <returns>Estado actualizado del usuario.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.AccountController.Delete(System.String)">
-            <summary>Elimina un usuario del sistema.</summary>
-            <param name="id">Identificador del usuario.</param>
-            <returns>Resultado de la operación.</returns>
-        </member>
         <member name="T:MedAnalyzer.Api.Controllers.AiAnalysisController">
             <summary>Consulta de análisis generados por inteligencia artificial.</summary>
         </member>
+        <member name="M:MedAnalyzer.Api.Controllers.AiAnalysisController.GetAll">
+            <summary>Obtiene todos los análisis de IA.</summary>
+        </member>
         <member name="M:MedAnalyzer.Api.Controllers.AiAnalysisController.Generate(MedAnalyzer.Core.Application.Dto.AiAnalisys.GenerateAiAnalysisRequestDto)">
             <summary>Genera un nuevo análisis de IA para una cita médica usando Gemini.</summary>
-            <param name="request">Cita y tipo de análisis a generar.</param>
-            <returns>El análisis de IA generado.</returns>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.AiAnalysisController.GetByAppointment(System.Int32)">
             <summary>Obtiene los análisis de IA asociados a una cita médica.</summary>
-            <param name="appointmentId">Identificador de la cita.</param>
-            <returns>Lista de análisis de IA de la cita.</returns>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.AiAnalysisController.GetByPatient(System.Int32)">
             <summary>Obtiene todos los análisis de IA de un paciente.</summary>
-            <param name="patientId">Identificador del paciente.</param>
-            <returns>Lista de análisis de IA del paciente.</returns>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.AiAnalysisController.GetById(System.Int32)">
             <summary>Obtiene un análisis de IA por su identificador.</summary>
-            <param name="id">Identificador del análisis.</param>
-            <returns>Datos del análisis de IA.</returns>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.AiAnalysisController.MarkReviewed(System.Int32)">
             <summary>Marca un análisis de IA como revisado por el médico.</summary>
@@ -80,73 +50,35 @@
             <param name="patientId">Identificador del paciente.</param>
             <returns>Lista de alertas del paciente.</returns>
         </member>
-        <member name="M:MedAnalyzer.Api.Controllers.AlertController.GetByAppointment(System.Int32)">
-            <summary>Obtiene las alertas asociadas a una cita médica.</summary>
-            <param name="appointmentId">Identificador de la cita.</param>
-            <returns>Lista de alertas de la cita.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.AlertController.GetActive">
-            <summary>Obtiene todas las alertas que aún no han sido resueltas.</summary>
-            <returns>Lista de alertas activas.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.AlertController.Resolve(System.Int32)">
-            <summary>Marca una alerta como resuelta.</summary>
-            <param name="id">Identificador de la alerta.</param>
-            <returns>Sin contenido si la operación fue exitosa.</returns>
-        </member>
         <member name="T:MedAnalyzer.Api.Controllers.AppointmentController">
             <summary>Gestión de citas médicas.</summary>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.AppointmentController.GetAll">
-            <summary>Obtiene todas las citas médicas registradas.</summary>
-            <returns>Lista de citas médicas.</returns>
+            <summary>Obtiene las citas del médico autenticado.</summary>
+        </member>
+        <member name="M:MedAnalyzer.Api.Controllers.AppointmentController.GetFiltered(System.Nullable{System.Int32},System.String)">
+            <summary>Filtra las citas del médico autenticado por paciente y/o estado.</summary>
+        </member>
+        <member name="M:MedAnalyzer.Api.Controllers.AppointmentController.GetByPatient(System.Int32)">
+            <summary>Obtiene todas las citas de un paciente específico.</summary>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.AppointmentController.GetById(System.Int32)">
             <summary>Obtiene una cita médica por su identificador.</summary>
-            <param name="id">Identificador de la cita.</param>
-            <returns>Datos de la cita médica.</returns>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.AppointmentController.GetDetail(System.Int32)">
             <summary>Obtiene el detalle completo de una cita incluyendo signos vitales, síntomas y registros clínicos.</summary>
-            <param name="id">Identificador de la cita.</param>
-            <returns>Detalle completo de la cita médica.</returns>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.AppointmentController.Create(MedAnalyzer.Core.Application.Dto.Appointment.AppointmentDto)">
             <summary>Crea una nueva cita médica.</summary>
-            <param name="dto">Datos de la cita a crear.</param>
-            <returns>Datos de la cita creada.</returns>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.AppointmentController.Update(System.Int32,MedAnalyzer.Core.Application.Dto.Appointment.AppointmentDto)">
             <summary>Actualiza los datos de una cita médica existente.</summary>
-            <param name="id">Identificador de la cita.</param>
-            <param name="dto">Nuevos datos de la cita.</param>
-            <returns>Datos de la cita actualizada.</returns>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.AppointmentController.ChangeStatus(System.Int32,MedAnalyzer.Core.Application.Dto.Appointment.ChangeAppointmentStatusDto)">
             <summary>Cambia el estado de una cita médica. Estados válidos: Pending, InProgress, Completed, Cancelled.</summary>
-            <param name="id">Identificador de la cita.</param>
-            <param name="dto">Nuevo estado de la cita.</param>
-            <returns>Mensaje de confirmación y el nuevo estado.</returns>
         </member>
         <member name="T:MedAnalyzer.Api.Controllers.AuditLogController">
             <summary>Consulta de registros de auditoría (solo administradores).</summary>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.AuditLogController.GetAll">
-            <summary>Obtiene todos los registros de auditoría.</summary>
-            <returns>Lista de registros de auditoría.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.AuditLogController.GetById(System.Int32)">
-            <summary>Obtiene un registro de auditoría por su identificador.</summary>
-            <param name="id">Identificador del registro.</param>
-            <returns>Registro de auditoría encontrado.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.AuditLogController.GetFiltered(System.String,System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
-            <summary>Filtra registros de auditoría por usuario, acción o rango de fechas.</summary>
-            <param name="userId">Identificador del usuario (opcional).</param>
-            <param name="action">Nombre de la acción registrada (opcional).</param>
-            <param name="from">Fecha de inicio del filtro (opcional).</param>
-            <param name="to">Fecha de fin del filtro (opcional).</param>
-            <returns>Lista filtrada de registros de auditoría.</returns>
         </member>
         <member name="T:MedAnalyzer.Api.Controllers.AuthController">
             <summary>Autenticación y gestión de sesión de usuarios.</summary>
@@ -172,43 +104,23 @@
         <member name="T:MedAnalyzer.Api.Controllers.DashboardController">
             <summary>Estadísticas y métricas del panel de control.</summary>
         </member>
-        <member name="M:MedAnalyzer.Api.Controllers.DashboardController.GetAdminStats">
-            <summary>Obtiene las estadísticas generales del sistema para el panel del administrador.</summary>
-            <returns>Métricas globales: usuarios, pacientes, citas y alertas.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.DashboardController.GetDoctorStats">
-            <summary>Obtiene las estadísticas personalizadas para el panel del médico o enfermero autenticado.</summary>
-            <returns>Métricas del usuario: citas, pacientes y alertas propias.</returns>
-        </member>
         <member name="T:MedAnalyzer.Api.Controllers.MedicalDocumentController">
             <summary>Gestión de documentos médicos adjuntos a pacientes y citas.</summary>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.MedicalDocumentController.GetByPatient(System.Int32)">
-            <summary>Obtiene los documentos médicos de un paciente.</summary>
-            <param name="patientId">Identificador del paciente.</param>
-            <returns>Lista de documentos médicos del paciente.</returns>
+            <summary>Obtiene los documentos médicos de un paciente, con el nombre del usuario que los subió.</summary>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.MedicalDocumentController.GetByAppointment(System.Int32)">
             <summary>Obtiene los documentos médicos de una cita.</summary>
-            <param name="appointmentId">Identificador de la cita.</param>
-            <returns>Lista de documentos médicos de la cita.</returns>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.MedicalDocumentController.GetById(System.Int32)">
             <summary>Obtiene un documento médico por su identificador.</summary>
-            <param name="id">Identificador del documento.</param>
-            <returns>Datos del documento médico.</returns>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.MedicalDocumentController.Upload(Microsoft.AspNetCore.Http.IFormFile,System.Int32,System.String,System.String,System.Nullable{System.Int32})">
             <summary>
             Sube un documento médico (PDF, JPG o PNG, máximo 10 MB).
             Tipos válidos: Resultados de laboratorio, Indicaciones médicas, Historial externo, Estudios en PDF, Documentos administrativos.
             </summary>
-            <param name="file">Archivo a subir.</param>
-            <param name="patientId">Identificador del paciente.</param>
-            <param name="fileName">Nombre descriptivo del documento.</param>
-            <param name="fileType">Categoría del documento.</param>
-            <param name="appointmentId">Identificador de la cita asociada (opcional).</param>
-            <returns>Datos del documento guardado.</returns>
         </member>
         <member name="M:MedAnalyzer.Api.Controllers.MedicalDocumentController.Delete(System.Int32)">
             <summary>Elimina un documento médico y su archivo del almacenamiento.</summary>
@@ -218,36 +130,10 @@
         <member name="T:MedAnalyzer.Api.Controllers.MedicalRecordController">
             <summary>Gestión de registros clínicos asociados a citas y pacientes.</summary>
         </member>
-        <member name="M:MedAnalyzer.Api.Controllers.MedicalRecordController.GetByAppointment(System.Int32)">
-            <summary>Obtiene los registros clínicos de una cita médica.</summary>
-            <param name="appointmentId">Identificador de la cita.</param>
-            <returns>Lista de registros clínicos de la cita.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.MedicalRecordController.GetByPatient(System.Int32)">
-            <summary>Obtiene todos los registros clínicos de un paciente.</summary>
-            <param name="patientId">Identificador del paciente.</param>
-            <returns>Lista de registros clínicos del paciente.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.MedicalRecordController.GetById(System.Int32)">
-            <summary>Obtiene un registro clínico por su identificador.</summary>
-            <param name="id">Identificador del registro.</param>
-            <returns>Datos del registro clínico.</returns>
-        </member>
         <member name="M:MedAnalyzer.Api.Controllers.MedicalRecordController.Create(MedAnalyzer.Core.Application.Dto.MedicalRecord.MedicalRecordDto)">
             <summary>Crea un nuevo registro clínico asociado a una cita.</summary>
             <param name="dto">Datos del registro clínico.</param>
             <returns>Datos del registro clínico creado.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.MedicalRecordController.Update(System.Int32,MedAnalyzer.Core.Application.Dto.MedicalRecord.MedicalRecordDto)">
-            <summary>Actualiza un registro clínico existente.</summary>
-            <param name="id">Identificador del registro.</param>
-            <param name="dto">Nuevos datos del registro clínico.</param>
-            <returns>Datos del registro clínico actualizado.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.MedicalRecordController.GetDetailsByPatient(System.Int32)">
-            <summary>Obtiene todos los registros clínicos de un paciente para el botón ver detalles.</summary>
-            <param name="patientId">Identificador del paciente.</param>
-            <returns>Lista de registros clínicos del paciente para el botón "ver detalles".</returns>
         </member>
         <member name="T:MedAnalyzer.Api.Controllers.PatientController">
             <summary>Gestión de pacientes. Creación y consulta de expedientes clínicos.</summary>
@@ -312,21 +198,6 @@
         <member name="T:MedAnalyzer.Api.Controllers.RecommendationController">
             <summary>Consulta de recomendaciones generadas por el sistema de IA.</summary>
         </member>
-        <member name="M:MedAnalyzer.Api.Controllers.RecommendationController.GetByAppointment(System.Int32)">
-            <summary>Obtiene las recomendaciones asociadas a una cita médica.</summary>
-            <param name="appointmentId">Identificador de la cita.</param>
-            <returns>Lista de recomendaciones de la cita.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.RecommendationController.GetByPatient(System.Int32)">
-            <summary>Obtiene todas las recomendaciones de un paciente.</summary>
-            <param name="patientId">Identificador del paciente.</param>
-            <returns>Lista de recomendaciones del paciente.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.RecommendationController.GetById(System.Int32)">
-            <summary>Obtiene una recomendación por su identificador.</summary>
-            <param name="id">Identificador de la recomendación.</param>
-            <returns>Datos de la recomendación.</returns>
-        </member>
         <member name="T:MedAnalyzer.Api.Controllers.ReportController">
             <summary>Generación de reportes clínicos consolidados.</summary>
         </member>
@@ -353,53 +224,11 @@
         <member name="T:MedAnalyzer.Api.Controllers.SymptomController">
             <summary>Gestión de síntomas registrados durante una cita médica.</summary>
         </member>
-        <member name="M:MedAnalyzer.Api.Controllers.SymptomController.GetByAppointment(System.Int32)">
-            <summary>Obtiene los síntomas registrados en una cita médica.</summary>
-            <param name="appointmentId">Identificador de la cita.</param>
-            <returns>Lista de síntomas de la cita.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.SymptomController.GetById(System.Int32)">
-            <summary>Obtiene un síntoma por su identificador.</summary>
-            <param name="id">Identificador del síntoma.</param>
-            <returns>Datos del síntoma.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.SymptomController.Create(MedAnalyzer.Core.Application.Dto.Symptom.SymptomDto)">
-            <summary>Registra un nuevo síntoma en una cita. Severidad válida: Leve, Moderado, Severo.</summary>
-            <param name="dto">Datos del síntoma a registrar.</param>
-            <returns>Datos del síntoma registrado.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.SymptomController.Update(System.Int32,MedAnalyzer.Core.Application.Dto.Symptom.SymptomDto)">
-            <summary>Actualiza los datos de un síntoma existente.</summary>
-            <param name="id">Identificador del síntoma.</param>
-            <param name="dto">Nuevos datos del síntoma.</param>
-            <returns>Datos del síntoma actualizado.</returns>
-        </member>
         <member name="T:MedAnalyzer.Api.Controllers.VitalSignController">
             <summary>Gestión de signos vitales registrados durante una cita médica.</summary>
         </member>
-        <member name="M:MedAnalyzer.Api.Controllers.VitalSignController.GetByAppointment(System.Int32)">
-            <summary>Obtiene los signos vitales registrados en una cita médica.</summary>
-            <param name="appointmentId">Identificador de la cita.</param>
-            <returns>Lista de registros de signos vitales de la cita.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.VitalSignController.GetById(System.Int32)">
-            <summary>Obtiene un registro de signos vitales por su identificador.</summary>
-            <param name="id">Identificador del registro.</param>
-            <returns>Datos de los signos vitales.</returns>
-        </member>
         <member name="M:MedAnalyzer.Api.Controllers.VitalSignController.Register(MedAnalyzer.Core.Application.Dto.VitalSign.VitalSignDto)">
-            <summary>
-            Registra signos vitales en una cita y genera alertas automáticas para valores fuera de rango.
-            Temperatura: 30–45 °C. Saturación de oxígeno: 0–100%.
-            </summary>
-            <param name="dto">Datos de los signos vitales a registrar.</param>
-            <returns>Datos de los signos vitales registrados.</returns>
-        </member>
-        <member name="M:MedAnalyzer.Api.Controllers.VitalSignController.Update(System.Int32,MedAnalyzer.Core.Application.Dto.VitalSign.VitalSignDto)">
-            <summary>Actualiza un registro de signos vitales existente.</summary>
-            <param name="id">Identificador del registro.</param>
-            <param name="dto">Nuevos datos de los signos vitales.</param>
-            <returns>Datos del registro actualizado.</returns>
+            <summary>Registra signos vitales en una cita y genera alertas automáticas para valores fuera de rango.</summary>
         </member>
         <member name="T:Program">
             <summary>

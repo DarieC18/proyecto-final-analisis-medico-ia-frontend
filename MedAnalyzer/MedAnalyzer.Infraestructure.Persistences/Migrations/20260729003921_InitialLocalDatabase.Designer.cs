@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MedAnalyzer.Infraestructure.Persistences.Migrations
 {
     [DbContext(typeof(MedAnalyzerContextDb))]
-    [Migration("20260715232855_SyncModelChanges")]
-    partial class SyncModelChanges
+    [Migration("20260729003921_InitialLocalDatabase")]
+    partial class InitialLocalDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
