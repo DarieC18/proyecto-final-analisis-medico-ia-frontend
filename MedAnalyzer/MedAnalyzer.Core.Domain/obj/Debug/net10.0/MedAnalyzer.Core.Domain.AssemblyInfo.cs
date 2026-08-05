@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MedAnalyzer.Core.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+39a9f8c1d334332c3e2ca81da8ece808c91b80d3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4eec2967e59e714cc4f2301db04c44b8c253b8d5")]
 [assembly: System.Reflection.AssemblyProductAttribute("MedAnalyzer.Core.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MedAnalyzer.Core.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
