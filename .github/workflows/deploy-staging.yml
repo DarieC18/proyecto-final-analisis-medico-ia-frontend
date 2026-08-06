@@ -1,0 +1,14 @@
+name: Deploy Frontend Staging
+
+on:
+  push:
+    branches:
+      - feature/frontend-staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Dokploy redeploy
+        run: |
+          curl -s -X POST "${{ secrets.DOKPLOY_FRONTEND_STAGING_WEBHOOK }}"
