@@ -104,7 +104,7 @@
                 <td class="py-3 text-muted">{{ u.userName }}</td>
                 <td class="py-3 text-muted">{{ u.email }}</td>
                 <td class="py-3">
-                  <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">{{ u.role }}</span>
+                  <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">{{ translateRole(u.role) }}</span>
                 </td>
                 <td class="py-3">
                   <StatusBadge :text="u.status ? 'Activo' : 'Inactivo'" :variant="u.status ? 'active' : 'inactive'" />
@@ -147,6 +147,13 @@ const form = reactive({
   numberIdentification: '',
   role: 'Doctor'
 })
+
+const translateRole = (role) => ({
+  Administrator: 'Administrador',
+  Doctor: 'Doctor',
+  Nurse: 'Enfermero',
+  Patient: 'Paciente',
+})[role] ?? role
 
 const cargarUsuarios = async () => {
   loading.value = true

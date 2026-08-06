@@ -11,8 +11,8 @@
       <div class="card-body p-3">
         <div class="row g-2 align-items-end">
           <div class="col-md-3">
-            <label class="form-label fw-medium">👤 Usuario ID</label>
-            <input v-model="filtros.userId" type="text" class="form-control form-filter" placeholder="ID del usuario">
+            <label class="form-label fw-medium">👤 Nombre de usuario</label>
+            <input v-model="filtros.userName" type="text" class="form-control form-filter" placeholder="Nombre del usuario">
           </div>
           <div class="col-md-2">
             <label class="form-label fw-medium">⚡ Acción</label>
@@ -74,7 +74,7 @@
                 <td class="ps-4 py-3 text-muted">{{ formatFecha(log.createdAt) }}</td>
                 <td class="py-3 fw-bold text-dark">{{ log.userName }}</td>
                 <td class="py-3">
-                  <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">{{ log.userRole }}</span>
+                  <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">{{ translateRole(log.userRole) }}</span>
                 </td>
                 <td class="py-3">
                   <StatusBadge :text="log.action" variant="info" />
@@ -101,7 +101,7 @@
                         </div>
                         <div class="detail-item">
                           <span class="detail-label">🎭 Rol</span>
-                          <span class="detail-value">{{ log.userRole }}</span>
+                          <span class="detail-value">{{ translateRole(log.userRole) }}</span>
                         </div>
                         <div class="detail-item">
                           <span class="detail-label">⚡ Acción</span>
@@ -146,14 +146,14 @@ const toggleDetalle = (log) => {
 }
 
 const filtros = reactive({
-  userId: '', action: '', from: '', to: ''
+  userName: '', action: '', from: '', to: ''
 })
 
 const cargarLogs = async () => {
   loading.value = true
   try {
     const params = {}
-    if (filtros.userId) params.userId = filtros.userId
+    if (filtros.userName) params.userName = filtros.userName
     if (filtros.action) params.action = filtros.action
     if (filtros.from) params.from = filtros.from
     if (filtros.to) params.to = filtros.to
@@ -176,12 +176,19 @@ const cargarLogs = async () => {
 }
 
 const limpiarFiltros = () => {
-  filtros.userId = ''
+  filtros.userName = ''
   filtros.action = ''
   filtros.from = ''
   filtros.to = ''
   cargarLogs()
 }
+
+const translateRole = (role) => ({
+  Administrator: 'Administrador',
+  Doctor: 'Doctor',
+  Nurse: 'Enfermero',
+  Patient: 'Paciente',
+})[role] ?? role
 
 const descripcionEntidad = (log) => {
   const map = {
