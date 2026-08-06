@@ -58,7 +58,7 @@
           <div class="row g-3">
             <div v-for="(count, status) in stats.appointmentsByStatus" :key="status" class="col-md-3 col-6">
               <div class="bg-light rounded-4 p-3 text-center">
-                <small class="text-muted d-block fw-bold text-uppercase">{{ status }}</small>
+                <small class="text-muted d-block fw-bold text-uppercase">{{ statusLabel(status) }}</small>
                 <h4 class="fw-bold mt-1 mb-0">{{ count }}</h4>
               </div>
             </div>
@@ -91,6 +91,8 @@ const fechaActual = computed(() => {
     day: 'numeric', month: 'long', year: 'numeric'
   })
 })
+
+const statusLabel = (status) => ({ Pending: 'Pendiente', InProgress: 'En Progreso', Completed: 'Completada', Cancelled: 'Cancelada' })[status] || status
 
 const totalCitas = computed(() => {
   return Object.values(stats.value.appointmentsByStatus || {}).reduce((a, b) => a + b, 0)

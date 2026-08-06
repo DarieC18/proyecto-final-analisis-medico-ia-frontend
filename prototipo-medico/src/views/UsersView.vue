@@ -42,8 +42,8 @@
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-medium">Identificación</label>
-                      <input v-model="form.numberIdentification" type="text" class="form-control" maxlength="13" placeholder="Ej: 001-1234567-8" required>
-                      <small v-if="form.numberIdentification.length === 13" class="text-danger">Máximo 13 caracteres</small>
+                      <input v-model="form.numberIdentification" type="text" class="form-control" maxlength="20" placeholder="Ej: 001-1234567-8" required>
+                      <small v-if="form.numberIdentification.length === 20" class="text-danger">Máximo 20 caracteres</small>
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-medium">Email</label>
@@ -51,11 +51,13 @@
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-medium">Rol</label>
-                      <select v-model="form.role" class="form-select" required>
-                        <option value="Doctor">Médico</option>
-                        <option value="Nurse">Enfermera</option>
-                        <option value="Administrator">Administrador</option>
-                        <option value="Patient">Paciente</option>
+                      <select v-model="form.role" class="form-select" :disabled="vista === 'editar' && form.role === 'Patient'" required>
+                        <option v-if="form.role === 'Patient'" value="Patient">Paciente</option>
+                        <template v-else>
+                          <option value="Doctor">Médico</option>
+                          <option value="Nurse">Enfermero</option>
+                          <option value="Administrator">Administrador</option>
+                        </template>
                       </select>
                     </div>
                   </div>
@@ -108,7 +110,7 @@
                   <StatusBadge :text="u.status ? 'Activo' : 'Inactivo'" :variant="u.status ? 'active' : 'inactive'" />
                 </td>
                 <td class="pe-4 py-3 text-end">
-                  <button v-if="u.id === auth.user?.id" class="btn btn-sm btn-secondary px-3" disabled>Propia Cuenta</button>
+                  <button v-if="u.id === auth.user?.id" class="btn btn-sm btn-secondary px-3" disabled>Mi Cuenta</button>
                   <template v-else>
                     <button @click="abrirEditar(u)" class="btn btn-sm btn-light border text-warning fw-medium px-3 me-2">Editar</button>
                     <button @click="toggleStatus(u)" class="btn btn-sm px-3" :class="u.status ? 'btn-light border text-danger' : 'btn-light border text-success'">
