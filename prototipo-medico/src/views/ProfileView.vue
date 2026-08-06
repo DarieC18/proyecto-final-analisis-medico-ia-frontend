@@ -8,7 +8,7 @@
           </div>
           <div>
             <h3 class="fw-bold mb-0">{{ user?.name }} {{ user?.lastName }}</h3>
-            <p class="text-muted mb-0">{{ user?.role || user?.roles?.[0] }}</p>
+            <p class="text-muted mb-0">{{ translateRole(user?.role || user?.roles?.[0]) }}</p>
           </div>
         </div>
 
@@ -42,7 +42,7 @@
               </div>
               <div class="col-md-6">
                 <label class="form-label text-muted small fw-bold text-uppercase">Rol</label>
-                <p><span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">{{ user?.role || user?.roles?.[0] || '-' }}</span></p>
+                <p><span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">{{ translateRole(user?.role || user?.roles?.[0] || '-') }}</span></p>
               </div>
               <div class="col-md-6">
                 <label class="form-label text-muted small fw-bold text-uppercase">Estado</label>
@@ -69,6 +69,7 @@ import { ref, computed, onMounted } from 'vue'
 import { authService } from '@/api/auth'
 import { authStore } from '@/stores/auth'
 import StatusBadge from '@/components/StatusBadge.vue'
+import { translateRole } from '@/utils/roles'
 
 const auth = authStore
 const loading = ref(true)

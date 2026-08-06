@@ -133,6 +133,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { accountService } from '@/api/account'
 import { authStore } from '@/stores/auth'
 import StatusBadge from '@/components/StatusBadge.vue'
+import { translateRole } from '@/utils/roles'
 
 const auth = authStore
 const loading = ref(true)
@@ -147,13 +148,6 @@ const form = reactive({
   numberIdentification: '',
   role: 'Doctor'
 })
-
-const translateRole = (role) => ({
-  Administrator: 'Administrador',
-  Doctor: 'Doctor',
-  Nurse: 'Enfermero',
-  Patient: 'Paciente',
-})[role] ?? role
 
 const cargarUsuarios = async () => {
   loading.value = true

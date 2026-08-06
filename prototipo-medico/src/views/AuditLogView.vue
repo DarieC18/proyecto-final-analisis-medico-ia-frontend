@@ -136,6 +136,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { auditLogService } from '@/api/auditLog'
 import StatusBadge from '@/components/StatusBadge.vue'
+import { translateRole } from '@/utils/roles'
 
 const loading = ref(true)
 const logs = ref([])
@@ -182,13 +183,6 @@ const limpiarFiltros = () => {
   filtros.to = ''
   cargarLogs()
 }
-
-const translateRole = (role) => ({
-  Administrator: 'Administrador',
-  Doctor: 'Doctor',
-  Nurse: 'Enfermero',
-  Patient: 'Paciente',
-})[role] ?? role
 
 const descripcionEntidad = (log) => {
   const map = {
