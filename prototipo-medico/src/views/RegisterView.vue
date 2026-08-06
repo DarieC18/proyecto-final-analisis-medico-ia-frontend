@@ -76,9 +76,8 @@
                       <label class="form-label fw-medium">Tipo de paciente</label>
                       <select v-model="form.patientType" class="form-select">
                         <option value="">Seleccione...</option>
-                        <option value="Regular">Regular</option>
-                        <option value="Urgencia">Urgencia</option>
-                        <option value="Crónico">Crónico</option>
+                        <option value="Asegurado">Asegurado</option>
+                        <option value="No Asegurado">No Asegurado</option>
                       </select>
                     </div>
                   </div>
