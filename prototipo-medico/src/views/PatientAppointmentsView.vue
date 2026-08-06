@@ -5,16 +5,62 @@
         <h3 class="fw-bold mb-0">Mis Citas</h3>
         <p class="text-muted">Historial de citas médicas</p>
       </div>
+      <button v-if="vista === 'lista'" @click="abrirCrear" class="btn btn-primary px-4 shadow-sm">+ Solicitar Cita</button>
     </div>
+
     <div v-if="loading" class="text-center py-5">
       <div class="spinner-border text-primary" role="status"></div>
     </div>
+
     <div v-else-if="error" class="alert alert-danger border-0 rounded-3">{{ error }}</div>
-    <div v-else-if="citas.length === 0" class="text-center py-5 text-muted">
-      <p>No tienes citas registradas.</p>
+
+    <div v-else-if="vista === 'crear'" class="animation-fade">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-5">
+          <h5 class="fw-bold mb-4">Solicitar Nueva Cita</h5>
+          <div v-if="formError" class="alert alert-danger border-0 rounded-3 py-2 small mb-4">{{ formError }}</div>
+          <form @submit.prevent="solicitar">
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-medium">Doctor <span class="text-muted fw-normal">(opcional)</span></label>
+                <select v-model="form.doctorId" class="form-select">
+                  <option value="">Sin preferencia</option>
+                  <option v-for="d in doctores" :key="d.id" :value="d.id">{{ d.fullName }}<span v-if="d.specialty"> — {{ d.specialty }}</span></option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-medium">Fecha de la Cita</label>
+                <input v-model="form.appointmentDate" type="datetime-local" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-medium">Motivo de Consulta</label>
+                <input v-model="form.reason" type="text" class="form-control" placeholder="Razón principal de la consulta" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-medium">Notas <span class="text-muted fw-normal">(opcional)</span></label>
+                <textarea v-model="form.notes" class="form-control" rows="3" placeholder="Notas adicionales..."></textarea>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-end gap-3">
+              <button type="button" @click="vista = 'lista'" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancelar</button>
+              <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow" :disabled="saving">
+                <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
+                {{ saving ? 'Enviando...' : 'Solicitar Cita' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-    <div v-else>
-      <div class="row g-4">
+
+    <template v-else>
+      <div v-if="citas.length === 0" class="text-center py-5 text-muted">
+        <p>No tienes citas registradas.</p>
+      </div>
+      <div v-else class="row g-4">
         <div v-for="c in citas" :key="c.id" class="col-md-6">
           <div class="card shadow-sm border-0 rounded-4 h-100">
             <div class="card-body p-4">
@@ -38,7 +84,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -51,10 +97,61 @@ const loading = ref(true)
 const error = ref('')
 const citas = ref([])
 const cancelling = ref(null)
+const vista = ref('lista')
+const doctores = ref([])
+const saving = ref(false)
+const formError = ref('')
+const form = ref({ doctorId: '', appointmentDate: '', reason: '', notes: '' })
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+const cargarCitas = async () => {
+  try {
+    const res = await portalService.getAppointments()
+    citas.value = res.data || []
+  } catch (err) {
+    if (err.response?.status === 404) {
+      error.value = 'No tienes un perfil de paciente registrado. Contacta a un administrador para que vincule tu cuenta.'
+    } else {
+      error.value = 'Error al cargar citas'
+    }
+  }
+}
+
+const abrirCrear = async () => {
+  formError.value = ''
+  form.value = { doctorId: '', appointmentDate: '', reason: '', notes: '' }
+  vista.value = 'crear'
+  if (doctores.value.length === 0) {
+    try {
+      const res = await portalService.getDoctors()
+      doctores.value = res.data || []
+    } catch {
+      // si falla, el select solo mostrará "Sin preferencia"
+    }
+  }
+}
+
+const solicitar = async () => {
+  saving.value = true
+  formError.value = ''
+  try {
+    await portalService.requestAppointment({
+      doctorId: form.value.doctorId || null,
+      appointmentDate: form.value.appointmentDate,
+      reason: form.value.reason,
+      notes: form.value.notes || null
+    })
+    await cargarCitas()
+    vista.value = 'lista'
+  } catch (err) {
+    formError.value = err.response?.data?.message || 'Error al solicitar la cita. Intenta de nuevo.'
+  } finally {
+    saving.value = false
+  }
 }
 
 const cancelarCita = async (c) => {
@@ -70,17 +167,7 @@ const cancelarCita = async (c) => {
 }
 
 onMounted(async () => {
-  try {
-    const res = await portalService.getAppointments()
-    citas.value = res.data || []
-  } catch (err) {
-    if (err.response?.status === 404) {
-      error.value = 'No tienes un perfil de paciente registrado. Contacta a un administrador para que vincule tu cuenta.'
-    } else {
-      error.value = 'Error al cargar citas'
-    }
-  } finally {
-    loading.value = false
-  }
+  await cargarCitas()
+  loading.value = false
 })
 </script>

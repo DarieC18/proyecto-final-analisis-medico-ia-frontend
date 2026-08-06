@@ -24,5 +24,8 @@ export const portalService = {
   },
   getDoctors() {
     return api.get('/api/v1/portal/doctors')
+  },
+  requestAppointment(data) {
+    return api.post('/api/v1/portal/appointments', data)
   }
 }
