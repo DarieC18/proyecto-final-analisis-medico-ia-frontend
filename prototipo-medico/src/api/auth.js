@@ -7,6 +7,9 @@ export const authService = {
   register(data) {
     return api.post('/api/v1/Auth/register', data)
   },
+  registerPatient(data) {
+    return api.post('/api/v1/auth/register/patient', data)
+  },
   me() {
     return api.get('/api/v1/Auth/me')
   },

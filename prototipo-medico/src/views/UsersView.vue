@@ -42,8 +42,8 @@
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-medium">Identificación</label>
-                      <input v-model="form.numberIdentification" type="text" class="form-control" maxlength="10" placeholder="Ej: 001-1234567-8" required>
-                      <small v-if="form.numberIdentification.length === 10" class="text-danger">Máximo 10 caracteres</small>
+                      <input v-model="form.numberIdentification" type="text" class="form-control" maxlength="13" placeholder="Ej: 001-1234567-8" required>
+                      <small v-if="form.numberIdentification.length === 13" class="text-danger">Máximo 13 caracteres</small>
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-medium">Email</label>
@@ -128,7 +128,6 @@
                     <button @click="toggleStatus(u)" class="btn btn-sm px-3" :class="u.status ? 'btn-light border text-danger' : 'btn-light border text-success'">
                       {{ u.status ? 'Inactivar' : 'Activar' }}
                     </button>
-                    <button @click="confirmarEliminar(u)" class="btn btn-sm btn-light border text-danger fw-medium px-3 ms-2">Eliminar</button>
                   </template>
                 </td>
               </tr>
@@ -138,15 +137,6 @@
       </div>
     </template>
 
-    <ConfirmDialog
-      :visible="deleteDialog"
-      title="Eliminar Usuario"
-      :message="`¿Está seguro que desea eliminar a ${deleteTarget?.name} ${deleteTarget?.lastName}?`"
-      confirmText="Eliminar"
-      :danger="true"
-      @confirm="eliminarUsuario"
-      @cancel="deleteDialog = false"
-    />
   </div>
 </template>
 
@@ -155,7 +145,6 @@ import { ref, reactive, onMounted } from 'vue'
 import { accountService } from '@/api/account'
 import { authStore } from '@/stores/auth'
 import StatusBadge from '@/components/StatusBadge.vue'
-import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const auth = authStore
 const loading = ref(true)
@@ -170,9 +159,6 @@ const form = reactive({
   numberIdentification: '', password: '', confirmPassword: '',
   role: 'Doctor'
 })
-
-const deleteDialog = ref(false)
-const deleteTarget = ref(null)
 
 const cargarUsuarios = async () => {
   loading.value = true
@@ -251,21 +237,6 @@ const toggleStatus = async (u) => {
     await cargarUsuarios()
   } catch (err) {
     error.value = err.response?.data?.message || 'Error al cambiar estado'
-  }
-}
-
-const confirmarEliminar = (u) => {
-  deleteTarget.value = u
-  deleteDialog.value = true
-}
-
-const eliminarUsuario = async () => {
-  deleteDialog.value = false
-  try {
-    await accountService.remove(deleteTarget.value.id)
-    await cargarUsuarios()
-  } catch (err) {
-    error.value = 'Error al eliminar usuario'
   }
 }
 

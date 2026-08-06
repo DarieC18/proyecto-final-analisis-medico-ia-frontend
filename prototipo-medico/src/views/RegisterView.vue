@@ -4,7 +4,7 @@
       <div class="col-md-8">
         <div class="card shadow">
           <div class="card-body">
-            <h3 class="card-title text-center mb-4">Registro de Usuario</h3>
+            <h3 class="card-title text-center mb-4">Registro de Paciente</h3>
             <div v-if="successMsg" class="alert alert-success border-0 rounded-3">{{ successMsg }}</div>
             <div v-if="errorMsg" class="alert alert-danger border-0 rounded-3">{{ errorMsg }}</div>
             <form @submit.prevent="registrar">
@@ -41,6 +41,52 @@
 
               <div class="form-section mb-4">
                 <div class="section-header">
+                  <span class="section-icon">🏥</span>
+                  <span>Datos Clínicos</span>
+                </div>
+                <div class="section-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Teléfono</label>
+                      <input v-model="form.phoneNumber" type="tel" class="form-control" placeholder="Ej: 809-555-0000">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Género</label>
+                      <select v-model="form.gender" class="form-select">
+                        <option value="">Seleccione...</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                        <option value="Otro">Otro</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Fecha de nacimiento</label>
+                      <input v-model="form.birthDate" type="date" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Tipo de identificación</label>
+                      <select v-model="form.identificationType" class="form-select">
+                        <option value="">Seleccione...</option>
+                        <option value="Cédula">Cédula</option>
+                        <option value="Pasaporte">Pasaporte</option>
+                        <option value="Otro">Otro</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-medium">Tipo de paciente</label>
+                      <select v-model="form.patientType" class="form-select">
+                        <option value="">Seleccione...</option>
+                        <option value="Regular">Regular</option>
+                        <option value="Urgencia">Urgencia</option>
+                        <option value="Crónico">Crónico</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section mb-4">
+                <div class="section-header">
                   <span class="section-icon">🔐</span>
                   <span>Credenciales</span>
                 </div>
@@ -53,13 +99,6 @@
                     <div class="col-md-6">
                       <label class="form-label fw-medium">Confirmar contraseña</label>
                       <input v-model="form.confirmPassword" type="password" class="form-control" placeholder="••••••••" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-medium">Rol</label>
-                      <select v-model="form.role" class="form-select">
-                        <option value="">Seleccione un rol...</option>
-                        <option value="ConsultationUser">Usuario de consulta</option>
-                      </select>
                     </div>
                   </div>
                 </div>
@@ -95,7 +134,11 @@ const form = reactive({
   numberIdentification: '',
   password: '',
   confirmPassword: '',
-  role: ''
+  phoneNumber: '',
+  gender: '',
+  birthDate: '',
+  identificationType: '',
+  patientType: ''
 })
 
 const registrar = async () => {
@@ -110,20 +153,18 @@ const registrar = async () => {
   }
 
   try {
-    const res = await authService.register({ ...form })
+    const res = await authService.registerPatient({ ...form })
     if (res.data.hasError) {
       errorMsg.value = res.data.errors?.join(', ') || 'Error al registrar'
       return
     }
     successMsg.value = 'Cuenta registrada exitosamente. Revisa tu correo para confirmar.'
-    form.name = ''
-    form.lastName = ''
-    form.userName = ''
-    form.email = ''
-    form.numberIdentification = ''
-    form.password = ''
-    form.confirmPassword = ''
-    form.role = ''
+    Object.assign(form, {
+      name: '', lastName: '', userName: '', email: '',
+      numberIdentification: '', password: '', confirmPassword: '',
+      phoneNumber: '', gender: '', birthDate: '',
+      identificationType: '', patientType: ''
+    })
   } catch (err) {
     const data = err.response?.data
     errorMsg.value = data?.errors?.join(', ') || 'Error al registrar el usuario'
