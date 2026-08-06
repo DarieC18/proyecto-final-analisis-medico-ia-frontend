@@ -18,7 +18,7 @@
       <div v-if="vista === 'crear' || vista === 'editar'" class="animation-fade">
         <div class="card shadow-sm border-0 rounded-4">
           <div class="card-body p-5">
-            <h5 class="fw-bold mb-4">Nuevo Usuario</h5>
+            <h5 class="fw-bold mb-4">{{ vista === 'editar' ? 'Editar Usuario' : 'Nuevo Usuario' }}</h5>
             <div v-if="formError" class="alert alert-danger border-0 rounded-3 py-2 small">{{ formError }}</div>
             <form @submit.prevent="crearUsuario">
               <div class="form-section mb-4">
@@ -55,13 +55,14 @@
                         <option value="Doctor">Médico</option>
                         <option value="Nurse">Enfermera</option>
                         <option value="Administrator">Administrador</option>
+                        <option value="Patient">Paciente</option>
                       </select>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div class="form-section mb-4">
+              <div v-if="vista === 'crear'" class="form-section mb-4">
                 <div class="section-header">
                   <span class="section-icon">🔐</span>
                   <span>Contraseña</span>
