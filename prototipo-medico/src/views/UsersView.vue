@@ -62,23 +62,8 @@
                 </div>
               </div>
 
-              <div v-if="vista === 'crear'" class="form-section mb-4">
-                <div class="section-header">
-                  <span class="section-icon">🔐</span>
-                  <span>Contraseña</span>
-                </div>
-                <div class="section-body">
-                  <div class="row g-3">
-                    <div class="col-md-6">
-                      <label class="form-label fw-medium">Contraseña</label>
-                      <input v-model="form.password" type="password" class="form-control" placeholder="••••••••" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-medium">Confirmar contraseña</label>
-                      <input v-model="form.confirmPassword" type="password" class="form-control" placeholder="••••••••" required>
-                    </div>
-                  </div>
-                </div>
+              <div v-if="vista === 'crear'" class="alert alert-info border-0 rounded-3 py-2 small mb-4">
+                🔑 Se generará una contraseña automática y se enviará por correo al nuevo usuario.
               </div>
 
               <hr class="my-4">
@@ -157,7 +142,7 @@ const vista = ref('lista')
 
 const form = reactive({
   name: '', lastName: '', userName: '', email: '',
-  numberIdentification: '', password: '', confirmPassword: '',
+  numberIdentification: '',
   role: 'Doctor'
 })
 
@@ -180,7 +165,7 @@ const cargarUsuarios = async () => {
 
 const abrirCrear = () => {
   vista.value = 'crear'
-  Object.assign(form, { name: '', lastName: '', userName: '', email: '', numberIdentification: '', password: '', confirmPassword: '', role: 'Doctor' })
+  Object.assign(form, { name: '', lastName: '', userName: '', email: '', numberIdentification: '', role: 'Doctor' })
   formError.value = ''
 }
 
@@ -189,17 +174,12 @@ const cancelarForm = () => {
 }
 
 const crearUsuario = async () => {
-  if (vista.value === 'crear' && form.password !== form.confirmPassword) {
-    formError.value = 'Las contraseñas no coinciden'
-    return
-  }
   saving.value = true
   formError.value = ''
   try {
     let res
     if (vista.value === 'editar') {
-      const { password, confirmPassword, ...data } = form
-      res = await accountService.update(form.id, data)
+      res = await accountService.update(form.id, { ...form })
     } else {
       res = await accountService.create({ ...form })
     }
@@ -222,8 +202,7 @@ const abrirEditar = (u) => {
   Object.assign(form, {
     id: u.id, name: u.name, lastName: u.lastName,
     userName: u.userName, email: u.email,
-    numberIdentification: u.numberIdentification, role: u.role,
-    password: '', confirmPassword: ''
+    numberIdentification: u.numberIdentification, role: u.role
   })
   formError.value = ''
 }

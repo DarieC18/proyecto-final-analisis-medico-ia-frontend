@@ -16,7 +16,21 @@
           </div>
           <div class="col-md-2">
             <label class="form-label fw-medium">⚡ Acción</label>
-            <input v-model="filtros.action" type="text" class="form-control form-filter" placeholder="Ej: Login">
+            <select v-model="filtros.action" class="form-control form-filter">
+              <option value="">Todas</option>
+              <option value="Login">Login</option>
+              <option value="CreateUser">Crear usuario</option>
+              <option value="UpdateUser">Editar usuario</option>
+              <option value="RegisterPatient">Registro paciente</option>
+              <option value="ToggleStatus">Cambio estado</option>
+              <option value="Delete">Eliminar usuario</option>
+              <option value="CreatePatient">Crear paciente</option>
+              <option value="CreateAppointment">Crear cita</option>
+              <option value="GenerateAiAnalysis">Análisis IA</option>
+              <option value="UploadDocument">Subir documento</option>
+              <option value="DeletePatient">Eliminar paciente</option>
+              <option value="DeleteAppointment">Eliminar cita</option>
+            </select>
           </div>
           <div class="col-md-2">
             <label class="form-label fw-medium">📅 Desde</label>
@@ -170,12 +184,21 @@ const limpiarFiltros = () => {
 }
 
 const descripcionEntidad = (log) => {
-  if (log.action === 'Login') return `Inicio de sesión de ${log.userName}`
-  if (log.action === 'Create') return `Registro creado`
-  if (log.action === 'Update') return `Registro actualizado`
-  if (log.action === 'Delete') return `Registro eliminado`
-  if (log.entityId) return log.entityId.slice(0, 20) + '…'
-  return '—'
+  const map = {
+    Login:             'Inicio de sesión',
+    CreateUser:        'Usuario creado por administrador',
+    UpdateUser:        'Usuario actualizado',
+    RegisterPatient:   'Registro público de paciente',
+    ToggleStatus:      'Cambio de estado de cuenta',
+    Delete:            'Cuenta eliminada',
+    CreatePatient:     'Expediente de paciente creado',
+    CreateAppointment: 'Cita registrada',
+    GenerateAiAnalysis:'Análisis IA generado',
+    UploadDocument:    'Documento médico subido',
+    DeletePatient:     'Paciente eliminado',
+    DeleteAppointment: 'Cita eliminada',
+  }
+  return map[log.action] ?? log.entityName ?? '—'
 }
 
 const formatFecha = (dateStr) => {
