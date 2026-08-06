@@ -12,3 +12,4 @@ jobs:
       - name: Trigger Dokploy redeploy
         run: |
           curl -s -X POST "${{ secrets.DOKPLOY_FRONTEND_STAGING_WEBHOOK }}"
+
