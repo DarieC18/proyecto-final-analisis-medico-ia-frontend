@@ -99,7 +99,7 @@
                 <td class="py-3 text-muted">{{ formatDateTime(c.appointmentDate) }}</td>
                 <td class="py-3 text-muted">{{ c.reason }}</td>
                 <td class="py-3">
-                  <StatusBadge :text="c.status" :variant="statusVariant(c.status)" />
+                  <StatusBadge :text="translateStatus(c.status)" :variant="statusVariant(c.status)" />
                 </td>
                 <td class="pe-4 py-3 text-end">
                   <button @click="cambiarEstado(c)" class="btn btn-sm btn-light border text-success fw-medium px-3 me-2" v-if="c.status === 'Pending'">Iniciar</button>
@@ -143,6 +143,11 @@ const form = reactive({
 const statusVariant = (status) => {
   const map = { Pending: 'pending', InProgress: 'inprogress', Completed: 'completed', Cancelled: 'cancelled' }
   return map[status] || 'secondary'
+}
+
+const translateStatus = (status) => {
+  const map = { Pending: 'Pendiente', InProgress: 'En progreso', Completed: 'Completada', Cancelled: 'Cancelada' }
+  return map[status] || status
 }
 
 const formatDateTime = (dateStr) => {
