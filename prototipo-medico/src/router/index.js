@@ -23,6 +23,7 @@ import PatientHistoryView from '../views/PatientHistoryView.vue'
 import PatientRecommendationsView from '../views/PatientRecommendationsView.vue'
 import PatientDocumentsView from '../views/PatientDocumentsView.vue'
 import PatientResultsView from '../views/PatientResultsView.vue'
+import NurseFollowUpView from '../views/NurseFollowUpView.vue'
 
 
 const router = createRouter({
@@ -140,6 +141,12 @@ const router = createRouter({
       name: 'chat-ia',
       component: AiChatView,
       meta: { roles: ['Doctor', 'Nurse'] }
+    },
+    {
+      path: '/seguimiento-pacientes',
+      name: 'seguimiento-pacientes',
+      component: NurseFollowUpView,
+      meta: { roles: ['Nurse'] }
     },
 
     {

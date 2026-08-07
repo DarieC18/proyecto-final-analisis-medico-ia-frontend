@@ -7,7 +7,7 @@
           <h3 class="fw-bold mb-0">Gestión de Pacientes</h3>
           <p class="text-muted">Directorio general de pacientes registrados</p>
         </div>
-        <button @click="vistaActual = 'crear'" class="btn btn-primary px-4 shadow-sm">+ Crear Paciente</button>
+        <button v-if="!auth.hasRole('Doctor')" @click="vistaActual = 'crear'" class="btn btn-primary px-4 shadow-sm">+ Crear Paciente</button>
       </div>
 
       <div class="card shadow-sm mb-4 border-0">
@@ -256,9 +256,11 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { patientService } from '@/api/patients'
+import { authStore } from '@/stores/auth'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 
+const auth = authStore
 const busqueda = ref('')
 const vistaActual = ref('lista')
 const loading = ref(true)

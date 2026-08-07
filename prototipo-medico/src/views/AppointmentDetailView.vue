@@ -63,16 +63,16 @@
           <li class="nav-item">
             <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'signos', 'text-muted': tabActual !== 'signos' }" @click="tabActual = 'signos'" href="#">❤️ Signos Vitales</a>
           </li>
-          <li class="nav-item">
+          <li v-if="!auth.hasRole('Nurse')" class="nav-item">
             <a class="nav-link rounded-pill fw-bold" :class="{ 'active bg-dark text-white shadow-sm': tabActual === 'ia', 'text-primary bg-primary bg-opacity-10': tabActual !== 'ia' }" @click="tabActual = 'ia'" href="#">🤖 Análisis IA</a>
           </li>
-          <li class="nav-item">
+          <li v-if="!auth.hasRole('Nurse')" class="nav-item">
             <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'records', 'text-muted': tabActual !== 'records' }" @click="tabActual = 'records'" href="#">📋 Historial Médico</a>
           </li>
           <li class="nav-item">
             <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'alertas', 'text-muted': tabActual !== 'alertas' }" @click="tabActual = 'alertas'" href="#">🔔 Alertas</a>
           </li>
-          <li class="nav-item">
+          <li v-if="!auth.hasRole('Nurse')" class="nav-item">
             <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'recomendaciones', 'text-muted': tabActual !== 'recomendaciones' }" @click="tabActual = 'recomendaciones'" href="#">💡 Recomendaciones</a>
           </li>
           <li class="nav-item">
@@ -124,7 +124,7 @@
           <div v-if="tabActual === 'sintomas'" class="animation-fade">
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h5 class="fw-bold text-dark mb-0">Registro de Síntomas</h5>
-              <button @click="toggleFormSintoma" class="btn btn-primary btn-sm px-3 shadow-sm">
+              <button v-if="!auth.hasRole('Nurse')" @click="toggleFormSintoma" class="btn btn-primary btn-sm px-3 shadow-sm">
                 {{ showSintomaForm ? 'Cancelar' : '+ Agregar Síntoma' }}
               </button>
             </div>
@@ -180,7 +180,7 @@
                   </div>
                   <p class="text-muted small mb-2"><strong>Inicio:</strong> {{ formatDate(s.startedAt) }}</p>
                   <p class="mb-2 text-dark small">{{ s.notes || 'Sin notas adicionales.' }}</p>
-                  <div class="d-flex justify-content-end gap-2 mt-2">
+                  <div v-if="!auth.hasRole('Nurse')" class="d-flex justify-content-end gap-2 mt-2">
                     <button @click="editarSintoma(s)" class="btn btn-sm btn-light border text-warning px-3">Editar</button>
                   </div>
                 </div>
@@ -243,7 +243,7 @@
                 <h5 class="fw-bold text-dark mb-0">Mediciones Clínicas</h5>
                 <p class="text-muted small mb-0" v-if="signos.length">Última toma: {{ formatDateTime(signos[signos.length - 1]?.measuredAt) }}</p>
               </div>
-              <button @click="toggleFormSignos" class="btn btn-primary btn-sm px-3 shadow-sm">
+              <button v-if="!auth.hasRole('Nurse')" @click="toggleFormSignos" class="btn btn-primary btn-sm px-3 shadow-sm">
                 {{ showSignosForm ? 'Cancelar' : '+ Registrar Medición' }}
               </button>
             </div>
@@ -682,12 +682,14 @@ import { recommendationService } from '@/api/recommendations'
 import { medicalDocumentService } from '@/api/medicalDocuments'
 import StatusBadge from '@/components/StatusBadge.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { authStore } from '@/stores/auth'
 
 const props = defineProps({
   id: { type: String, required: true }
 })
 
 const router = useRouter()
+const auth = authStore
 
 const loading = ref(true)
 const error = ref('')
