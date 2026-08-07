@@ -14,7 +14,7 @@ jobs:
           HTTP_STATUS=$(curl -s -o /tmp/response.txt -w "%{http_code}" \
             -X POST \
             -H "Content-Type: application/json" \
-            -d '{"branch":"feature/frontend-staging"}' \
+            -d '{"ref":"refs/heads/feature/frontend-staging"}' \
             "${{ secrets.DOKPLOY_FRONTEND_STAGING_WEBHOOK }}")
           echo "HTTP Status: $HTTP_STATUS"
           echo "Response: $(cat /tmp/response.txt)"
