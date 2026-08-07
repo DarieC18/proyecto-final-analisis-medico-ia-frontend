@@ -11,7 +11,11 @@ jobs:
     steps:
       - name: Trigger Dokploy redeploy
         run: |
-          HTTP_STATUS=$(curl -s -o /tmp/response.txt -w "%{http_code}" -X POST "${{ secrets.DOKPLOY_FRONTEND_STAGING_WEBHOOK }}")
+          HTTP_STATUS=$(curl -s -o /tmp/response.txt -w "%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"branch":"feature/frontend-staging"}' \
+            "${{ secrets.DOKPLOY_FRONTEND_STAGING_WEBHOOK }}")
           echo "HTTP Status: $HTTP_STATUS"
           echo "Response: $(cat /tmp/response.txt)"
           if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
