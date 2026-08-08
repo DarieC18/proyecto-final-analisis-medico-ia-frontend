@@ -5,7 +5,7 @@
         <h3 class="fw-bold mb-0">Agenda de Citas</h3>
         <p class="text-muted">Gestiona las consultas médicas programadas</p>
       </div>
-      <button @click="abrirCrear" class="btn btn-primary px-4 shadow-sm">+ Agendar Cita</button>
+      <button v-if="auth.hasRole('Nurse')" @click="abrirCrear" class="btn btn-primary px-4 shadow-sm">+ Agendar Cita</button>
     </div>
 
     <div v-if="loading" class="text-center py-5">
@@ -32,6 +32,13 @@
                     <select v-model="form.patientId" class="form-select" required>
                       <option value="">Seleccione un paciente...</option>
                       <option v-for="p in pacientes" :key="p.id" :value="p.id">{{ p.fullName }} - {{ p.identificationNumber }}</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-medium">Doctor</label>
+                    <select v-model="form.doctorId" class="form-select" required>
+                      <option value="">Seleccione un doctor...</option>
+                      <option v-for="d in doctores" :key="d.id" :value="d.id">{{ d.name }} {{ d.lastName }}</option>
                     </select>
                   </div>
                   <div class="col-md-6">
@@ -99,7 +106,7 @@
                 <td class="py-3 text-muted">{{ formatDateTime(c.appointmentDate) }}</td>
                 <td class="py-3 text-muted">{{ c.reason }}</td>
                 <td class="py-3">
-                  <StatusBadge :text="c.status" :variant="statusVariant(c.status)" />
+                  <StatusBadge :text="translateStatus(c.status)" :variant="statusVariant(c.status)" />
                 </td>
                 <td class="pe-4 py-3 text-end">
                   <button @click="cambiarEstado(c)" class="btn btn-sm btn-light border text-success fw-medium px-3 me-2" v-if="c.status === 'Pending'">Iniciar</button>
@@ -119,6 +126,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { appointmentService } from '@/api/appointments'
 import { patientService } from '@/api/patients'
+import { userService } from '@/api/users'
 import { authStore } from '@/stores/auth'
 import StatusBadge from '@/components/StatusBadge.vue'
 
@@ -135,6 +143,7 @@ const vista = ref('lista')
 
 const form = reactive({
   patientId: '',
+  doctorId: '',
   appointmentDate: '',
   reason: '',
   notes: ''
@@ -143,6 +152,11 @@ const form = reactive({
 const statusVariant = (status) => {
   const map = { Pending: 'pending', InProgress: 'inprogress', Completed: 'completed', Cancelled: 'cancelled' }
   return map[status] || 'secondary'
+}
+
+const translateStatus = (status) => {
+  const map = { Pending: 'Pendiente', InProgress: 'En progreso', Completed: 'Completada', Cancelled: 'Cancelada' }
+  return map[status] || status
 }
 
 const formatDateTime = (dateStr) => {
@@ -177,10 +191,13 @@ const cargarCitas = async () => {
     citas.value = citasRes.data || []
     pacientes.value = pacientesRes.data || []
 
-    const userData = localStorage.getItem('user')
-    if (userData) {
-      const user = JSON.parse(userData)
-      doctores.value = [{ id: user.id, name: user.name, lastName: user.lastName }]
+    if (auth.hasRole('Nurse')) {
+      try {
+        const doctoresRes = await userService.getDoctors()
+        doctores.value = doctoresRes.data || []
+      } catch {
+        doctores.value = []
+      }
     }
   } catch (err) {
     if (err.response?.status === 404 || err.response?.status === 204) {
@@ -197,6 +214,7 @@ const abrirCrear = () => {
   vista.value = 'crear'
   formError.value = ''
   form.patientId = ''
+  form.doctorId = ''
   form.appointmentDate = ''
   form.reason = ''
   form.notes = ''
@@ -210,11 +228,9 @@ const crearCita = async () => {
   saving.value = true
   formError.value = ''
   try {
-    const userData = localStorage.getItem('user')
-    const user = userData ? JSON.parse(userData) : null
     const payload = {
       patientId: Number(form.patientId),
-      doctorId: user?.id || '',
+      doctorId: form.doctorId,
       appointmentDate: form.appointmentDate,
       reason: form.reason,
       notes: form.notes || null

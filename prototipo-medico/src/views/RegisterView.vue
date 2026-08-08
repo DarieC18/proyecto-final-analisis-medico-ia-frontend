@@ -28,7 +28,7 @@
                       <input v-model="form.userName" type="text" class="form-control" placeholder="Elige un nombre de usuario" required>
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label fw-medium">Cédula / Identificación</label>
+                      <label class="form-label fw-medium">Identificación</label>
                       <input v-model="form.numberIdentification" type="text" class="form-control" placeholder="Ej: 001-1234567-8" required>
                     </div>
                     <div class="col-12">

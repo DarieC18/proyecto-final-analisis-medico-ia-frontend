@@ -20,6 +20,7 @@
               <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/dashboard-medico">📊 Dashboard Médico</RouterLink></li>
               <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/pacientes">👥 Pacientes</RouterLink></li>
               <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/citas">📅 Citas Médicas</RouterLink></li>
+              <li v-if="auth.hasRole('Nurse')"><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/seguimiento-pacientes">🩺 Seguimiento Pacientes</RouterLink></li>
               <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/alertas">🔔 Alertas</RouterLink></li>
               <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/recomendaciones">💡 Recomendaciones</RouterLink></li>
               <li><RouterLink @click="showClinical = false" class="dropdown-item rounded-pill px-3 py-2" to="/documentos">📄 Documentos</RouterLink></li>

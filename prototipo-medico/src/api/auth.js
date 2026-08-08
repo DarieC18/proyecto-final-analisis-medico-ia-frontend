@@ -13,8 +13,8 @@ export const authService = {
   me() {
     return api.get('/api/v1/Auth/me')
   },
-  forgotPassword(userName) {
-    return api.post('/api/v1/Auth/forgot-password', { userName })
+  forgotPassword(email) {
+    return api.post('/api/v1/Auth/forgot-password', { email })
   },
   resetPassword(id, token, password) {
     return api.post('/api/v1/Auth/reset-password', { id, token, password })

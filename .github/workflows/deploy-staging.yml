@@ -11,5 +11,8 @@ jobs:
     steps:
       - name: Trigger Dokploy redeploy
         run: |
-          curl -s -X POST "${{ secrets.DOKPLOY_FRONTEND_STAGING_WEBHOOK }}"
-
+          HTTP_STATUS=$(curl -s -o /tmp/response.txt -w "%{http_code}" \
+            -X POST "${{ secrets.DOKPLOY_FRONTEND_STAGING_WEBHOOK }}")
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Response: $(cat /tmp/response.txt)"
+          echo "Autodeploy también está activo en Dokploy como respaldo."
