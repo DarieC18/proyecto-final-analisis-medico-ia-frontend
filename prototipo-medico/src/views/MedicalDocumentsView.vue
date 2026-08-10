@@ -124,14 +124,14 @@
           </div>
           <div class="modal-body p-3 text-center">
             <img
-              :src="previewDoc.filePath"
+              :src="`/api/v1/MedicalDocument/${previewDoc.id}/file`"
               class="img-fluid rounded-3"
               style="max-height: 70vh;"
               alt="Documento"
             />
           </div>
           <div class="modal-footer border-0 pt-0">
-            <a :href="previewDoc.filePath" target="_blank" class="btn btn-outline-dark rounded-pill px-4">Abrir en nueva pestaña</a>
+            <a :href="`/api/v1/MedicalDocument/${previewDoc.id}/file`" target="_blank" class="btn btn-outline-dark rounded-pill px-4">Abrir en nueva pestaña</a>
             <button @click="showPreview = false" class="btn btn-dark rounded-pill px-4">Cerrar</button>
           </div>
         </div>
@@ -246,7 +246,7 @@ const confirmarEliminar = (d) => {
 
 const verDocumento = (d) => {
   if (d.fileName?.toLowerCase().endsWith('.pdf')) {
-    window.open(d.filePath, '_blank')
+    window.open(`/api/v1/MedicalDocument/${d.id}/file`, '_blank')
     return
   }
   previewDoc.value = d

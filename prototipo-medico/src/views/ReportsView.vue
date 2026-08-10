@@ -31,11 +31,19 @@
           <div class="card-body p-4">
             <h5 class="fw-bold mb-3">📋 Reporte de Cita</h5>
             <div class="row g-2">
-              <div class="col-8">
-                <input v-model="citaId" type="number" class="form-control bg-light border-0" placeholder="ID de la cita">
+              <div class="col-5">
+                <input v-model="citaFecha" type="date" class="form-control bg-light border-0" @change="filtrarCitasPorFecha">
               </div>
-              <div class="col-4">
-                <button @click="cargarReporteCita" class="btn btn-dark w-100" :disabled="!citaId">Ver</button>
+              <div class="col-5">
+                <select v-model="citaSeleccionada" class="form-select bg-light border-0" :disabled="!citasDelDia.length">
+                  <option value="">{{ citaFecha ? (citasDelDia.length ? 'Seleccione cita...' : 'Sin citas ese día') : 'Primero seleccione fecha' }}</option>
+                  <option v-for="c in citasDelDia" :key="c.id" :value="c.id">
+                    {{ c.patientName || `Paciente #${c.patientId}` }} — {{ formatHora(c.appointmentDate) }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-2">
+                <button @click="cargarReporteCita" class="btn btn-dark w-100" :disabled="!citaSeleccionada">Ver</button>
               </div>
             </div>
           </div>
@@ -156,18 +164,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { reportService } from '@/api/reports'
 import { patientService } from '@/api/patients'
+import { appointmentService } from '@/api/appointments'
 import StatusBadge from '@/components/StatusBadge.vue'
 
 const loading = ref(false)
 const error = ref('')
 const reporte = ref(null)
 const reporteTitulo = ref('')
-const citaId = ref('')
 const pacienteId = ref('')
 const pacientes = ref([])
+const citas = ref([])
+const citaFecha = ref('')
+const citaSeleccionada = ref('')
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
@@ -178,24 +189,54 @@ const formatDate = (dateStr) => {
   } catch { return dateStr }
 }
 
+const formatHora = (dateStr) => {
+  if (!dateStr) return '-'
+  try {
+    return new Date(dateStr).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+  } catch { return dateStr }
+}
+
+const citasDelDia = computed(() => {
+  if (!citaFecha.value) return []
+  return citas.value.filter(c => {
+    if (!c.appointmentDate) return false
+    const d = new Date(c.appointmentDate)
+    const yyyy = d.getFullYear()
+    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    const dd = String(d.getDate()).padStart(2, '0')
+    return `${yyyy}-${mm}-${dd}` === citaFecha.value
+  })
+})
+
+const filtrarCitasPorFecha = () => {
+  citaSeleccionada.value = ''
+  reporte.value = null
+}
+
 onMounted(async () => {
   try {
-    const res = await patientService.getAll()
-    pacientes.value = (res.data?.value || res.data || []).filter(p => p.fullName)
+    const [resP, resC] = await Promise.all([
+      patientService.getAll(),
+      appointmentService.getAll()
+    ])
+    pacientes.value = (resP.data?.value || resP.data || []).filter(p => p.fullName)
+    citas.value = resC.data || []
   } catch {
     pacientes.value = []
+    citas.value = []
   }
 })
 
 const cargarReporteCita = async () => {
-  if (!citaId.value) return
+  if (!citaSeleccionada.value) return
   loading.value = true
   error.value = ''
   reporte.value = null
   try {
-    const res = await reportService.getAppointmentReport(citaId.value)
+    const res = await reportService.getAppointmentReport(citaSeleccionada.value)
     reporte.value = res.data
-    reporteTitulo.value = `Reporte de Cita #${citaId.value}`
+    const cita = citasDelDia.value.find(c => c.id === citaSeleccionada.value)
+    reporteTitulo.value = `Reporte de Cita — ${cita?.patientName || ''} ${formatDate(cita?.appointmentDate)}`
   } catch (err) {
     if (err.response?.status === 404) {
       error.value = 'Cita no encontrada.'
