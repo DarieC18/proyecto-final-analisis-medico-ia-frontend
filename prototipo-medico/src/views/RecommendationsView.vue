@@ -9,16 +9,53 @@
 
     <div class="card shadow-sm mb-4 border-0">
       <div class="card-body p-3">
-        <div class="row g-2 align-items-end">
-          <div class="col-md-6">
-            <label class="form-label text-muted small fw-bold text-uppercase">Buscar por Paciente ID</label>
-            <input v-model="pacienteId" type="number" class="form-control bg-light border-0" placeholder="Ingrese ID del paciente">
+        <div v-if="pacienteSeleccionado" class="mb-3 d-flex align-items-center gap-2">
+          <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">
+            {{ pacienteSeleccionado.fullName }}
+            <span class="text-white-50 ms-1">· {{ pacienteSeleccionado.identificationNumber }}</span>
+          </span>
+          <button @click="limpiarBusqueda" class="btn btn-sm btn-outline-secondary rounded-pill">✕ Cambiar</button>
+        </div>
+
+        <div v-else>
+          <div class="row g-2 align-items-end">
+            <div class="col-md-6">
+              <label class="form-label text-muted small fw-bold text-uppercase">Buscar paciente</label>
+              <input
+                v-model="busqueda"
+                type="text"
+                class="form-control bg-light border-0"
+                placeholder="Nombre o número de identificación"
+                @keyup.enter="buscarPacientes"
+              >
+            </div>
+            <div class="col-md-3">
+              <button @click="buscarPacientes" class="btn btn-dark px-4 w-100" :disabled="buscando">
+                <span v-if="buscando" class="spinner-border spinner-border-sm me-1"></span>
+                Buscar
+              </button>
+            </div>
+            <div class="col-md-3">
+              <button @click="limpiarBusqueda" class="btn btn-light border px-4 w-100">Limpiar</button>
+            </div>
           </div>
-          <div class="col-md-3">
-            <button @click="cargarPorPaciente" class="btn btn-dark px-4 w-100">Buscar</button>
+
+          <div v-if="pacientesEncontrados.length > 0" class="mt-2 border rounded-3 overflow-hidden">
+            <div
+              v-for="p in pacientesEncontrados"
+              :key="p.id"
+              class="px-3 py-2 d-flex justify-content-between align-items-center cursor-pointer"
+              style="cursor: pointer;"
+              :class="{ 'border-top': p !== pacientesEncontrados[0] }"
+              @click="seleccionarPaciente(p)"
+            >
+              <span class="fw-medium">{{ p.fullName }}</span>
+              <small class="text-muted">{{ p.identificationNumber }}</small>
+            </div>
           </div>
-          <div class="col-md-3">
-            <button @click="limpiarBusqueda" class="btn btn-light border px-4 w-100">Limpiar</button>
+
+          <div v-else-if="buscado && !buscando" class="mt-2 text-muted small ps-1">
+            No se encontraron pacientes.
           </div>
         </div>
       </div>
@@ -32,7 +69,7 @@
 
     <div v-else-if="recomendaciones.length === 0" class="text-center py-5 text-muted">
       <div class="display-4 mb-3">💡</div>
-      <p v-if="!buscado">Ingrese un ID de paciente para ver sus recomendaciones.</p>
+      <p v-if="!pacienteSeleccionado">Busque un paciente por nombre o identificación para ver sus recomendaciones.</p>
       <p v-else>No hay recomendaciones para este paciente.</p>
     </div>
 
@@ -61,12 +98,16 @@
 <script setup>
 import { ref } from 'vue'
 import { recommendationService } from '@/api/recommendations'
+import { patientService } from '@/api/patients'
 
 const loading = ref(false)
 const error = ref('')
 const recomendaciones = ref([])
-const pacienteId = ref('')
+const busqueda = ref('')
+const buscando = ref(false)
 const buscado = ref(false)
+const pacientesEncontrados = ref([])
+const pacienteSeleccionado = ref(null)
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
@@ -82,13 +123,30 @@ const priorityBadge = (p) => {
   return map[p] || 'bg-info'
 }
 
-const cargarPorPaciente = async () => {
-  if (!pacienteId.value) return
+const buscarPacientes = async () => {
+  if (!busqueda.value.trim()) return
+  buscando.value = true
+  buscado.value = false
+  pacientesEncontrados.value = []
+  try {
+    const res = await patientService.search(busqueda.value)
+    pacientesEncontrados.value = res.data || []
+    buscado.value = true
+  } catch {
+    pacientesEncontrados.value = []
+    buscado.value = true
+  } finally {
+    buscando.value = false
+  }
+}
+
+const seleccionarPaciente = async (p) => {
+  pacienteSeleccionado.value = p
+  pacientesEncontrados.value = []
   loading.value = true
   error.value = ''
-  buscado.value = true
   try {
-    const res = await recommendationService.getByPatient(pacienteId.value)
+    const res = await recommendationService.getByPatient(p.id)
     recomendaciones.value = res.data || []
   } catch (err) {
     if (err.response?.status === 204 || err.response?.status === 404) {
@@ -102,8 +160,10 @@ const cargarPorPaciente = async () => {
 }
 
 const limpiarBusqueda = () => {
-  pacienteId.value = ''
-  recomendaciones.value = []
+  busqueda.value = ''
   buscado.value = false
+  pacientesEncontrados.value = []
+  pacienteSeleccionado.value = null
+  recomendaciones.value = []
 }
 </script>
