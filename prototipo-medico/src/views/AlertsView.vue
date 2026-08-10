@@ -92,7 +92,7 @@ const cargarAlertas = async () => {
     } else if (filtro.value === 'paciente') {
       res = await alertService.getByPatient(filtroPaciente.value)
     } else {
-      res = await alertService.getActive()
+      res = await alertService.getAll()
     }
     alertas.value = res.data || []
   } catch (err) {
@@ -110,7 +110,7 @@ const resolverAlerta = async (a) => {
   resolviendo.value = a.id
   try {
     await alertService.resolve(a.id)
-    a.isResolved = true
+    alertas.value = alertas.value.filter(x => x.id !== a.id)
   } catch (err) {
     error.value = 'Error al resolver la alerta'
   } finally {
