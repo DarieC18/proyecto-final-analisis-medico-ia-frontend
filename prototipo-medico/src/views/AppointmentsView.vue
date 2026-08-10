@@ -83,6 +83,15 @@
     </div>
 
     <template v-else>
+      <div class="mb-3">
+        <input
+          v-model="filtro"
+          type="text"
+          class="form-control"
+          placeholder="Buscar por paciente o médico..."
+          style="max-width: 360px;"
+        >
+      </div>
       <div class="card shadow-sm overflow-hidden border-0">
         <div v-if="citas.length === 0" class="text-center py-5 text-muted">
           <p>No hay citas registradas.</p>
@@ -100,9 +109,9 @@
               </tr>
             </thead>
             <tbody class="border-top-0">
-              <tr v-for="c in citas" :key="c.id">
-                <td class="ps-4 py-3 fw-bold text-dark">{{ getPatientName(c.patientId) }}</td>
-                <td class="py-3 text-muted">{{ getDoctorName(c.doctorId) }}</td>
+              <tr v-for="c in citasFiltradas" :key="c.id">
+                <td class="ps-4 py-3 fw-bold text-dark">{{ c.patientName || getPatientName(c.patientId) }}</td>
+                <td class="py-3 text-muted">{{ c.doctorName || getDoctorName(c.doctorId) }}</td>
                 <td class="py-3 text-muted">{{ formatDateTime(c.appointmentDate) }}</td>
                 <td class="py-3 text-muted">{{ c.reason }}</td>
                 <td class="py-3">
@@ -122,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { appointmentService } from '@/api/appointments'
 import { patientService } from '@/api/patients'
@@ -140,6 +149,16 @@ const citas = ref([])
 const pacientes = ref([])
 const doctores = ref([])
 const vista = ref('lista')
+const filtro = ref('')
+
+const citasFiltradas = computed(() => {
+  const q = filtro.value.trim().toLowerCase()
+  if (!q) return citas.value
+  return citas.value.filter(c =>
+    c.patientName?.toLowerCase().includes(q) ||
+    c.doctorName?.toLowerCase().includes(q)
+  )
+})
 
 const form = reactive({
   patientId: '',
