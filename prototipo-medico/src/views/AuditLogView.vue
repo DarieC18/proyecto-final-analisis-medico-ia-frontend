@@ -41,7 +41,7 @@
             <input v-model="filtros.to" type="date" class="form-control form-filter">
           </div>
           <div class="col-md-3 d-flex gap-2">
-            <button @click="cargarLogs" class="btn btn-dark rounded-pill px-4">🔍 Filtrar</button>
+            <button @click="aplicarFiltros" class="btn btn-dark rounded-pill px-4">🔍 Filtrar</button>
             <button @click="limpiarFiltros" class="btn btn-outline-secondary rounded-pill px-3">Limpiar</button>
           </div>
         </div>
@@ -58,7 +58,7 @@
 
     <div v-else class="card shadow-sm overflow-hidden border-0">
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table class="table table-hover align-middle mb-0" style="table-layout: fixed;">
           <thead class="table-dark">
             <tr>
               <th class="ps-4 py-3 fw-medium">Fecha</th>
@@ -128,12 +128,27 @@
           </tbody>
         </table>
       </div>
+      <!-- Paginación -->
+      <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top">
+        <small class="text-muted">{{ totalCount }} registros — página {{ currentPage }} de {{ totalPages || 1 }}</small>
+        <div class="d-flex gap-2">
+          <button :disabled="currentPage === 1" @click="irAPagina(currentPage - 1)" class="btn btn-sm btn-light border">‹ Anterior</button>
+          <button
+            v-for="p in paginasVisibles" :key="p"
+            @click="irAPagina(p)"
+            class="btn btn-sm"
+            :class="p === currentPage ? 'btn-dark' : 'btn-light border'">
+            {{ p }}
+          </button>
+          <button :disabled="currentPage >= totalPages" @click="irAPagina(currentPage + 1)" class="btn btn-sm btn-light border">Siguiente ›</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { auditLogService } from '@/api/auditLog'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { translateRole } from '@/utils/roles'
@@ -141,6 +156,19 @@ import { translateRole } from '@/utils/roles'
 const loading = ref(true)
 const logs = ref([])
 const detalleId = ref(null)
+const currentPage = ref(1)
+const pageSize = 20
+const totalCount = ref(0)
+
+const totalPages = computed(() => Math.ceil(totalCount.value / pageSize) || 1)
+const paginasVisibles = computed(() => {
+  const delta = 2
+  const range = []
+  for (let i = Math.max(1, currentPage.value - delta); i <= Math.min(totalPages.value, currentPage.value + delta); i++)
+    range.push(i)
+  return range
+})
+const irAPagina = (p) => { currentPage.value = p; cargarLogs() }
 
 const toggleDetalle = (log) => {
   detalleId.value = detalleId.value === log.id ? null : log.id
@@ -153,34 +181,33 @@ const filtros = reactive({
 const cargarLogs = async () => {
   loading.value = true
   try {
-    const params = {}
+    const params = { pageNumber: currentPage.value, pageSize }
     if (filtros.userName) params.userName = filtros.userName
     if (filtros.action) params.action = filtros.action
     if (filtros.from) params.from = filtros.from
     if (filtros.to) params.to = filtros.to
 
-    const hasFilters = Object.keys(params).length > 0
-    let res
-    if (hasFilters) {
-      res = await auditLogService.getFiltered(params)
-    } else {
-      res = await auditLogService.getAll()
-    }
-    logs.value = res.data || []
+    const res = await auditLogService.getFiltered(params)
+    logs.value = res.data?.items || []
+    totalCount.value = res.data?.totalCount || 0
   } catch (err) {
     if (err.response?.status === 204) {
       logs.value = []
+      totalCount.value = 0
     }
   } finally {
     loading.value = false
   }
 }
 
+const aplicarFiltros = () => { currentPage.value = 1; cargarLogs() }
+
 const limpiarFiltros = () => {
   filtros.userName = ''
   filtros.action = ''
   filtros.from = ''
   filtros.to = ''
+  currentPage.value = 1
   cargarLogs()
 }
 
