@@ -55,8 +55,9 @@
       <div class="bg-white p-4 rounded-4 shadow-sm">
         <h5 class="fw-bold mb-4">Accesos Rápidos</h5>
         <div class="d-flex gap-3 flex-wrap">
-          <RouterLink to="/pacientes" class="btn btn-light border px-4 py-2 text-primary fw-medium">👥 Gestión de Pacientes</RouterLink>
-          <RouterLink to="/citas" class="btn btn-light border px-4 py-2 text-success fw-medium">📅 Agendar Nueva Cita</RouterLink>
+          <RouterLink to="/citas" class="btn btn-light border px-4 py-2 text-primary fw-medium">📅 Citas</RouterLink>
+          <RouterLink to="/reportes" class="btn btn-light border px-4 py-2 text-success fw-medium">📊 Reportes</RouterLink>
+          <RouterLink to="/recomendaciones" class="btn btn-light border px-4 py-2 text-warning fw-medium">💡 Recomendaciones</RouterLink>
         </div>
       </div>
     </template>

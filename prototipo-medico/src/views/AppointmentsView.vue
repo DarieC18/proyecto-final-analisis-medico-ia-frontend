@@ -118,7 +118,8 @@
                   <StatusBadge :text="translateStatus(c.status)" :variant="statusVariant(c.status)" />
                 </td>
                 <td class="pe-4 py-3 text-end">
-                  <button @click="cambiarEstado(c)" class="btn btn-sm btn-light border text-success fw-medium px-3 me-2" v-if="c.status === 'Pending'">Iniciar</button>
+                  <button @click="iniciarCita(c)" class="btn btn-sm btn-light border text-success fw-medium px-3 me-2" v-if="c.status === 'Pending'">Iniciar</button>
+                  <button @click="completarCita(c)" class="btn btn-sm btn-light border text-primary fw-medium px-3 me-2" v-if="c.status === 'Pending'">Completar</button>
                   <RouterLink :to="`/citas/${c.id}`" class="btn btn-sm btn-light border text-primary fw-medium px-3">Ir al Detalle</RouterLink>
                 </td>
               </tr>
@@ -271,12 +272,21 @@ const crearCita = async () => {
   }
 }
 
-const cambiarEstado = async (c) => {
+const iniciarCita = async (c) => {
   try {
     await appointmentService.changeStatus(c.id, 'InProgress')
+    router.push(`/citas/${c.id}`)
+  } catch {
+    error.value = 'Error al iniciar la cita'
+  }
+}
+
+const completarCita = async (c) => {
+  try {
+    await appointmentService.changeStatus(c.id, 'Completed')
     await cargarCitas()
-  } catch (err) {
-    error.value = 'Error al cambiar estado de la cita'
+  } catch {
+    error.value = 'Error al completar la cita'
   }
 }
 

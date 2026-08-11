@@ -621,14 +621,34 @@
                   <p class="text-muted">{{ ia.modelUsed || 'Modelo por defecto' }}</p>
                 </div>
 
-                <div class="mb-3" v-if="ia.aiResponse">
-                  <h6 class="fw-bold text-dark mb-1">Resultado:</h6>
-                  <p class="text-muted" style="white-space: pre-wrap;">{{ ia.aiResponse }}</p>
-                </div>
-
-                <div class="mb-3" v-if="ia.promptUsed">
-                  <h6 class="fw-bold text-dark mb-1">Prompt utilizado:</h6>
-                  <p class="text-muted small">{{ ia.promptUsed }}</p>
+                <template v-if="ia.aiResponse && !ia.aiResponse.startsWith('ERROR')">
+                  <div class="mb-3" v-if="parsearRespuestaIA(ia.aiResponse)?.summary">
+                    <h6 class="fw-bold text-dark mb-1">Resumen clínico:</h6>
+                    <p class="text-muted">{{ parsearRespuestaIA(ia.aiResponse).summary }}</p>
+                  </div>
+                  <div class="mb-3" v-if="parsearRespuestaIA(ia.aiResponse)?.riskLevel">
+                    <h6 class="fw-bold text-dark mb-1">Nivel de riesgo:</h6>
+                    <span class="badge px-3 py-2 rounded-pill"
+                      :class="{
+                        'bg-success': parsearRespuestaIA(ia.aiResponse).riskLevel === 'Bajo',
+                        'bg-warning text-dark': parsearRespuestaIA(ia.aiResponse).riskLevel === 'Medio',
+                        'bg-danger': parsearRespuestaIA(ia.aiResponse).riskLevel === 'Alto'
+                      }">
+                      {{ parsearRespuestaIA(ia.aiResponse).riskLevel }}
+                    </span>
+                  </div>
+                  <div class="mb-3" v-if="parsearRespuestaIA(ia.aiResponse)?.recommendations?.length">
+                    <h6 class="fw-bold text-dark mb-1">Recomendaciones:</h6>
+                    <ul class="list-unstyled mb-0">
+                      <li v-for="(rec, i) in parsearRespuestaIA(ia.aiResponse).recommendations" :key="i" class="mb-2 ps-3 border-start border-2 border-info">
+                        <strong class="text-dark">{{ rec.title }}</strong>
+                        <p class="text-muted small mb-0">{{ rec.description }}</p>
+                      </li>
+                    </ul>
+                  </div>
+                </template>
+                <div v-else-if="ia.aiResponse?.startsWith('ERROR')" class="alert alert-danger border-0 rounded-3 small py-2 mb-3">
+                  {{ ia.aiResponse }}
                 </div>
 
                 <div v-if="!ia.isReviewed" class="d-flex justify-content-end mt-3">
@@ -965,6 +985,10 @@ const solicitarAnalisisIA = async () => {
     error.value = data?.detail || data?.title || 'Error al generar análisis IA'
     solicitandoIA.value = false
   }
+}
+
+const parsearRespuestaIA = (raw) => {
+  try { return JSON.parse(raw) } catch { return null }
 }
 
 const marcarRevisado = async (ia) => {
