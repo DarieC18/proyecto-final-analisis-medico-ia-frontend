@@ -1,7 +1,10 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3 custom-navbar">
     <div class="container-fluid px-4">
-      <RouterLink class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2" to="/dashboard-medico">
+      <RouterLink
+        class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2"
+        :to="auth.isAdmin() ? '/dashboard-admin' : auth.hasRole('Patient') ? '/portal/perfil' : '/dashboard-medico'"
+      >
         <span class="fs-4">⚕️</span> Smart-Medical IA
       </RouterLink>
       <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

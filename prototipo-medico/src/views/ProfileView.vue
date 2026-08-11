@@ -2,6 +2,9 @@
   <div class="container mt-4">
     <div class="row justify-content-center">
       <div class="col-md-8">
+        <div class="mb-3">
+          <button @click="volver" class="btn btn-sm btn-outline-secondary rounded-pill">← Volver</button>
+        </div>
         <div class="d-flex align-items-center gap-3 mb-4">
           <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 1.5rem;">
             {{ iniciales }}
@@ -66,14 +69,22 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { authService } from '@/api/auth'
 import { authStore } from '@/stores/auth'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { translateRole } from '@/utils/roles'
 
+const router = useRouter()
 const auth = authStore
 const loading = ref(true)
 const user = ref(null)
+
+const volver = () => {
+  if (auth.isAdmin()) router.push('/dashboard-admin')
+  else if (auth.hasRole('Doctor') || auth.hasRole('Nurse')) router.push('/dashboard-medico')
+  else router.push('/portal/perfil')
+}
 
 const iniciales = computed(() => {
   const u = user.value || auth.user
