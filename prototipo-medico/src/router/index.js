@@ -205,7 +205,7 @@ router.beforeEach((to, from) => {
     return '/login'
   }
 
-  const roles = user?.roles || []
+  const roles = user?.roles?.filter(Boolean) || []
 
   if (!to.meta.public && !isAuthenticated) {
     return '/login'
@@ -214,16 +214,24 @@ router.beforeEach((to, from) => {
   const homeRoute = roles.includes('Administrator') ? '/dashboard-admin'
     : roles.includes('Doctor') || roles.includes('Nurse') ? '/dashboard-medico'
     : roles.includes('Patient') ? '/portal/perfil'
-    : '/login'
+    : null
 
   if (to.meta.public && isAuthenticated) {
-    return homeRoute
+    if (homeRoute) return homeRoute
+    // Sesión con roles inválidos: limpiar y dejar pasar a la página pública
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('user')
+    return
   }
 
   if (!to.meta.public && to.meta.roles && isAuthenticated) {
     const hasRole = to.meta.roles.some(r => roles.includes(r))
     if (!hasRole) {
-      return homeRoute
+      if (homeRoute) return homeRoute
+      // Sin rol reconocido: limpiar sesión y redirigir a login
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('user')
+      return '/login'
     }
   }
 })
