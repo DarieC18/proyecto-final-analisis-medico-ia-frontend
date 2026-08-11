@@ -114,7 +114,7 @@
                   <template v-else>
                     <button @click="abrirEditar(u)" class="btn btn-sm btn-light border text-warning fw-medium px-3 me-2">Editar</button>
                     <button @click="toggleStatus(u)" class="btn btn-sm px-3" :class="u.status ? 'btn-light border text-danger' : 'btn-light border text-success'">
-                      {{ u.status ? 'Inactivar' : 'Activar' }}
+                      {{ u.status ? 'Desactivar' : 'Activar' }}
                     </button>
                   </template>
                 </td>

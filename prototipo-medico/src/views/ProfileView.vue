@@ -3,7 +3,7 @@
     <div class="row justify-content-center">
       <div class="col-md-8">
         <div class="mb-3">
-          <button @click="volver" class="btn btn-sm btn-outline-secondary rounded-pill">← Volver</button>
+          <button @click="volver" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">← Volver</button>
         </div>
         <div class="d-flex align-items-center gap-3 mb-4">
           <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 1.5rem;">
