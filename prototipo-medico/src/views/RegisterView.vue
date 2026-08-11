@@ -17,11 +17,15 @@
                   <div class="row g-3">
                     <div class="col-md-6">
                       <label class="form-label fw-medium">Nombre</label>
-                      <input v-model="form.name" type="text" class="form-control" placeholder="Tu nombre" required>
+                      <input v-model="form.name" type="text" class="form-control" placeholder="Tu nombre" required
+                        pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-']+"
+                        title="El nombre solo puede contener letras">
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-medium">Apellido</label>
-                      <input v-model="form.lastName" type="text" class="form-control" placeholder="Tu apellido" required>
+                      <input v-model="form.lastName" type="text" class="form-control" placeholder="Tu apellido" required
+                        pattern="[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-']+"
+                        title="El apellido solo puede contener letras">
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-medium">Nombre de usuario</label>
@@ -144,6 +148,18 @@ const registrar = async () => {
   loading.value = true
   successMsg.value = ''
   errorMsg.value = ''
+
+  const soloLetras = /^[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s\-']+$/
+  if (!soloLetras.test(form.name)) {
+    errorMsg.value = 'El nombre solo puede contener letras.'
+    loading.value = false
+    return
+  }
+  if (!soloLetras.test(form.lastName)) {
+    errorMsg.value = 'El apellido solo puede contener letras.'
+    loading.value = false
+    return
+  }
 
   if (form.password !== form.confirmPassword) {
     errorMsg.value = 'Las contraseñas no coinciden'
