@@ -584,15 +584,24 @@
 
           <!-- IA TAB -->
           <div v-if="tabActual === 'ia'" class="animation-fade">
+
+            <!-- Header con botón siempre visible -->
+            <div class="d-flex justify-content-between align-items-center mb-4" v-if="!generandoIA">
+              <div>
+                <h6 class="fw-bold mb-0">Análisis de IA</h6>
+                <small class="text-muted">{{ analisisIA.length }} análisis generado{{ analisisIA.length === 1 ? '' : 's' }}</small>
+              </div>
+              <button @click="solicitarAnalisisIA" class="btn btn-dark px-4" :disabled="solicitandoIA">
+                <span v-if="solicitandoIA" class="spinner-border spinner-border-sm me-2"></span>
+                {{ solicitandoIA ? 'Procesando...' : analisisIA.length === 0 ? 'Generar Reporte IA' : '+ Nuevo Análisis' }}
+              </button>
+            </div>
+
+            <!-- Estado vacío descriptivo -->
             <div v-if="analisisIA.length === 0 && !generandoIA" class="text-center py-5">
               <div class="display-4 mb-3">🧠</div>
               <h4 class="fw-bold">Asistente de Diagnóstico</h4>
               <p class="text-muted w-50 mx-auto">La Inteligencia Artificial analizará el cuadro clínico, signos vitales y síntomas para sugerir recomendaciones y calcular factores de riesgo.</p>
-              <button @click="solicitarAnalisisIA" class="btn btn-dark btn-lg px-5 mt-3 shadow">
-                <span v-if="solicitandoIA" class="spinner-border spinner-border-sm me-2"></span>
-                <span v-if="solicitandoIA">Procesando modelo...</span>
-                <span v-else>Generar Reporte IA</span>
-              </button>
             </div>
 
             <div v-if="generandoIA" class="text-center py-5">
