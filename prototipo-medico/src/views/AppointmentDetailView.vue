@@ -646,6 +646,11 @@
                       </li>
                     </ul>
                   </div>
+                  <div v-if="!parsearRespuestaIA(ia.aiResponse)" class="mb-3">
+                    <h6 class="fw-bold text-dark mb-1">Resultado:</h6>
+                    <pre class="bg-white border rounded-3 p-3 small text-muted"
+                         style="white-space: pre-wrap; overflow-x: auto; max-height: 300px">{{ ia.aiResponse }}</pre>
+                  </div>
                 </template>
                 <div v-else-if="ia.aiResponse?.startsWith('ERROR')" class="alert alert-danger border-0 rounded-3 small py-2 mb-3">
                   {{ ia.aiResponse }}
@@ -963,6 +968,7 @@ const guardarSignos = async () => {
 
 const solicitarAnalisisIA = async () => {
   solicitandoIA.value = true
+  generandoIA.value = true
   try {
     const res = await aiAnalysisService.generate({
       appointmentId: Number(props.id),
@@ -983,12 +989,20 @@ const solicitarAnalisisIA = async () => {
   } catch (err) {
     const data = err.response?.data
     error.value = data?.detail || data?.title || 'Error al generar análisis IA'
+    generandoIA.value = false
     solicitandoIA.value = false
   }
 }
 
 const parsearRespuestaIA = (raw) => {
-  try { return JSON.parse(raw) } catch { return null }
+  if (!raw) return null
+  try {
+    const cleaned = raw.trim()
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/, '')
+      .replace(/\s*```$/, '')
+    return JSON.parse(cleaned)
+  } catch { return null }
 }
 
 const marcarRevisado = async (ia) => {
