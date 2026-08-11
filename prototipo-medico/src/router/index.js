@@ -195,7 +195,16 @@ const router = createRouter({
 router.beforeEach((to, from) => {
   const isAuthenticated = !!localStorage.getItem('accessToken')
   const userData = localStorage.getItem('user')
-  const user = userData ? JSON.parse(userData) : null
+
+  let user = null
+  try {
+    user = userData ? JSON.parse(userData) : null
+  } catch {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('user')
+    return '/login'
+  }
+
   const roles = user?.roles || []
 
   if (!to.meta.public && !isAuthenticated) {
@@ -205,7 +214,7 @@ router.beforeEach((to, from) => {
   const homeRoute = roles.includes('Administrator') ? '/dashboard-admin'
     : roles.includes('Doctor') || roles.includes('Nurse') ? '/dashboard-medico'
     : roles.includes('Patient') ? '/portal/perfil'
-    : '/perfil'
+    : '/login'
 
   if (to.meta.public && isAuthenticated) {
     return homeRoute
