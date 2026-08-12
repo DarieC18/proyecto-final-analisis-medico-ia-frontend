@@ -84,6 +84,7 @@
                   <option value="Historial externo">Historial externo</option>
                   <option value="Estudios en PDF">Estudios en PDF</option>
                   <option value="Documentos administrativos">Documentos administrativos</option>
+                  <option value="Seguro médico">Seguro médico</option>
                 </select>
               </div>
             </div>
