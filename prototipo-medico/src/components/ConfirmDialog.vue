@@ -1,17 +1,21 @@
 <template>
-  <div v-if="visible" class="d-flex justify-content-center mt-5 animation-fade">
-    <div class="card shadow border-0 rounded-4 text-center p-5" style="max-width: 500px;">
-      <div class="mb-4">
-        <div class="display-1" :class="iconClass">{{ icon }}</div>
-      </div>
-      <h4 class="fw-bold mb-3">{{ title }}</h4>
-      <p class="text-muted mb-4">{{ message }}</p>
-      <div class="d-flex justify-content-center gap-3">
-        <button @click="$emit('cancel')" class="btn btn-light border px-4 py-2 fw-medium">Cancelar</button>
-        <button @click="$emit('confirm')" class="btn px-4 py-2 fw-medium shadow-sm" :class="confirmClass">Sí, {{ confirmText }}</button>
+  <Teleport to="body">
+    <div v-if="visible" class="confirm-overlay" @click.self="$emit('cancel')">
+      <div class="confirm-card animation-fade">
+        <div class="mb-4">
+          <div class="display-1" :class="iconClass">{{ icon }}</div>
+        </div>
+        <h4 class="fw-bold mb-3">{{ title }}</h4>
+        <p class="text-muted mb-4">{{ message }}</p>
+        <div class="d-flex justify-content-center gap-3">
+          <button @click="$emit('cancel')" class="btn btn-light border px-4 py-2 fw-medium">Cancelar</button>
+          <button @click="$emit('confirm')" class="btn px-4 py-2 fw-medium shadow-sm" :class="confirmClass">
+            Sí, {{ confirmText }}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script setup>
@@ -33,11 +37,33 @@ const confirmClass = computed(() => props.danger ? 'btn-danger' : 'btn-primary')
 </script>
 
 <style scoped>
-.animation-fade {
-  animation: fadeIn 0.3s ease-in-out;
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
+
+.confirm-card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 2.5rem;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.animation-fade {
+  animation: fadeIn 0.2s ease-out;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
 }
 </style>
