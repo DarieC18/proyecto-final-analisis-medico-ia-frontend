@@ -13,8 +13,8 @@
             <div v-if="errorMsg" class="alert alert-danger border-0 rounded-3 py-2 small">{{ errorMsg }}</div>
             <form @submit.prevent="iniciarSesion" class="form-card">
               <div class="mb-3">
-                <label class="form-label fw-medium">👤 Nombre de Usuario</label>
-                <input v-model="userName" type="text" class="form-control form-control-lg" placeholder="Tu usuario" required>
+                <label class="form-label fw-medium">👤 Usuario o Correo</label>
+                <input v-model="userName" type="text" class="form-control form-control-lg" placeholder="Tu usuario o correo electrónico" required>
               </div>
               <div class="mb-4">
                 <label class="form-label fw-medium">🔒 Contraseña</label>
