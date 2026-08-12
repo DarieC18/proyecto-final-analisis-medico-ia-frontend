@@ -689,15 +689,25 @@
             <button type="button" class="btn-close" @click="showPreview = false"></button>
           </div>
           <div class="modal-body p-3 text-center">
-            <img
-              :src="previewDoc.filePath"
-              class="img-fluid rounded-3"
-              style="max-height: 70vh;"
-              alt="Documento"
-            />
+            <template v-if="previewDoc.fileName?.toLowerCase().endsWith('.pdf')">
+              <iframe
+                :src="`/api/v1/MedicalDocument/${previewDoc.id}/file`"
+                class="w-100 border-0 rounded-3"
+                style="height: 70vh;"
+              />
+            </template>
+            <template v-else>
+              <img
+                :src="`/api/v1/MedicalDocument/${previewDoc.id}/file`"
+                class="img-fluid rounded-3"
+                style="max-height: 70vh;"
+                alt="Documento"
+              />
+            </template>
           </div>
           <div class="modal-footer border-0 pt-0">
-            <a :href="previewDoc.filePath" target="_blank" class="btn btn-outline-dark rounded-pill px-4">Abrir en nueva pestaña</a>
+            <a :href="`/api/v1/MedicalDocument/${previewDoc.id}/file`" :download="previewDoc.fileName" class="btn btn-outline-primary rounded-pill px-4">Descargar</a>
+            <a :href="`/api/v1/MedicalDocument/${previewDoc.id}/file`" target="_blank" class="btn btn-outline-dark rounded-pill px-4">Abrir en nueva pestaña</a>
             <button @click="showPreview = false" class="btn btn-dark rounded-pill px-4">Cerrar</button>
           </div>
         </div>
@@ -1158,10 +1168,6 @@ const confirmarEliminarDoc = (d) => {
 }
 
 const verDocumento = (d) => {
-  if (d.fileName?.toLowerCase().endsWith('.pdf')) {
-    window.open(d.filePath, '_blank')
-    return
-  }
   previewDoc.value = d
   showPreview.value = true
 }
