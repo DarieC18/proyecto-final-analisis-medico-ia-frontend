@@ -19,7 +19,7 @@
       </svg>
     </span>
     <span v-if="!compact" class="brand__name">
-      Smart<span class="brand__name-accent">-Medical</span> IA
+      Med<span class="brand__name-accent">Analyzer</span>
     </span>
   </span>
 </template>

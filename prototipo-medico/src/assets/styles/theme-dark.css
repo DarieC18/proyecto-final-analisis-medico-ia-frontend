@@ -101,9 +101,11 @@
   --bs-warning-bg-subtle: #3a2408;
   --bs-warning-border-subtle: #92400e;
   --bs-warning-text-emphasis: #fcd34d;
-  --bs-danger-bg-subtle: #3b1113;
-  --bs-danger-border-subtle: #991b1b;
-  --bs-danger-text-emphasis: #fca5a5;
+  /* Mismo criterio que en light: el rojo "subtle" bajaba de saturación menos
+     que success/warning y quedaba como el color con más peso visual del set. */
+  --bs-danger-bg-subtle: #2e1416;
+  --bs-danger-border-subtle: #7f2c2c;
+  --bs-danger-text-emphasis: #f3a5a5;
   --bs-light-bg-subtle: #162032;
   --bs-light-border-subtle: #23324a;
   --bs-light-text-emphasis: #cbd5e1;

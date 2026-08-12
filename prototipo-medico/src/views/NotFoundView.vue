@@ -5,7 +5,7 @@
     <h1 class="not-found__title">Esta página no existe</h1>
     <p class="not-found__text">
       La dirección <code>{{ $route.fullPath }}</code> no corresponde a ninguna sección de
-      Smart-Medical IA.
+      MedAnalyzer.
     </p>
     <RouterLink :to="homeRoute" class="btn btn-primary">
       <Icon :icon="IconBack" :size="16" class="me-2" />

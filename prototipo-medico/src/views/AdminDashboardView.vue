@@ -19,17 +19,17 @@
             :hint="`${stats.totalActiveUsers} activos · ${stats.totalInactiveUsers} inactivos`"
             :icon="IconRoles"
             tone="brand"
-            variant="solid"
+            variant="soft"
           />
         </div>
         <div class="col-md-4">
-          <StatTile label="Total de Pacientes" :value="stats.totalPatients" :icon="IconPatients" tone="success" variant="solid" />
+          <StatTile label="Total de Pacientes" :value="stats.totalPatients" :icon="IconPatients" tone="success" variant="soft" />
         </div>
         <div class="col-md-4">
-          <StatTile label="Citas Registradas" :value="totalCitas" :icon="IconAppointment" tone="warning" variant="solid" />
+          <StatTile label="Citas Registradas" :value="totalCitas" :icon="IconAppointment" tone="warning" variant="soft" />
         </div>
         <div class="col-md-6">
-          <StatTile label="Análisis IA Generados" :value="stats.totalAiAnalyses" :icon="IconAi" tone="info" variant="solid" />
+          <StatTile label="Análisis IA Generados" :value="stats.totalAiAnalyses" :icon="IconAi" tone="info" variant="soft" />
         </div>
         <div class="col-md-6">
           <StatTile label="Alertas Clínicas Activas" :value="stats.activeAlerts" :icon="IconAlert" tone="danger" variant="solid" />

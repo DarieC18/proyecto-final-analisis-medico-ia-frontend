@@ -13,13 +13,13 @@
     <template v-else>
       <div class="row g-3 mb-4">
         <div class="col-md-3">
-          <StatTile label="Total Pacientes" :value="stats.totalPatients" :icon="IconPatients" tone="brand" variant="solid" />
+          <StatTile label="Total Pacientes" :value="stats.totalPatients" :icon="IconPatients" tone="brand" variant="soft" />
         </div>
         <div class="col-md-3">
-          <StatTile label="Citas del Día" :value="stats.totalAppointmentsToday" :icon="IconAppointment" tone="success" variant="solid" />
+          <StatTile label="Citas del Día" :value="stats.totalAppointmentsToday" :icon="IconAppointment" tone="success" variant="soft" />
         </div>
         <div class="col-md-3">
-          <StatTile label="Análisis IA Pendientes" :value="stats.pendingAiAnalyses" :icon="IconAi" tone="warning" variant="solid" />
+          <StatTile label="Análisis IA Pendientes" :value="stats.pendingAiAnalyses" :icon="IconAi" tone="warning" variant="soft" />
         </div>
         <div class="col-md-3">
           <StatTile label="Alertas Activas" :value="stats.activeAlerts" :icon="IconAlert" tone="danger" variant="solid" />

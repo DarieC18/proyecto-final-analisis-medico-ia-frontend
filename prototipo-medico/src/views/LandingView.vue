@@ -154,7 +154,7 @@
       <div class="l-cta">
         <h2 class="l-cta__title">El futuro de tu consulta empieza hoy</h2>
         <p class="l-cta__sub">
-          Únete a los centros que ya diagnostican más rápido con Smart-Medical IA.
+          Únete a los centros que ya diagnostican más rápido con MedAnalyzer.
         </p>
         <div class="l-cta__actions">
           <AppButton variant="on-brand" size="lg" to="/registro">Crear cuenta gratis</AppButton>
@@ -167,7 +167,7 @@
     <footer class="l-footer">
       <div class="l-container l-footer__inner">
         <BrandMark :size="26" compact />
-        <small class="text-app-muted">© {{ year }} Smart-Medical IA. Proyecto académico.</small>
+        <small class="text-app-muted">© {{ year }} MedAnalyzer. Proyecto académico.</small>
         <div class="l-footer__links">
           <RouterLink to="/login">Acceso</RouterLink>
           <RouterLink to="/registro">Registro</RouterLink>

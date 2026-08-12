@@ -66,8 +66,9 @@
   --bs-warning-bg-subtle: #fef3c7;
   --bs-warning-border-subtle: #fcd34d;
   --bs-warning-text-emphasis: #92400e;
-  --bs-danger-bg-subtle: #fee2e2;
-  --bs-danger-border-subtle: #fca5a5;
+  /* Ver nota en tokens.css: mismo ajuste de saturación que --c-danger-subtle/border. */
+  --bs-danger-bg-subtle: #fef2f2;
+  --bs-danger-border-subtle: #fecaca;
   --bs-danger-text-emphasis: #991b1b;
   --bs-light-bg-subtle: #f8fafc;
   --bs-light-border-subtle: #e2e8f0;

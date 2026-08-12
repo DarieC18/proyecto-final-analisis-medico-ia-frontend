@@ -72,8 +72,12 @@
   --c-danger-500: #ef4444;
   --c-danger-600: #dc2626;
   --c-danger-700: #b91c1c;
-  --c-danger-subtle: #fee2e2;
-  --c-danger-border: #fca5a5;
+  /* Antes #fee2e2 / #fca5a5: la pareja subtle/border quedaba tan saturada como
+     success/warning, pero el rojo se percibe más "urgente" a igual saturación
+     que verde o ámbar. Se baja un escalón para que una tarjeta de alerta no
+     grite al lado de badges y bordes normales. */
+  --c-danger-subtle: #fef2f2;
+  --c-danger-border: #fecaca;
   --c-danger-emphasis: #991b1b;
 
   /* Violeta a propósito: el --bs-info:#3b82f6 anterior chocaba con el primario
