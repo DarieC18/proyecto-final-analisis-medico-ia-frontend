@@ -80,8 +80,7 @@
                   <StatusBadge :text="log.action" variant="info" />
                 </td>
                 <td class="pe-4 py-3">
-                  <span v-if="log.action === 'Login'" class="text-muted small">Cuenta de {{ log.userName }}</span>
-                  <code v-else class="small text-muted" :title="log.entityId">{{ log.entityId?.slice(0, 8) }}…</code>
+                  <span class="text-muted small">{{ log.entityName || log.entityId?.slice(0, 8) + '…' }}</span>
                 </td>
               </tr>
               <tr v-if="detalleId === log.id">
