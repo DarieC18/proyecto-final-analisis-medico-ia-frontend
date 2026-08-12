@@ -87,8 +87,10 @@
                 </select>
               </div>
             </div>
+            <div v-if="uploadError" class="alert alert-danger border-0 rounded-3 py-2 small mt-3 mb-0">{{ uploadError }}</div>
+            <div v-if="uploadSuccess" class="alert alert-success border-0 rounded-3 py-2 small mt-3 mb-0">{{ uploadSuccess }}</div>
             <div class="d-flex justify-content-end gap-3 mt-4">
-              <button type="button" @click="showUpload = false; fileType = ''" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</button>
+              <button type="button" @click="showUpload = false; fileType = ''; uploadError = ''; uploadSuccess = ''" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</button>
               <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm" :disabled="subiendo">
                 <span v-if="subiendo" class="spinner-border spinner-border-sm me-2"></span>
                 📤 Subir Documento
@@ -157,6 +159,8 @@ const subiendo = ref(false)
 const uploadDescription = ref('')
 const fileType = ref('')
 const fileInput = ref(null)
+const uploadError = ref('')
+const uploadSuccess = ref('')
 const deleteDialog = ref(false)
 const deleteTarget = ref(null)
 
@@ -217,7 +221,17 @@ const limpiarBusqueda = () => {
 
 const subirDocumento = async () => {
   const file = fileInput.value?.files?.[0]
+  uploadError.value = ''
+  uploadSuccess.value = ''
   if (!file) return
+  if (!fileType.value) {
+    uploadError.value = 'Selecciona el tipo de documento.'
+    return
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    uploadError.value = 'El archivo supera el límite de 10 MB.'
+    return
+  }
   subiendo.value = true
   try {
     const formData = new FormData()
@@ -227,13 +241,18 @@ const subirDocumento = async () => {
     formData.append('patientId', pacienteId.value)
     if (uploadDescription.value) formData.append('description', uploadDescription.value)
     await medicalDocumentService.upload(formData)
-    showUpload.value = false
+    uploadSuccess.value = 'Documento subido exitosamente.'
     uploadDescription.value = ''
     fileType.value = ''
     fileInput.value.value = ''
     await cargarDocumentos()
+    setTimeout(() => {
+      uploadSuccess.value = ''
+      showUpload.value = false
+    }, 1500)
   } catch (err) {
-    error.value = 'Error al subir el documento'
+    const msg = err.response?.data?.message
+    uploadError.value = msg || 'Error al subir el documento. Verifica el archivo e inténtalo de nuevo.'
   } finally {
     subiendo.value = false
   }

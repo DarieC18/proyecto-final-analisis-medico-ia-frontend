@@ -521,7 +521,7 @@
           <div v-if="tabActual === 'documentos'" class="animation-fade">
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h5 class="fw-bold text-dark mb-0">Documentos</h5>
-              <button @click="showDocUpload = !showDocUpload" class="btn btn-primary btn-sm px-3 shadow-sm">
+              <button @click="showDocUpload = !showDocUpload; docError = ''; docSuccess = ''" class="btn btn-primary btn-sm px-3 shadow-sm">
                 {{ showDocUpload ? 'Cancelar' : '+ Subir Documento' }}
               </button>
             </div>
@@ -557,6 +557,8 @@
                       </button>
                     </div>
                   </div>
+                  <div v-if="docError" class="alert alert-danger border-0 rounded-3 py-2 small mt-3 mb-0">{{ docError }}</div>
+                  <div v-if="docSuccess" class="alert alert-success border-0 rounded-3 py-2 small mt-3 mb-0">{{ docSuccess }}</div>
                 </form>
               </div>
             </div>
@@ -787,6 +789,8 @@ const showDocUpload = ref(false)
 const subiendoDoc = ref(false)
 const docFileInput = ref(null)
 const docFileType = ref('')
+const docError = ref('')
+const docSuccess = ref('')
 
 const deleteDocDialog = ref(false)
 const deleteDocTarget = ref(null)
@@ -867,18 +871,11 @@ const guardarNotas = async () => {
   guardandoNotas.value = true
   notasGuardadas.value = false
   try {
-    await appointmentService.update(Number(props.id), {
-      patientId: cita.value.patientId,
-      doctorId: cita.value.doctorId,
-      appointmentDate: cita.value.appointmentDate,
-      status: cita.value.status,
-      reason: cita.value.reason,
-      notes: notasEdit.value
-    })
+    await appointmentService.updateNotes(Number(props.id), notasEdit.value)
     notasGuardadas.value = true
     cita.value.notes = notasEdit.value
     setTimeout(() => { notasGuardadas.value = false }, 3000)
-  } catch (err) {
+  } catch {
     error.value = 'Error al guardar las notas'
   } finally {
     guardandoNotas.value = false
@@ -1171,7 +1168,17 @@ const verDocumento = (d) => {
 
 const subirDocumento = async () => {
   const file = docFileInput.value?.files?.[0]
+  docError.value = ''
+  docSuccess.value = ''
   if (!file) return
+  if (!docFileType.value) {
+    docError.value = 'Selecciona el tipo de documento.'
+    return
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    docError.value = 'El archivo supera el límite de 10 MB.'
+    return
+  }
   subiendoDoc.value = true
   try {
     const formData = new FormData()
@@ -1181,12 +1188,17 @@ const subirDocumento = async () => {
     formData.append('appointmentId', props.id)
     formData.append('patientId', cita.value.patientId)
     await medicalDocumentService.upload(formData)
-    showDocUpload.value = false
+    docSuccess.value = 'Documento subido exitosamente.'
     docFileType.value = ''
     docFileInput.value.value = ''
     await cargarDocumentos()
+    setTimeout(() => {
+      docSuccess.value = ''
+      showDocUpload.value = false
+    }, 1500)
   } catch (err) {
-    error.value = 'Error al subir el documento'
+    const msg = err.response?.data?.message
+    docError.value = msg || 'Error al subir el documento. Verifica el archivo e inténtalo de nuevo.'
   } finally {
     subiendoDoc.value = false
   }
