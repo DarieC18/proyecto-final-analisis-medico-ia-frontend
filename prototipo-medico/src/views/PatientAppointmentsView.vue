@@ -22,9 +22,9 @@
           <form @submit.prevent="solicitar">
             <div class="row g-3 mb-4">
               <div class="col-md-6">
-                <label class="form-label fw-medium">Doctor <span class="text-muted fw-normal">(opcional)</span></label>
-                <select v-model="form.doctorId" class="form-select">
-                  <option value="">Sin preferencia</option>
+                <label class="form-label fw-medium">Doctor</label>
+                <select v-model="form.doctorId" class="form-select" required>
+                  <option value="" disabled>Selecciona un doctor...</option>
                   <option v-for="d in doctores" :key="d.id" :value="d.id">{{ d.fullName }}<span v-if="d.specialty"> — {{ d.specialty }}</span></option>
                 </select>
               </div>
@@ -136,11 +136,15 @@ const abrirCrear = async () => {
 }
 
 const solicitar = async () => {
-  saving.value = true
   formError.value = ''
+  if (!form.value.doctorId) {
+    formError.value = 'Debes seleccionar un doctor para continuar.'
+    return
+  }
+  saving.value = true
   try {
     await portalService.requestAppointment({
-      doctorId: form.value.doctorId || null,
+      doctorId: form.value.doctorId,
       appointmentDate: form.value.appointmentDate,
       reason: form.value.reason,
       notes: form.value.notes || null
