@@ -399,6 +399,8 @@
                     <input v-model.number="editSignoForm.glucose" type="number" class="form-control">
                   </div>
                 </div>
+                <div v-if="editSignoError" class="alert alert-danger border-0 rounded-3 py-2 small mt-3">{{ editSignoError }}</div>
+                <div v-if="editSignoSuccess" class="alert alert-success border-0 rounded-3 py-2 small mt-3">{{ editSignoSuccess }}</div>
                 <div class="d-flex justify-content-end gap-2 mt-4">
                   <button @click="cancelarEditSigno" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</button>
                   <button @click="actualizarSigno" class="btn btn-success rounded-pill px-4 shadow-sm" :disabled="guardandoSignos">
@@ -763,6 +765,8 @@ const deleteSintomaTarget = ref(null)
 const deleteSintomaLoading = ref(false)
 
 const editSignoId = ref(null)
+const editSignoError = ref('')
+const editSignoSuccess = ref('')
 const editSignoForm = reactive({ temperature: 36.5, heartRate: 72, systolicPressure: 120, diastolicPressure: 80, oxygenSaturation: 98, glucose: null })
 
 const recordsMedicos = ref([])
@@ -1071,17 +1075,22 @@ const editarSigno = (s) => {
 
 const cancelarEditSigno = () => {
   editSignoId.value = null
+  editSignoError.value = ''
+  editSignoSuccess.value = ''
 }
 
 const actualizarSigno = async () => {
   guardandoSignos.value = true
+  editSignoError.value = ''
+  editSignoSuccess.value = ''
   try {
-    const res = await vitalSignService.update(editSignoId.value, { ...editSignoForm })
+    await vitalSignService.update(editSignoId.value, { ...editSignoForm })
     const idx = signos.value.findIndex(s => s.id === editSignoId.value)
-    if (idx !== -1) signos.value[idx] = res.data
-    editSignoId.value = null
-  } catch (err) {
-    error.value = 'Error al actualizar signos vitales'
+    if (idx !== -1) signos.value[idx] = { ...signos.value[idx], ...editSignoForm }
+    editSignoSuccess.value = 'Medición actualizada exitosamente.'
+    setTimeout(() => { editSignoId.value = null }, 1500)
+  } catch {
+    editSignoError.value = 'Error al actualizar la medición. Intente de nuevo.'
   } finally {
     guardandoSignos.value = false
   }
