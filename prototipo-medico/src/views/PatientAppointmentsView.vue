@@ -29,16 +29,17 @@
               <label for="p-doctor" class="form-label">
                 Médico <span class="text-app-muted fw-normal">(opcional)</span>
               </label>
-              <select id="p-doctor" v-model="form.doctorId" class="form-select">
-                <option value="">Sin preferencia</option>
-                <option v-for="d in doctores" :key="d.id" :value="d.id">
-                  {{ d.fullName }}<template v-if="d.specialty"> — {{ d.specialty }}</template>
-                </option>
-              </select>
+              <AppSelect id="p-doctor" v-model="form.doctorId" :options="opcionesDoctores" />
             </div>
             <div class="col-md-6">
               <label for="p-fecha" class="form-label">Fecha de la cita</label>
-              <input id="p-fecha" v-model="form.appointmentDate" type="datetime-local" class="form-control" required />
+              <AppDatePicker
+                id="p-fecha"
+                v-model="form.appointmentDate"
+                mode="datetime"
+                :min="hoyISO"
+                placeholder="Elegir fecha y hora…"
+              />
             </div>
             <div class="col-12">
               <label for="p-motivo" class="form-label">Motivo de consulta</label>
@@ -110,11 +111,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { portalService } from '@/api/portal'
 import {
   AppAlert,
   AppButton,
+  AppDatePicker,
+  AppSelect,
   BaseCard,
   EmptyState,
   FormSection,
@@ -134,6 +137,20 @@ const doctores = ref([])
 const saving = ref(false)
 const formError = ref('')
 const form = ref({ doctorId: '', appointmentDate: '', reason: '', notes: '' })
+
+const opcionesDoctores = computed(() => [
+  { value: '', label: 'Sin preferencia' },
+  ...doctores.value.map((d) => ({
+    value: d.id,
+    label: d.specialty ? `${d.fullName} — ${d.specialty}` : d.fullName
+  }))
+])
+
+// Una cita no puede pedirse para ayer. El input nativo no lo impedía.
+const hoyISO = computed(() => {
+  const n = new Date()
+  return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`
+})
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '—'
@@ -173,6 +190,13 @@ const abrirCrear = async () => {
 }
 
 const solicitar = async () => {
+  // AppDatePicker no es un <input>, así que la validación nativa de `required`
+  // ya no cubre este campo: se comprueba a mano antes de enviar.
+  if (!form.value.appointmentDate) {
+    formError.value = 'Selecciona la fecha y hora de la cita.'
+    return
+  }
+
   saving.value = true
   formError.value = ''
   try {

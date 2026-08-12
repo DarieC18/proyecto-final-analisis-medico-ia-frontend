@@ -464,59 +464,65 @@
           <!-- DOCUMENTOS TAB -->
           <div v-if="tabActual === 'documentos'" class="animation-fade">
             <div class="d-flex justify-content-between align-items-center mb-4">
-              <h5 class="fw-bold text-dark mb-0">Documentos</h5>
-              <button @click="showDocUpload = !showDocUpload" class="btn btn-primary btn-sm px-3 shadow-sm">
-                {{ showDocUpload ? 'Cancelar' : '+ Subir Documento' }}
-              </button>
+              <h5 class="fw-bold mb-0">Documentos</h5>
+              <AppButton
+                variant="primary"
+                size="sm"
+                :icon="showDocUpload ? IconClose : IconUpload"
+                @click="showDocUpload = !showDocUpload"
+              >
+                {{ showDocUpload ? 'Cancelar' : 'Subir documento' }}
+              </AppButton>
             </div>
 
-            <FormSection v-if="showDocUpload" title="Subir Documento" :icon="IconUpload" class="mb-4">
-                <form @submit.prevent="subirDocumento">
-                  <div class="row g-3">
-                    <div class="col-md-4">
-                      <label class="form-label fw-medium">📄 Archivo</label>
-                      <input ref="docFileInput" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
-                      <small class="text-muted">PDF, JPG o PNG. Máximo 10MB.</small>
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label fw-medium">Tipo de documento</label>
-                      <select v-model="docFileType" class="form-select" required>
-                        <option value="">Seleccionar...</option>
-                        <option value="Resultados de laboratorio">Resultados de laboratorio</option>
-                        <option value="Indicaciones médicas">Indicaciones médicas</option>
-                        <option value="Historial externo">Historial externo</option>
-                        <option value="Estudios en PDF">Estudios en PDF</option>
-                        <option value="Documentos administrativos">Documentos administrativos</option>
-                      </select>
-                    </div>
-                    <div class="col-md-4 d-flex align-items-end">
-                      <button type="submit" class="btn btn-success w-100 rounded-pill shadow-sm" :disabled="subiendoDoc">
-                        <span v-if="subiendoDoc" class="spinner-border spinner-border-sm me-2"></span>
-                        📤 Subir
-                      </button>
-                    </div>
+            <FormSection v-if="showDocUpload" title="Subir documento" :icon="IconUpload" class="mb-4">
+              <form @submit.prevent="subirDocumento">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label for="ad-archivo" class="form-label">Archivo</label>
+                    <input id="ad-archivo" ref="docFileInput" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                    <small class="text-app-muted">PDF, JPG o PNG. Máximo 10MB.</small>
                   </div>
-                </form>
-              
-            </FormSection>
-
-            <LoadingState v-if="cargandoDocs" />
-            <div v-else-if="documentos.length === 0" class="text-muted text-center py-4">
-              <p>No hay documentos asociados a esta cita.</p>
-            </div>
-            <div v-else class="row g-4">
-              <div class="col-md-4 col-sm-6" v-for="d in documentos" :key="d.id">
-                <div class="card border-0 shadow-sm rounded-4 h-100">
-                  <div class="card-body p-4 text-center">
-                    <div class="display-5 mb-2">{{ fileIcon(d.fileName) }}</div>
-                    <h6 class="fw-bold small mb-1">{{ d.fileName }}</h6>
-                    <small class="text-muted d-block mb-2">{{ formatDate(d.uploadedAt) }}</small>
-                    <div class="d-flex justify-content-center gap-2">
-                      <button @click="verDocumento(d)" class="btn btn-sm btn-light border px-3">Ver</button>
-                      <button @click="confirmarEliminarDoc(d)" class="btn btn-sm btn-light border text-danger px-3">Eliminar</button>
-                    </div>
+                  <div class="col-md-4">
+                    <label for="ad-tipo" class="form-label">Tipo de documento</label>
+                    <select id="ad-tipo" v-model="docFileType" class="form-select" required>
+                      <option value="">Seleccionar…</option>
+                      <option value="Resultados de laboratorio">Resultados de laboratorio</option>
+                      <option value="Indicaciones médicas">Indicaciones médicas</option>
+                      <option value="Historial externo">Historial externo</option>
+                      <option value="Estudios en PDF">Estudios en PDF</option>
+                      <option value="Documentos administrativos">Documentos administrativos</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 d-flex align-items-end">
+                    <AppButton type="submit" variant="success" block :icon="IconUpload" :loading="subiendoDoc">
+                      Subir
+                    </AppButton>
                   </div>
                 </div>
+              </form>
+            </FormSection>
+
+            <LoadingState v-if="cargandoDocs" label="Cargando documentos…" />
+            <EmptyState
+              v-else-if="documentos.length === 0"
+              size="sm"
+              :icon="IconDocument"
+              title="Sin documentos asociados"
+            />
+            <div v-else class="row g-3">
+              <div class="col-md-4 col-sm-6" v-for="d in documentos" :key="d.id">
+                <BaseCard class="h-100 text-center">
+                  <IconTile :icon="fileIconFor(d.fileName)" :tone="fileToneFor(d.fileName)" size="lg" class="mx-auto mb-2" />
+                  <p class="doc__name">{{ d.fileName }}</p>
+                  <small class="text-app-muted d-block mb-3">{{ formatDate(d.uploadedAt) }}</small>
+                  <div class="d-flex justify-content-center gap-2">
+                    <AppButton variant="soft" size="sm" :icon="IconView" @click="verDocumento(d)">Ver</AppButton>
+                    <AppButton variant="soft-danger" size="sm" :icon="IconDelete" @click="confirmarEliminarDoc(d)">
+                      Eliminar
+                    </AppButton>
+                  </div>
+                </BaseCard>
               </div>
             </div>
           </div>
@@ -618,29 +624,7 @@
       @cancel="deleteDocDialog = false"
     />
 
-    <div v-if="showPreview && previewDoc" class="modal-backdrop fade show"></div>
-    <div v-if="showPreview && previewDoc" class="modal d-block" tabindex="-1" @click.self="showPreview = false">
-      <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4 shadow">
-          <div class="modal-header border-0 pb-0">
-            <h5 class="fw-bold">{{ previewDoc.fileName }}</h5>
-            <button type="button" class="btn-close" @click="showPreview = false"></button>
-          </div>
-          <div class="modal-body p-3 text-center">
-            <img
-              :src="previewDoc.filePath"
-              class="img-fluid rounded-3"
-              style="max-height: 70vh;"
-              alt="Documento"
-            />
-          </div>
-          <div class="modal-footer border-0 pt-0">
-            <a :href="previewDoc.filePath" target="_blank" class="btn btn-outline-dark rounded-pill px-4">Abrir en nueva pestaña</a>
-            <button @click="showPreview = false" class="btn btn-dark rounded-pill px-4">Cerrar</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <DocumentPreviewModal v-model="showPreview" :doc="previewDoc" />
   </div>
 </template>
 
@@ -658,13 +642,15 @@ import { recommendationService } from '@/api/recommendations'
 import { medicalDocumentService } from '@/api/medicalDocuments'
 import {
   AppAlert,
+  AppButton,
   BaseCard,
   ConfirmDialog,
   DataField,
-  AppButton,
+  DocumentPreviewModal,
   EmptyState,
   FormSection,
   Icon,
+  IconTile,
   LoadingState,
   PageHeader,
   StatusBadge,
@@ -675,6 +661,8 @@ import {
   IconAlert,
   IconAppointment,
   IconCheck,
+  IconClose,
+  IconDelete,
   IconDocument,
   IconEdit,
   IconNotes,
@@ -684,8 +672,10 @@ import {
   IconSymptoms,
   IconUpload,
   IconUser,
+  IconView,
   IconVitals
 } from '@/lib/icons'
+import { fileIconFor, fileToneFor, isPdfFile } from '@/lib/fileIcons'
 import { statusVariant, translateStatus } from '@/utils/appointmentStatus'
 import { authStore } from '@/stores/auth'
 
@@ -1116,22 +1106,17 @@ const editarRecord = (r) => {
   showRecordForm.value = true
 }
 
-const fileIcon = (name) => {
-  if (!name) return '📄'
-  const ext = name.split('.').pop()?.toLowerCase()
-  if (ext === 'pdf') return '📕'
-  if (['jpg', 'jpeg', 'png'].includes(ext)) return '🖼️'
-  return '📄'
-}
-
 const confirmarEliminarDoc = (d) => {
   deleteDocTarget.value = d
   deleteDocDialog.value = true
 }
 
+// Los PDF no se previsualizan dentro del modal: el visor nativo del navegador
+// en una pestaña aparte es mejor que un <embed> encajado (mismo criterio que
+// MedicalDocumentsView).
 const verDocumento = (d) => {
-  if (d.fileName?.toLowerCase().endsWith('.pdf')) {
-    window.open(d.filePath, '_blank')
+  if (isPdfFile(d.fileName)) {
+    window.open(`/api/v1/MedicalDocument/${d.id}/file`, '_blank')
     return
   }
   previewDoc.value = d
@@ -1259,5 +1244,15 @@ onMounted(() => {
   margin: 0.5rem 0 0;
   font-size: 0.85rem;
   color: var(--app-text-muted);
+}
+
+.doc__name {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--app-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

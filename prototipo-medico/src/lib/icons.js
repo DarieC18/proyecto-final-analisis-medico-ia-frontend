@@ -74,6 +74,7 @@ export {
   ArrowRight as IconForward,
   ArrowUpRight as IconExternal,
   ChevronDown as IconChevronDown,
+  ChevronLeft as IconChevronLeft,
   ChevronRight as IconChevronRight,
   RefreshCw as IconRefresh,
   History as IconHistory,

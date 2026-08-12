@@ -10,6 +10,12 @@
 
 :root,
 [data-bs-theme='light'] {
+  /* Explícito y no heredado del SO: sin esto, un usuario con el SO en oscuro
+     pero la app en modo claro (o al revés) recibe los popups nativos del
+     calendario/select en el tema equivocado, aunque el resto de la página
+     esté correcto. Ver el comentario gemelo en theme-dark.css. */
+  color-scheme: light;
+
   /* --- Neutro: Tailwind slate ------------------------------------------------
      Rampa única. Quedan desterradas la rampa `gray` de Tailwind y el #e9ecef
      de Bootstrap que convivían con esta en el código anterior. Subtono azul

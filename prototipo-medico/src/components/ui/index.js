@@ -1,5 +1,7 @@
 export { default as AppAlert } from './AppAlert.vue'
 export { default as AppButton } from './AppButton.vue'
+export { default as AppDatePicker } from './AppDatePicker.vue'
+export { default as AppSelect } from './AppSelect.vue'
 export { default as AvatarInitials } from './AvatarInitials.vue'
 export { default as BaseCard } from './BaseCard.vue'
 export { default as BaseModal } from './BaseModal.vue'

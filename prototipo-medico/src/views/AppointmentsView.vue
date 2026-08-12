@@ -31,25 +31,30 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label for="a-patient" class="form-label">Paciente</label>
-              <select id="a-patient" v-model="form.patientId" class="form-select" required>
-                <option value="">Seleccione un paciente…</option>
-                <option v-for="p in pacientes" :key="p.id" :value="p.id">
-                  {{ p.fullName }} — {{ p.identificationNumber }}
-                </option>
-              </select>
+              <AppSelect
+                id="a-patient"
+                v-model="form.patientId"
+                :options="opcionesPacientes"
+                placeholder="Seleccione un paciente…"
+              />
             </div>
             <div class="col-md-6">
               <label for="a-doctor" class="form-label">Médico</label>
-              <select id="a-doctor" v-model="form.doctorId" class="form-select" required>
-                <option value="">Seleccione un médico…</option>
-                <option v-for="d in doctores" :key="d.id" :value="d.id">
-                  {{ d.name }} {{ d.lastName }}
-                </option>
-              </select>
+              <AppSelect
+                id="a-doctor"
+                v-model="form.doctorId"
+                :options="opcionesDoctores"
+                placeholder="Seleccione un médico…"
+              />
             </div>
             <div class="col-md-6">
               <label for="a-date" class="form-label">Fecha y hora</label>
-              <input id="a-date" v-model="form.appointmentDate" type="datetime-local" class="form-control" required>
+              <AppDatePicker
+                id="a-date"
+                v-model="form.appointmentDate"
+                mode="datetime"
+                placeholder="Elegir fecha y hora…"
+              />
             </div>
           </div>
         </FormSection>
@@ -137,6 +142,8 @@ import { useRouter } from 'vue-router'
 import {
   AppAlert,
   AppButton,
+  AppDatePicker,
+  AppSelect,
   BaseCard,
   DataTable,
   FilterBar,
@@ -174,6 +181,14 @@ const filtro = ref('')
 
 const EMPTY_FORM = { patientId: '', doctorId: '', appointmentDate: '', reason: '', notes: '' }
 const form = reactive({ ...EMPTY_FORM })
+
+const opcionesPacientes = computed(() =>
+  pacientes.value.map((p) => ({ value: p.id, label: `${p.fullName} — ${p.identificationNumber}` }))
+)
+
+const opcionesDoctores = computed(() =>
+  doctores.value.map((d) => ({ value: d.id, label: `${d.name} ${d.lastName}` }))
+)
 
 const columnas = [
   { key: 'paciente', label: 'Paciente' },
@@ -255,6 +270,13 @@ const cancelarForm = () => {
 }
 
 const crearCita = async () => {
+  // AppSelect y AppDatePicker no son controles nativos: `required` ya no los
+  // valida, así que los campos obligatorios se comprueban aquí.
+  if (!form.patientId || !form.doctorId || !form.appointmentDate) {
+    formError.value = 'Paciente, médico y fecha son obligatorios.'
+    return
+  }
+
   saving.value = true
   formError.value = ''
   try {

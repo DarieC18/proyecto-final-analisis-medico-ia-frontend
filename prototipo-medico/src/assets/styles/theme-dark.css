@@ -14,6 +14,14 @@
    ========================================================================== */
 
 [data-bs-theme='dark'] {
+  /* El popup del calendario de <input type="date|datetime-local">, la lista
+     desplegada de <select> y las scrollbars son UI del NAVEGADOR, pintada
+     fuera del DOM: ningún selector CSS los alcanza. `color-scheme` es la única
+     palanca que existe para pedirle al motor que los pinte en oscuro en vez
+     de blanco por defecto. Sin esto, esos dos popups quedan claros encima de
+     una página oscura sin importar cuánto se retoque .form-control/.form-select. */
+  color-scheme: dark;
+
   /* --- Capa semántica de aplicación -----------------------------------------
      La jerarquía en oscuro la da el COLOR, no la sombra: canvas < surface <
      raised. Por eso `raised` es más claro que `surface`, al revés que en claro. */
