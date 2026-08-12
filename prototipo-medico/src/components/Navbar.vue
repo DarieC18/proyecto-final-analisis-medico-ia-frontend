@@ -15,7 +15,7 @@
 
           <!-- Clinical dropdown (solo Doctor/Nurse) -->
           <li v-if="auth.hasRole('Doctor') || auth.hasRole('Nurse')" class="nav-item dropdown" :class="{ show: showClinical }">
-            <button @click="showClinical = !showClinical" class="btn btn-sm btn-light border rounded-pill px-3 py-1 d-flex align-items-center gap-1 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <button @click="showClinical = !showClinical" class="btn btn-sm btn-light border rounded-pill px-3 py-1 d-flex align-items-center gap-1 dropdown-toggle">
               <span>🩺</span>
               <span>Clínico</span>
             </button>
@@ -66,13 +66,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { Collapse } from 'bootstrap'
 import { authStore } from '@/stores/auth'
 
 const router = useRouter()
+const route = useRoute()
 const auth = authStore
 const showClinical = ref(false)
+
+watch(() => route.path, () => {
+  const navbarNav = document.getElementById('navbarNav')
+  if (navbarNav) {
+    Collapse.getInstance(navbarNav)?.hide()
+  }
+  showClinical.value = false
+})
 
 const cerrarSesion = () => {
   auth.logout()
