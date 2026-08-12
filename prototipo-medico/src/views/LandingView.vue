@@ -4,7 +4,7 @@
     <header class="header d-flex align-items-center justify-content-between">
       <RouterLink to="/" class="brand d-flex align-items-center gap-2">
         <span class="brand-icon d-flex align-items-center justify-content-center">⚕️</span>
-        <span class="fw-bold">Smart-Medical <span class="text-primary">IA</span></span>
+        <span class="fw-bold">MedAnalyzer</span>
       </RouterLink>
       <div class="d-flex align-items-center gap-2">
         <RouterLink to="/login" class="btn btn-login">Iniciar sesión</RouterLink>
@@ -182,7 +182,7 @@
     <section class="cta-final container text-center rounded-4">
       <h2 class="fw-bold text-white cta-title mb-3">El futuro de tu consulta empieza hoy</h2>
       <p class="cta-sub text-white opacity-75 mx-auto mb-4">
-        Únete a los centros que ya diagnostican más rápido con Smart-Medical IA.
+        Únete a los centros que ya diagnostican más rápido con MedAnalyzer.
       </p>
       <div class="d-flex flex-wrap gap-3 justify-content-center">
         <RouterLink to="/registro" class="btn btn-cta-final btn-lg px-4">Crear cuenta gratis</RouterLink>
@@ -194,9 +194,9 @@
     <footer class="footer container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
       <div class="d-flex align-items-center gap-2">
         <span class="brand-mark small d-flex align-items-center justify-content-center">⚕️</span>
-        <span class="fw-semibold">Smart-Medical IA</span>
+        <span class="fw-semibold">MedAnalyzer</span>
       </div>
-      <small class="text-muted">© 2026 Smart-Medical IA. Proyecto académico.</small>
+      <small class="text-muted">© 2026 MedAnalyzer. Proyecto académico.</small>
       <div class="d-flex gap-4 small text-muted">
         <RouterLink to="/login" class="footer-link">Acceso</RouterLink>
         <RouterLink to="/registro" class="footer-link">Registro</RouterLink>

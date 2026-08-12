@@ -3,7 +3,7 @@
     <div class="row justify-content-center">
       <div class="col-md-5 col-lg-4 mt-5">
         <div class="text-center mb-4">
-          <h1 class="text-primary fw-bold mb-1">⚕️ Smart-Medical</h1>
+          <h1 class="text-primary fw-bold mb-1">⚕️ MedAnalyzer</h1>
           <p class="text-muted">Plataforma de Análisis Clínico</p>
         </div>
 

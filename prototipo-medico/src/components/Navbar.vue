@@ -5,7 +5,7 @@
         class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2"
         :to="auth.isAdmin() ? '/dashboard-admin' : auth.hasRole('Patient') ? '/portal/perfil' : '/dashboard-medico'"
       >
-        <span class="fs-4">⚕️</span> Smart-Medical IA
+        <span class="fs-4">⚕️</span> MedAnalyzer
       </RouterLink>
       <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
