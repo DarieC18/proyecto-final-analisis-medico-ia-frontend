@@ -5,7 +5,7 @@
         <h3 class="fw-bold mb-0">Gestión de Usuarios</h3>
         <p class="text-muted">Administración de cuentas del sistema</p>
       </div>
-      <button @click="abrirCrear" class="btn btn-dark px-4 shadow-sm">+ Crear Usuario</button>
+      <button v-if="vista === 'lista'" @click="abrirCrear" class="btn btn-dark px-4 shadow-sm">+ Crear Usuario</button>
     </div>
 
     <div v-if="loading" class="text-center py-5">
