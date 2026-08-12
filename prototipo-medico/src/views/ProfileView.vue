@@ -1,101 +1,91 @@
 <template>
-  <div class="container mt-4">
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="mb-3">
-          <button @click="volver" class="btn btn-sm btn-outline-secondary rounded-pill">← Volver</button>
-        </div>
-        <div class="d-flex align-items-center gap-3 mb-4">
-          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 1.5rem;">
-            {{ iniciales }}
-          </div>
-          <div>
-            <h3 class="fw-bold mb-0">{{ user?.name }} {{ user?.lastName }}</h3>
-            <p class="text-muted mb-0">{{ translateRole(user?.role || user?.roles?.[0]) }}</p>
-          </div>
-        </div>
+  <div>
+    <PageHeader title="Mi Perfil" subtitle="Información de tu cuenta" :icon="IconUser" :back-to="rutaVolver" />
 
-        <div v-if="loading" class="text-center py-5">
-          <div class="spinner-border text-primary" role="status"></div>
-        </div>
-
-        <div v-else class="card shadow-sm border-0 rounded-4">
-          <div class="card-body p-5">
-            <h5 class="fw-bold mb-4">Información de la Cuenta</h5>
-            <div class="row g-4">
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Nombre</label>
-                <p class="fw-medium">{{ user?.name || '-' }}</p>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Apellido</label>
-                <p class="fw-medium">{{ user?.lastName || '-' }}</p>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Usuario</label>
-                <p class="fw-medium">{{ user?.userName || '-' }}</p>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Email</label>
-                <p class="fw-medium">{{ user?.email || '-' }}</p>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Identificación</label>
-                <p class="fw-medium">{{ user?.numberIdentification || '-' }}</p>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Rol</label>
-                <p><span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">{{ translateRole(user?.role || user?.roles?.[0] || '-') }}</span></p>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Estado</label>
-                <p><StatusBadge :text="user?.status ? 'Activo' : 'Inactivo'" :variant="user?.status ? 'active' : 'inactive'" /></p>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-bold text-uppercase">Verificado</label>
-                <p><StatusBadge :text="user?.isVerified ? 'Sí' : 'No'" :variant="user?.isVerified ? 'active' : 'inactive'" /></p>
-              </div>
-              <div class="col-12">
-                <label class="form-label text-muted small fw-bold text-uppercase">Fecha de Registro</label>
-                <p class="fw-medium">{{ formatFecha(user?.createdAt) }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div class="profile__identity">
+      <AvatarInitials :name="user?.name" :last-name="user?.lastName" size="lg" />
+      <div>
+        <h2 class="profile__name">{{ user?.name }} {{ user?.lastName }}</h2>
+        <p class="profile__role">{{ translateRole(rolActual) }}</p>
       </div>
     </div>
+
+    <LoadingState v-if="loading" label="Cargando perfil…" />
+
+    <BaseCard v-else title="Información de la cuenta" :icon="IconSecurity">
+      <div class="row g-4">
+        <div class="col-md-6">
+          <DataField label="Nombre" :value="user?.name" />
+        </div>
+        <div class="col-md-6">
+          <DataField label="Apellido" :value="user?.lastName" />
+        </div>
+        <div class="col-md-6">
+          <DataField label="Usuario" :value="user?.userName" />
+        </div>
+        <div class="col-md-6">
+          <DataField label="Email" :value="user?.email" :icon="IconEmail" />
+        </div>
+        <div class="col-md-6">
+          <DataField label="Identificación" :value="user?.numberIdentification" :icon="IconIdentification" />
+        </div>
+        <div class="col-md-6">
+          <DataField label="Rol" :icon="IconRoles">
+            <StatusBadge :text="translateRole(rolActual)" variant="info" />
+          </DataField>
+        </div>
+        <div class="col-md-6">
+          <DataField label="Estado">
+            <StatusBadge
+              :text="user?.status ? 'Activo' : 'Inactivo'"
+              :variant="user?.status ? 'active' : 'inactive'"
+              dot
+            />
+          </DataField>
+        </div>
+        <div class="col-md-6">
+          <DataField label="Verificado">
+            <StatusBadge
+              :text="user?.isVerified ? 'Sí' : 'No'"
+              :variant="user?.isVerified ? 'active' : 'inactive'"
+              dot
+            />
+          </DataField>
+        </div>
+        <div class="col-12">
+          <DataField label="Fecha de registro" :value="formatFecha(user?.createdAt)" :icon="IconBirthdate" />
+        </div>
+      </div>
+    </BaseCard>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { authService } from '@/api/auth'
 import { authStore } from '@/stores/auth'
-import StatusBadge from '@/components/StatusBadge.vue'
+import { AvatarInitials, BaseCard, DataField, LoadingState, PageHeader, StatusBadge } from '@/components/ui'
+import { IconBirthdate, IconEmail, IconIdentification, IconRoles, IconSecurity, IconUser } from '@/lib/icons'
 import { translateRole } from '@/utils/roles'
+import { homeRouteForRoles } from '@/config/navigation'
 
-const router = useRouter()
 const auth = authStore
 const loading = ref(true)
 const user = ref(null)
 
-const volver = () => {
-  if (auth.isAdmin()) router.push('/dashboard-admin')
-  else if (auth.hasRole('Doctor') || auth.hasRole('Nurse')) router.push('/dashboard-medico')
-  else router.push('/portal/perfil')
-}
+const rolActual = computed(() => user.value?.role || user.value?.roles?.[0] || '')
 
-const iniciales = computed(() => {
-  const u = user.value || auth.user
-  if (!u) return '?'
-  return ((u.name?.[0] || '') + (u.lastName?.[0] || '')).toUpperCase()
-})
+// El botón de volver reutiliza la misma fuente que el guard del router y la
+// marca del sidebar; antes esta vista tenía su propia cadena de if/else que
+// podía discrepar de `homeRouteForRoles`.
+const rutaVolver = computed(() => homeRouteForRoles(auth.user?.roles ?? []) ?? '/login')
 
 const formatFecha = (dateStr) => {
-  if (!dateStr) return '-'
+  if (!dateStr) return ''
   return new Date(dateStr).toLocaleDateString('es-ES', {
-    day: 'numeric', month: 'long', year: 'numeric'
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
   })
 }
 
@@ -112,3 +102,25 @@ onMounted(async () => {
   }
 })
 </script>
+
+<style scoped>
+.profile__identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.profile__name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--app-text-strong);
+}
+
+.profile__role {
+  margin: 0.125rem 0 0;
+  font-size: 0.875rem;
+  color: var(--app-text-muted);
+}
+</style>

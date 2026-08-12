@@ -1,150 +1,160 @@
 <template>
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h3 class="fw-bold mb-0">Documentos Médicos</h3>
-        <p class="text-muted">Gestión de documentos clínicos por paciente</p>
-      </div>
-    </div>
+  <div>
+    <PageHeader
+      title="Documentos médicos"
+      subtitle="Gestión de documentos clínicos por paciente"
+      :icon="IconDocument"
+    >
+      <template #actions>
+        <AppButton
+          v-if="buscado && !showUpload"
+          variant="primary"
+          :icon="IconUpload"
+          @click="showUpload = true"
+        >
+          Subir documento
+        </AppButton>
+      </template>
+    </PageHeader>
 
-    <div class="card shadow-sm mb-4 border-0">
-      <div class="card-body p-3">
-        <div class="row g-2 align-items-end">
-          <div class="col-md-4">
-            <label class="form-label text-muted small fw-bold text-uppercase">Paciente</label>
-            <select v-model="pacienteId" class="form-select bg-light border-0" @change="cargarDocumentos">
-              <option value="">Seleccione un paciente...</option>
-              <option v-for="p in pacientes" :key="p.id" :value="p.id">{{ p.fullName || `#${p.id}` }}</option>
+    <FilterBar>
+      <div class="flex-grow-1" style="min-width: 240px">
+        <label for="d-patient" class="form-label">Paciente</label>
+        <select id="d-patient" v-model="pacienteId" class="form-select" @change="cargarDocumentos">
+          <option value="">Seleccione un paciente…</option>
+          <option v-for="p in pacientes" :key="p.id" :value="p.id">
+            {{ p.fullName || `#${p.id}` }}
+          </option>
+        </select>
+      </div>
+      <template #actions>
+        <AppButton variant="primary" :icon="IconSearch" :disabled="!pacienteId" @click="cargarDocumentos">
+          Buscar
+        </AppButton>
+        <AppButton variant="soft" @click="limpiarBusqueda">Limpiar</AppButton>
+      </template>
+    </FilterBar>
+
+    <AppAlert v-if="error" variant="danger" :message="error" class="mb-3" />
+
+    <!-- ============ Formulario de subida ============ -->
+    <BaseCard v-if="showUpload" title="Subir documento" :icon="IconUpload" class="mb-3 u-fade-in">
+      <form @submit.prevent="subirDocumento">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="d-file" class="form-label">Archivo</label>
+            <input id="d-file" ref="fileInput" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+            <small class="text-app-muted">PDF, JPG o PNG. Máximo 10 MB.</small>
+          </div>
+          <div class="col-md-3">
+            <label for="d-desc" class="form-label">
+              Descripción <span class="text-app-subtle fw-normal">(opcional)</span>
+            </label>
+            <input id="d-desc" v-model="uploadDescription" type="text" class="form-control" placeholder="Descripción">
+          </div>
+          <div class="col-md-3">
+            <label for="d-type" class="form-label">Tipo de documento</label>
+            <select id="d-type" v-model="fileType" class="form-select" required>
+              <option value="">Seleccionar…</option>
+              <option v-for="t in TIPOS_DOCUMENTO" :key="t" :value="t">{{ t }}</option>
             </select>
           </div>
-          <div class="col-md-3">
-            <button @click="cargarDocumentos" class="btn btn-dark px-4 w-100" :disabled="!pacienteId">Buscar</button>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <AppButton type="button" variant="soft" @click="cancelarSubida">Cancelar</AppButton>
+          <AppButton type="submit" variant="primary" :icon="IconUpload" :loading="subiendo">
+            Subir documento
+          </AppButton>
+        </div>
+      </form>
+    </BaseCard>
+
+    <!-- ============ Resultados ============ -->
+    <LoadingState v-if="loading" label="Cargando documentos…" />
+
+    <BaseCard v-else-if="!buscado" flush padding="none">
+      <EmptyState
+        :icon="IconDocument"
+        title="Selecciona un paciente"
+        message="Elige un paciente en el filtro superior para consultar sus documentos clínicos."
+      />
+    </BaseCard>
+
+    <BaseCard v-else-if="!documentos.length" flush padding="none">
+      <EmptyState
+        :icon="IconDocument"
+        title="Sin documentos"
+        message="Este paciente todavía no tiene documentos cargados."
+        action-label="Subir el primero"
+        :action-icon="IconUpload"
+        @action="showUpload = true"
+      />
+    </BaseCard>
+
+    <div v-else class="doc-grid">
+      <BaseCard v-for="d in documentos" :key="d.id" hoverable padding="sm">
+        <div class="doc">
+          <IconTile :icon="fileIconFor(d.fileName)" :tone="fileToneFor(d.fileName)" size="lg" />
+          <div class="doc__body">
+            <p class="doc__name" :title="d.fileName">{{ d.fileName }}</p>
+            <p class="doc__date">{{ formatDate(d.uploadedAt) }}</p>
+            <p v-if="d.description" class="doc__desc">{{ d.description }}</p>
           </div>
-          <div class="col-md-3">
-            <button @click="limpiarBusqueda" class="btn btn-light border px-4 w-100">Limpiar</button>
-          </div>
-          <div class="col-md-2" v-if="documentos.length">
-            <button @click="showUpload = true" class="btn btn-primary px-4 w-100">+ Subir</button>
+          <div class="doc__actions">
+            <AppButton variant="soft" size="sm" :icon="IconView" @click="verDocumento(d)">Ver</AppButton>
+            <AppButton
+              variant="ghost"
+              size="sm"
+              :icon="IconDelete"
+              aria-label="Eliminar documento"
+              @click="confirmarEliminar(d)"
+            />
           </div>
         </div>
-      </div>
-    </div>
-
-    <div v-if="loading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-    </div>
-
-    <div v-else-if="error" class="alert alert-danger border-0 rounded-3">{{ error }}</div>
-
-    <div v-else-if="documentos.length === 0 && buscado" class="text-center py-5 text-muted">
-      <div class="display-4 mb-3">📄</div>
-      <p>No hay documentos para este paciente.</p>
-    </div>
-
-    <div v-else-if="buscado">
-      <div class="row g-4">
-        <div class="col-md-4 col-sm-6" v-for="d in documentos" :key="d.id">
-          <div class="card border-0 shadow-sm rounded-4 h-100">
-            <div class="card-body p-4">
-              <div class="text-center mb-3">
-                <div class="display-5">{{ fileIcon(d.fileName) }}</div>
-              </div>
-              <h6 class="fw-bold text-center mb-1">{{ d.fileName }}</h6>
-              <p class="text-muted small text-center mb-2">{{ formatDate(d.uploadedAt) }}</p>
-              <p class="small text-muted text-center mb-3" v-if="d.description">{{ d.description }}</p>
-              <div class="d-flex justify-content-center gap-2">
-                <button @click="verDocumento(d)" class="btn btn-sm btn-light border px-3">Ver</button>
-                <button @click="confirmarEliminar(d)" class="btn btn-sm btn-light border text-danger px-3">Eliminar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="showUpload" class="card shadow-sm border-0 rounded-4 mt-4">
-        <div class="card-body p-4">
-          <h5 class="fw-bold mb-4">Subir Documento</h5>
-          <form @submit.prevent="subirDocumento">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label fw-medium">📄 Archivo</label>
-                <input ref="fileInput" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
-                <small class="text-muted">PDF, JPG o PNG. Máximo 10MB.</small>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label fw-medium">📝 Descripción <span class="text-muted fw-normal">(opcional)</span></label>
-                <input v-model="uploadDescription" type="text" class="form-control" placeholder="Descripción">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label fw-medium">Tipo de documento</label>
-                <select v-model="fileType" class="form-select" required>
-                  <option value="">Seleccionar...</option>
-                  <option value="Resultados de laboratorio">Resultados de laboratorio</option>
-                  <option value="Indicaciones médicas">Indicaciones médicas</option>
-                  <option value="Historial externo">Historial externo</option>
-                  <option value="Estudios en PDF">Estudios en PDF</option>
-                  <option value="Documentos administrativos">Documentos administrativos</option>
-                </select>
-              </div>
-            </div>
-            <div class="d-flex justify-content-end gap-3 mt-4">
-              <button type="button" @click="showUpload = false; fileType = ''" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</button>
-              <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm" :disabled="subiendo">
-                <span v-if="subiendo" class="spinner-border spinner-border-sm me-2"></span>
-                📤 Subir Documento
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <div v-else class="text-center py-5 text-muted">
-      <div class="display-4 mb-3">📄</div>
-      <p>Ingrese un ID de paciente para buscar sus documentos.</p>
+      </BaseCard>
     </div>
 
     <ConfirmDialog
       :visible="deleteDialog"
-      title="Eliminar Documento"
-      :message="`¿Está seguro que desea eliminar el documento ${deleteTarget?.fileName}?`"
-      confirmText="Eliminar"
-      :danger="true"
+      danger
+      title="Eliminar documento"
+      :message="`¿Seguro que deseas eliminar ${deleteTarget?.fileName ?? 'este documento'}?`"
+      confirm-text="Eliminar"
       @confirm="eliminarDocumento"
       @cancel="deleteDialog = false"
     />
 
-    <div v-if="showPreview && previewDoc" class="modal-backdrop fade show"></div>
-    <div v-if="showPreview && previewDoc" class="modal d-block" tabindex="-1" @click.self="showPreview = false">
-      <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4 shadow">
-          <div class="modal-header border-0 pb-0">
-            <h5 class="fw-bold">{{ previewDoc.fileName }}</h5>
-            <button type="button" class="btn-close" @click="showPreview = false"></button>
-          </div>
-          <div class="modal-body p-3 text-center">
-            <img
-              :src="`/api/v1/MedicalDocument/${previewDoc.id}/file`"
-              class="img-fluid rounded-3"
-              style="max-height: 70vh;"
-              alt="Documento"
-            />
-          </div>
-          <div class="modal-footer border-0 pt-0">
-            <a :href="`/api/v1/MedicalDocument/${previewDoc.id}/file`" target="_blank" class="btn btn-outline-dark rounded-pill px-4">Abrir en nueva pestaña</a>
-            <button @click="showPreview = false" class="btn btn-dark rounded-pill px-4">Cerrar</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <DocumentPreviewModal v-model="showPreview" :doc="previewDoc" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
+import {
+  AppAlert,
+  AppButton,
+  BaseCard,
+  ConfirmDialog,
+  DocumentPreviewModal,
+  EmptyState,
+  FilterBar,
+  IconTile,
+  LoadingState,
+  PageHeader
+} from '@/components/ui'
+import { IconDelete, IconDocument, IconSearch, IconUpload, IconView } from '@/lib/icons'
+import { fileIconFor, fileToneFor, isPdfFile } from '@/lib/fileIcons'
 import { medicalDocumentService } from '@/api/medicalDocuments'
 import { patientService } from '@/api/patients'
-import ConfirmDialog from '@/components/ConfirmDialog.vue'
+
+const TIPOS_DOCUMENTO = [
+  'Resultados de laboratorio',
+  'Indicaciones médicas',
+  'Historial externo',
+  'Estudios en PDF',
+  'Documentos administrativos'
+]
 
 const loading = ref(false)
 const error = ref('')
@@ -166,27 +176,25 @@ const previewDoc = ref(null)
 onMounted(async () => {
   try {
     const res = await patientService.getAll()
-    pacientes.value = (res.data?.value || res.data || []).filter(p => p.fullName)
+    pacientes.value = (res.data?.value || res.data || []).filter((p) => p.fullName)
   } catch {
     pacientes.value = []
   }
 })
 
 const formatDate = (dateStr) => {
-  if (!dateStr) return '-'
+  if (!dateStr) return '—'
   try {
     return new Date(dateStr).toLocaleDateString('es-ES', {
-      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     })
-  } catch { return dateStr }
-}
-
-const fileIcon = (name) => {
-  if (!name) return '📄'
-  const ext = name.split('.').pop()?.toLowerCase()
-  if (ext === 'pdf') return '📕'
-  if (['jpg', 'jpeg', 'png'].includes(ext)) return '🖼️'
-  return '📄'
+  } catch {
+    return dateStr
+  }
 }
 
 const cargarDocumentos = async () => {
@@ -215,6 +223,12 @@ const limpiarBusqueda = () => {
   showUpload.value = false
 }
 
+const cancelarSubida = () => {
+  showUpload.value = false
+  fileType.value = ''
+  uploadDescription.value = ''
+}
+
 const subirDocumento = async () => {
   const file = fileInput.value?.files?.[0]
   if (!file) return
@@ -227,12 +241,10 @@ const subirDocumento = async () => {
     formData.append('patientId', pacienteId.value)
     if (uploadDescription.value) formData.append('description', uploadDescription.value)
     await medicalDocumentService.upload(formData)
-    showUpload.value = false
-    uploadDescription.value = ''
-    fileType.value = ''
+    cancelarSubida()
     fileInput.value.value = ''
     await cargarDocumentos()
-  } catch (err) {
+  } catch {
     error.value = 'Error al subir el documento'
   } finally {
     subiendo.value = false
@@ -244,8 +256,10 @@ const confirmarEliminar = (d) => {
   deleteDialog.value = true
 }
 
+// Los PDF no se previsualizan dentro del modal: el visor nativo del navegador
+// en una pestaña aparte es mejor que un <embed> encajado.
 const verDocumento = (d) => {
-  if (d.fileName?.toLowerCase().endsWith('.pdf')) {
+  if (isPdfFile(d.fileName)) {
     window.open(`/api/v1/MedicalDocument/${d.id}/file`, '_blank')
     return
   }
@@ -257,33 +271,61 @@ const eliminarDocumento = async () => {
   deleteDialog.value = false
   try {
     await medicalDocumentService.remove(deleteTarget.value.id)
-    documentos.value = documentos.value.filter(d => d.id !== deleteTarget.value.id)
-  } catch (err) {
+    documentos.value = documentos.value.filter((d) => d.id !== deleteTarget.value.id)
+  } catch {
     error.value = 'Error al eliminar el documento'
   }
 }
 </script>
 
 <style scoped>
-.form-control {
-  border: 1px solid #d1d5db;
-  background: #fff;
-  padding: 10px 12px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
 }
-.form-control:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-  background: #fff;
+
+.doc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.25rem;
+  height: 100%;
 }
-.form-control::placeholder {
-  color: #94a3b8;
-  font-size: 0.9rem;
+
+.doc__body {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  margin-top: 0.5rem;
 }
-.form-label {
-  font-size: 0.85rem;
-  color: #334155;
-  margin-bottom: 4px;
+
+.doc__name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--app-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.doc__date {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  color: var(--app-text-muted);
+}
+
+.doc__desc {
+  margin: 0.375rem 0 0;
+  font-size: 0.8rem;
+  color: var(--app-text-muted);
+}
+
+.doc__actions {
+  display: flex;
+  gap: 0.375rem;
+  margin-top: 0.875rem;
 }
 </style>

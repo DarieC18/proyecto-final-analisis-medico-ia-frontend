@@ -16,11 +16,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://medanalyzer-medanalyzerbackendstaging-af-3eb6c0-144-126-151-120.sslip.io',
+        target: 'https://dev.med-analyzer.com/',
         changeOrigin: true
       },
       '/uploads': {
-        target: 'http://medanalyzer-medanalyzerbackendstaging-af-3eb6c0-144-126-151-120.sslip.io',
+        target: 'https://dev.med-analyzer.com/',
         changeOrigin: true
       }
     }

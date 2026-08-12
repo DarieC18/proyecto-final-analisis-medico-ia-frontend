@@ -1,95 +1,94 @@
 <template>
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h3 class="fw-bold mb-0">Recomendaciones</h3>
-        <p class="text-muted">Recomendaciones generadas por el sistema por paciente</p>
+  <div>
+    <PageHeader
+      title="Recomendaciones"
+      subtitle="Recomendaciones generadas por el sistema por paciente"
+      :icon="IconRecommendation"
+    />
+
+    <BaseCard class="mb-3">
+      <div v-if="pacienteSeleccionado" class="d-flex align-items-center gap-2 flex-wrap">
+        <StatusBadge
+          :text="`${pacienteSeleccionado.fullName} · ${pacienteSeleccionado.identificationNumber}`"
+          variant="primary"
+          size="lg"
+        />
+        <AppButton variant="soft" size="sm" :icon="IconClose" @click="limpiarBusqueda">Cambiar</AppButton>
       </div>
-    </div>
 
-    <div class="card shadow-sm mb-4 border-0">
-      <div class="card-body p-3">
-        <div v-if="pacienteSeleccionado" class="mb-3 d-flex align-items-center gap-2">
-          <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">
-            {{ pacienteSeleccionado.fullName }}
-            <span class="text-white-50 ms-1">· {{ pacienteSeleccionado.identificationNumber }}</span>
-          </span>
-          <button @click="limpiarBusqueda" class="btn btn-sm btn-outline-secondary rounded-pill">✕ Cambiar</button>
-        </div>
-
-        <div v-else>
-          <div class="row g-2 align-items-end">
-            <div class="col-md-6">
-              <label class="form-label text-muted small fw-bold text-uppercase">Buscar paciente</label>
-              <input
-                v-model="busqueda"
-                type="text"
-                class="form-control bg-light border-0"
-                placeholder="Nombre o número de identificación"
-                @keyup.enter="buscarPacientes"
-              >
-            </div>
-            <div class="col-md-3">
-              <button @click="buscarPacientes" class="btn btn-dark px-4 w-100" :disabled="buscando">
-                <span v-if="buscando" class="spinner-border spinner-border-sm me-1"></span>
-                Buscar
-              </button>
-            </div>
-            <div class="col-md-3">
-              <button @click="limpiarBusqueda" class="btn btn-light border px-4 w-100">Limpiar</button>
-            </div>
+      <div v-else>
+        <div class="row g-2 align-items-end">
+          <div class="col-md-6">
+            <label for="r-busqueda" class="form-label">Buscar paciente</label>
+            <input
+              id="r-busqueda"
+              v-model="busqueda"
+              type="text"
+              class="form-control"
+              placeholder="Nombre o número de identificación"
+              @keyup.enter="buscarPacientes"
+            />
           </div>
-
-          <div v-if="pacientesEncontrados.length > 0" class="mt-2 border rounded-3 overflow-hidden">
-            <div
-              v-for="p in pacientesEncontrados"
-              :key="p.id"
-              class="px-3 py-2 d-flex justify-content-between align-items-center cursor-pointer"
-              style="cursor: pointer;"
-              :class="{ 'border-top': p !== pacientesEncontrados[0] }"
-              @click="seleccionarPaciente(p)"
+          <div class="col-md-3">
+            <AppButton
+              variant="primary"
+              block
+              :icon="IconSearch"
+              :loading="buscando"
+              @click="buscarPacientes"
             >
+              Buscar
+            </AppButton>
+          </div>
+          <div class="col-md-3">
+            <AppButton variant="soft" block @click="limpiarBusqueda">Limpiar</AppButton>
+          </div>
+        </div>
+
+        <ul v-if="pacientesEncontrados.length" class="resultados">
+          <li v-for="p in pacientesEncontrados" :key="p.id">
+            <button type="button" class="resultados__item" @click="seleccionarPaciente(p)">
               <span class="fw-medium">{{ p.fullName }}</span>
-              <small class="text-muted">{{ p.identificationNumber }}</small>
-            </div>
-          </div>
+              <small class="text-app-muted">{{ p.identificationNumber }}</small>
+            </button>
+          </li>
+        </ul>
 
-          <div v-else-if="buscado && !buscando" class="mt-2 text-muted small ps-1">
-            No se encontraron pacientes.
-          </div>
-        </div>
+        <p v-else-if="buscado && !buscando" class="text-app-muted small mb-0 mt-2">
+          No se encontraron pacientes.
+        </p>
       </div>
-    </div>
+    </BaseCard>
 
-    <div v-if="loading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-    </div>
+    <LoadingState v-if="loading" label="Cargando recomendaciones…" />
 
-    <div v-else-if="error" class="alert alert-danger border-0 rounded-3">{{ error }}</div>
+    <AppAlert v-else-if="error" variant="danger" :message="error" />
 
-    <div v-else-if="recomendaciones.length === 0" class="text-center py-5 text-muted">
-      <div class="display-4 mb-3">💡</div>
-      <p v-if="!pacienteSeleccionado">Busque un paciente por nombre o identificación para ver sus recomendaciones.</p>
-      <p v-else>No hay recomendaciones para este paciente.</p>
-    </div>
+    <BaseCard v-else-if="recomendaciones.length === 0" flush padding="none">
+      <EmptyState
+        :icon="IconRecommendation"
+        :title="pacienteSeleccionado ? 'Sin recomendaciones' : 'Busca un paciente'"
+        :message="
+          pacienteSeleccionado
+            ? 'Este paciente todavía no tiene recomendaciones registradas.'
+            : 'Busca por nombre o identificación para ver las recomendaciones de un paciente.'
+        "
+      />
+    </BaseCard>
 
-    <div v-else>
-      <div class="row g-4">
-        <div class="col-md-6" v-for="r in recomendaciones" :key="r.id">
-          <div class="card border-0 shadow-sm rounded-4 h-100 border-start border-4 border-info">
-            <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <h6 class="fw-bold mb-0">{{ r.title || 'Recomendación' }}</h6>
-                <small class="text-muted">{{ formatDate(r.createdAt) }}</small>
-              </div>
-              <p class="text-muted mb-2" v-if="r.description">{{ r.description }}</p>
-              <p class="mb-1" v-if="r.priority">
-                <span class="badge rounded-pill px-3" :class="priorityBadge(r.priority)">{{ r.priority }}</span>
-              </p>
-              <p class="mb-0 small text-muted" v-if="r.appointmentId">Relacionado a cita #{{ r.appointmentId }}</p>
-            </div>
+    <div v-else class="row g-3">
+      <div v-for="r in recomendaciones" :key="r.id" class="col-md-6">
+        <BaseCard class="h-100">
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+            <h3 class="rec__title">{{ r.title || 'Recomendación' }}</h3>
+            <small class="text-app-muted text-nowrap">{{ formatDate(r.createdAt) }}</small>
           </div>
-        </div>
+          <p v-if="r.description" class="rec__desc">{{ r.description }}</p>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <StatusBadge v-if="r.priority" :text="r.priority" :variant="priorityVariant(r.priority)" />
+            <small v-if="r.appointmentId" class="text-app-muted">Relacionado a cita #{{ r.appointmentId }}</small>
+          </div>
+        </BaseCard>
       </div>
     </div>
   </div>
@@ -99,6 +98,16 @@
 import { ref } from 'vue'
 import { recommendationService } from '@/api/recommendations'
 import { patientService } from '@/api/patients'
+import {
+  AppAlert,
+  AppButton,
+  BaseCard,
+  EmptyState,
+  LoadingState,
+  PageHeader,
+  StatusBadge
+} from '@/components/ui'
+import { IconClose, IconRecommendation, IconSearch } from '@/lib/icons'
 
 const loading = ref(false)
 const error = ref('')
@@ -110,18 +119,22 @@ const pacientesEncontrados = ref([])
 const pacienteSeleccionado = ref(null)
 
 const formatDate = (dateStr) => {
-  if (!dateStr) return '-'
+  if (!dateStr) return '—'
   try {
     return new Date(dateStr).toLocaleDateString('es-ES', {
-      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     })
-  } catch { return dateStr }
+  } catch {
+    return dateStr
+  }
 }
 
-const priorityBadge = (p) => {
-  const map = { Alta: 'bg-danger', Media: 'bg-warning text-dark', Baja: 'bg-success' }
-  return map[p] || 'bg-info'
-}
+const PRIORITY_VARIANTS = { Alta: 'severe', Media: 'moderate', Baja: 'low' }
+const priorityVariant = (p) => PRIORITY_VARIANTS[p] ?? 'info'
 
 const buscarPacientes = async () => {
   if (!busqueda.value.trim()) return
@@ -131,11 +144,10 @@ const buscarPacientes = async () => {
   try {
     const res = await patientService.search(busqueda.value)
     pacientesEncontrados.value = res.data || []
-    buscado.value = true
   } catch {
     pacientesEncontrados.value = []
-    buscado.value = true
   } finally {
+    buscado.value = true
     buscando.value = false
   }
 }
@@ -167,3 +179,56 @@ const limpiarBusqueda = () => {
   recomendaciones.value = []
 }
 </script>
+
+<style scoped>
+.resultados {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  overflow: hidden;
+}
+
+.resultados li + li {
+  border-top: 1px solid var(--app-border);
+}
+
+/* <button> y no <div @click>: la lista es navegable con teclado y anunciable
+   por lector de pantalla sin añadir roles ni tabindex a mano. */
+.resultados__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.5rem 0.875rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.resultados__item:hover {
+  background-color: var(--app-surface-sunken);
+}
+
+.resultados__item:focus-visible {
+  outline: none;
+  box-shadow: var(--app-ring);
+}
+
+.rec__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--app-text-strong);
+}
+
+.rec__desc {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  color: var(--app-text-muted);
+}
+</style>

@@ -1,187 +1,238 @@
 <template>
-  <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h3 class="fw-bold mb-0">Registro de Auditoría</h3>
-        <p class="text-muted">Trazabilidad de acciones en el sistema</p>
+  <div>
+    <PageHeader
+      title="Registro de auditoría"
+      subtitle="Trazabilidad de acciones en el sistema"
+      :icon="IconAudit"
+      tone="warning"
+    />
+
+    <FilterBar>
+      <div style="min-width: 200px; flex: 1 1 200px">
+        <label for="al-user" class="form-label">Nombre de usuario</label>
+        <input
+          id="al-user"
+          v-model="filtros.userName"
+          type="search"
+          class="form-control"
+          placeholder="Nombre del usuario"
+          @keyup.enter="aplicarFiltros"
+        >
       </div>
-    </div>
-
-    <div class="card shadow-sm mb-4 border-0">
-      <div class="card-body p-3">
-        <div class="row g-2 align-items-end">
-          <div class="col-md-3">
-            <label class="form-label fw-medium">👤 Nombre de usuario</label>
-            <input v-model="filtros.userName" type="text" class="form-control form-filter" placeholder="Nombre del usuario">
-          </div>
-          <div class="col-md-2">
-            <label class="form-label fw-medium">⚡ Acción</label>
-            <select v-model="filtros.action" class="form-control form-filter">
-              <option value="">Todas</option>
-              <option value="Login">Login</option>
-              <option value="CreateUser">Crear usuario</option>
-              <option value="UpdateUser">Editar usuario</option>
-              <option value="RegisterPatient">Registro paciente</option>
-              <option value="ToggleStatus">Cambio estado</option>
-              <option value="Delete">Eliminar usuario</option>
-              <option value="CreatePatient">Crear paciente</option>
-              <option value="CreateAppointment">Crear cita</option>
-              <option value="GenerateAiAnalysis">Análisis IA</option>
-              <option value="UploadDocument">Subir documento</option>
-              <option value="DeletePatient">Eliminar paciente</option>
-              <option value="DeleteAppointment">Eliminar cita</option>
-            </select>
-          </div>
-          <div class="col-md-2">
-            <label class="form-label fw-medium">📅 Desde</label>
-            <input v-model="filtros.from" type="date" class="form-control form-filter">
-          </div>
-          <div class="col-md-2">
-            <label class="form-label fw-medium">📅 Hasta</label>
-            <input v-model="filtros.to" type="date" class="form-control form-filter">
-          </div>
-          <div class="col-md-3 d-flex gap-2">
-            <button @click="aplicarFiltros" class="btn btn-dark rounded-pill px-4">🔍 Filtrar</button>
-            <button @click="limpiarFiltros" class="btn btn-outline-secondary rounded-pill px-3">Limpiar</button>
-          </div>
-        </div>
+      <div style="min-width: 180px; flex: 1 1 180px">
+        <label for="al-action" class="form-label">Acción</label>
+        <select id="al-action" v-model="filtros.action" class="form-select">
+          <option value="">Todas</option>
+          <option v-for="(label, key) in ACCIONES" :key="key" :value="key">{{ label }}</option>
+        </select>
       </div>
-    </div>
+      <div style="min-width: 150px">
+        <label for="al-from" class="form-label">Desde</label>
+        <input id="al-from" v-model="filtros.from" type="date" class="form-control">
+      </div>
+      <div style="min-width: 150px">
+        <label for="al-to" class="form-label">Hasta</label>
+        <input id="al-to" v-model="filtros.to" type="date" class="form-control">
+      </div>
+      <template #actions>
+        <AppButton variant="primary" :icon="IconFilter" @click="aplicarFiltros">Filtrar</AppButton>
+        <AppButton variant="soft" @click="limpiarFiltros">Limpiar</AppButton>
+      </template>
+    </FilterBar>
 
-    <div v-if="loading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-    </div>
+    <BaseCard flush padding="none">
+      <LoadingState v-if="loading" label="Cargando registros…" />
 
-    <div v-else-if="logs.length === 0" class="text-center py-5 text-muted">
-      <p>No hay registros de auditoría.</p>
-    </div>
+      <EmptyState
+        v-else-if="!logs.length"
+        :icon="IconAudit"
+        title="No hay registros de auditoría"
+        message="Ninguna acción coincide con los filtros aplicados."
+      />
 
-    <div v-else class="card shadow-sm overflow-hidden border-0">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" style="table-layout: fixed;">
-          <thead class="table-dark">
-            <tr>
-              <th class="ps-4 py-3 fw-medium">Fecha</th>
-              <th class="py-3 fw-medium">Usuario</th>
-              <th class="py-3 fw-medium">Rol</th>
-              <th class="py-3 fw-medium">Acción</th>
-              <th class="pe-4 py-3 fw-medium">Recurso</th>
-            </tr>
-          </thead>
-          <tbody class="border-top-0">
-            <template v-for="log in logs" :key="log.id">
-              <tr @click="toggleDetalle(log)" class="cursor-pointer" style="cursor: pointer;">
-                <td class="ps-4 py-3 text-muted">{{ formatFecha(log.createdAt) }}</td>
-                <td class="py-3 fw-bold text-dark">{{ log.userName }}</td>
-                <td class="py-3">
-                  <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">{{ translateRole(log.userRole) }}</span>
-                </td>
-                <td class="py-3">
-                  <StatusBadge :text="log.action" variant="info" />
-                </td>
-                <td class="pe-4 py-3">
-                  <span v-if="log.action === 'Login'" class="text-muted small">Cuenta de {{ log.userName }}</span>
-                  <code v-else class="small text-muted" :title="log.entityId">{{ log.entityId?.slice(0, 8) }}…</code>
-                </td>
+      <template v-else>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-head">
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Usuario</th>
+                <th scope="col">Rol</th>
+                <th scope="col">Acción</th>
+                <th scope="col">Recurso</th>
+                <th scope="col" class="text-end pe-4"><span class="visually-hidden">Detalle</span></th>
               </tr>
-              <tr v-if="detalleId === log.id">
-                <td colspan="5" class="p-4 bg-light">
-                  <div class="d-flex justify-content-between align-items-start">
-                    <div class="w-100">
-                      <h6 class="fw-bold mb-3">📋 Detalle de la acción</h6>
-                      <div class="detail-grid">
-                        <div class="detail-item">
-                          <span class="detail-label">🆔 Registro</span>
-                          <span class="detail-value">#{{ log.id }}</span>
-                        </div>
-                        <div class="detail-item">
-                          <span class="detail-label">👤 Usuario</span>
-                          <span class="detail-value">{{ log.userName }}</span>
-                          <span class="detail-raw-id">{{ log.userId }}</span>
-                        </div>
-                        <div class="detail-item">
-                          <span class="detail-label">🎭 Rol</span>
-                          <span class="detail-value">{{ translateRole(log.userRole) }}</span>
-                        </div>
-                        <div class="detail-item">
-                          <span class="detail-label">⚡ Acción</span>
-                          <span class="detail-value">
-                            <StatusBadge :text="log.action" variant="info" />
-                          </span>
-                        </div>
-                        <div class="detail-item">
-                          <span class="detail-label">📎 Recurso afectado</span>
-                          <span class="detail-value">{{ descripcionEntidad(log) }}</span>
-                          <span v-if="log.entityId" class="detail-raw-id">{{ log.entityId }}</span>
-                        </div>
-                        <div class="detail-item col-12" v-if="log.details">
-                          <span class="detail-label">📄 Detalles adicionales</span>
-                          <pre class="mt-2 mb-0 p-3 bg-white border rounded-3 small">{{ JSON.stringify(log.details, null, 2) }}</pre>
-                        </div>
+            </thead>
+            <tbody>
+              <template v-for="log in logs" :key="log.id">
+                <!-- La fila entera es un disparador: se usa <button> en la última
+                     celda en lugar de @click en el <tr>, para que sea alcanzable
+                     por teclado y se anuncie el estado expandido. -->
+                <tr>
+                  <td class="text-app-muted">{{ formatFecha(log.createdAt) }}</td>
+                  <td class="fw-semibold text-body-emphasis">{{ log.userName }}</td>
+                  <td><StatusBadge :text="translateRole(log.userRole)" variant="info" size="sm" /></td>
+                  <td><StatusBadge :text="log.action" variant="secondary" size="sm" /></td>
+                  <td>
+                    <span v-if="log.action === 'Login'" class="text-app-muted small">
+                      Cuenta de {{ log.userName }}
+                    </span>
+                    <code v-else class="small text-app-muted" :title="log.entityId">
+                      {{ log.entityId?.slice(0, 8) }}…
+                    </code>
+                  </td>
+                  <td class="text-end pe-4">
+                    <AppButton
+                      variant="ghost"
+                      size="sm"
+                      :icon="detalleId === log.id ? IconChevronDown : IconChevronRight"
+                      :aria-expanded="detalleId === log.id"
+                      :aria-label="detalleId === log.id ? 'Ocultar detalle' : 'Ver detalle'"
+                      @click="toggleDetalle(log)"
+                    />
+                  </td>
+                </tr>
+                <tr v-if="detalleId === log.id">
+                  <td colspan="6" class="audit-detail">
+                    <div class="row g-3">
+                      <div class="col-sm-6 col-lg-3">
+                        <DataField label="Registro" :value="`#${log.id}`" />
+                      </div>
+                      <div class="col-sm-6 col-lg-3">
+                        <DataField label="Usuario">
+                          {{ log.userName }}
+                          <span class="audit-detail__raw">{{ log.userId }}</span>
+                        </DataField>
+                      </div>
+                      <div class="col-sm-6 col-lg-3">
+                        <DataField label="Rol" :value="translateRole(log.userRole)" />
+                      </div>
+                      <div class="col-sm-6 col-lg-3">
+                        <DataField label="Acción">
+                          <StatusBadge :text="log.action" variant="info" size="sm" />
+                        </DataField>
+                      </div>
+                      <div class="col-12">
+                        <DataField label="Recurso afectado">
+                          {{ descripcionEntidad(log) }}
+                          <span v-if="log.entityId" class="audit-detail__raw">{{ log.entityId }}</span>
+                        </DataField>
+                      </div>
+                      <div v-if="log.details" class="col-12">
+                        <DataField label="Detalles adicionales">
+                          <pre class="audit-detail__json">{{ JSON.stringify(log.details, null, 2) }}</pre>
+                        </DataField>
                       </div>
                     </div>
-                    <button @click.stop="detalleId = null" class="btn btn-outline-secondary rounded-pill px-3 ms-3">✕ Cerrar</button>
-                  </div>
-                </td>
-              </tr>
-            </template>
-          </tbody>
-        </table>
-      </div>
-      <!-- Paginación -->
-      <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top">
-        <small class="text-muted">{{ totalCount }} registros — página {{ currentPage }} de {{ totalPages || 1 }}</small>
-        <div class="d-flex gap-2">
-          <button :disabled="currentPage === 1" @click="irAPagina(currentPage - 1)" class="btn btn-sm btn-light border">‹ Anterior</button>
-          <button
-            v-for="p in paginasVisibles" :key="p"
-            @click="irAPagina(p)"
-            class="btn btn-sm"
-            :class="p === currentPage ? 'btn-dark' : 'btn-light border'">
-            {{ p }}
-          </button>
-          <button :disabled="currentPage >= totalPages" @click="irAPagina(currentPage + 1)" class="btn btn-sm btn-light border">Siguiente ›</button>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
         </div>
-      </div>
-    </div>
+
+        <div class="audit-pagination">
+          <small class="text-app-muted">
+            {{ totalCount }} registros · página {{ currentPage }} de {{ totalPages }}
+          </small>
+          <nav aria-label="Paginación de registros">
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <button class="page-link" :disabled="currentPage === 1" @click="irAPagina(currentPage - 1)">
+                  Anterior
+                </button>
+              </li>
+              <li
+                v-for="p in paginasVisibles"
+                :key="p"
+                class="page-item"
+                :class="{ active: p === currentPage }"
+              >
+                <button class="page-link" :aria-current="p === currentPage ? 'page' : undefined" @click="irAPagina(p)">
+                  {{ p }}
+                </button>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage >= totalPages }">
+                <button class="page-link" :disabled="currentPage >= totalPages" @click="irAPagina(currentPage + 1)">
+                  Siguiente
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </template>
+    </BaseCard>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import {
+  AppButton,
+  BaseCard,
+  DataField,
+  EmptyState,
+  FilterBar,
+  LoadingState,
+  PageHeader,
+  StatusBadge
+} from '@/components/ui'
+import { IconAudit, IconChevronDown, IconChevronRight, IconFilter } from '@/lib/icons'
 import { auditLogService } from '@/api/auditLog'
-import StatusBadge from '@/components/StatusBadge.vue'
 import { translateRole } from '@/utils/roles'
+
+// Un solo mapa acción -> etiqueta: antes las opciones del filtro y las
+// descripciones del detalle eran dos listas separadas que podían divergir.
+const ACCIONES = {
+  Login: 'Inicio de sesión',
+  CreateUser: 'Usuario creado por administrador',
+  UpdateUser: 'Usuario actualizado',
+  RegisterPatient: 'Registro público de paciente',
+  ToggleStatus: 'Cambio de estado de cuenta',
+  Delete: 'Cuenta eliminada',
+  CreatePatient: 'Expediente de paciente creado',
+  CreateAppointment: 'Cita registrada',
+  GenerateAiAnalysis: 'Análisis IA generado',
+  UploadDocument: 'Documento médico subido',
+  DeletePatient: 'Paciente eliminado',
+  DeleteAppointment: 'Cita eliminada'
+}
+
+const PAGE_SIZE = 20
 
 const loading = ref(true)
 const logs = ref([])
 const detalleId = ref(null)
 const currentPage = ref(1)
-const pageSize = 20
 const totalCount = ref(0)
 
-const totalPages = computed(() => Math.ceil(totalCount.value / pageSize) || 1)
+const filtros = reactive({ userName: '', action: '', from: '', to: '' })
+
+const totalPages = computed(() => Math.ceil(totalCount.value / PAGE_SIZE) || 1)
+
 const paginasVisibles = computed(() => {
   const delta = 2
   const range = []
-  for (let i = Math.max(1, currentPage.value - delta); i <= Math.min(totalPages.value, currentPage.value + delta); i++)
-    range.push(i)
+  const start = Math.max(1, currentPage.value - delta)
+  const end = Math.min(totalPages.value, currentPage.value + delta)
+  for (let i = start; i <= end; i++) range.push(i)
   return range
 })
-const irAPagina = (p) => { currentPage.value = p; cargarLogs() }
+
+const irAPagina = (p) => {
+  currentPage.value = p
+  detalleId.value = null
+  cargarLogs()
+}
 
 const toggleDetalle = (log) => {
   detalleId.value = detalleId.value === log.id ? null : log.id
 }
 
-const filtros = reactive({
-  userName: '', action: '', from: '', to: ''
-})
-
 const cargarLogs = async () => {
   loading.value = true
   try {
-    const params = { pageNumber: currentPage.value, pageSize }
+    const params = { pageNumber: currentPage.value, pageSize: PAGE_SIZE }
     if (filtros.userName) params.userName = filtros.userName
     if (filtros.action) params.action = filtros.action
     if (filtros.from) params.from = filtros.from
@@ -200,39 +251,27 @@ const cargarLogs = async () => {
   }
 }
 
-const aplicarFiltros = () => { currentPage.value = 1; cargarLogs() }
-
-const limpiarFiltros = () => {
-  filtros.userName = ''
-  filtros.action = ''
-  filtros.from = ''
-  filtros.to = ''
+const aplicarFiltros = () => {
   currentPage.value = 1
   cargarLogs()
 }
 
-const descripcionEntidad = (log) => {
-  const map = {
-    Login:             'Inicio de sesión',
-    CreateUser:        'Usuario creado por administrador',
-    UpdateUser:        'Usuario actualizado',
-    RegisterPatient:   'Registro público de paciente',
-    ToggleStatus:      'Cambio de estado de cuenta',
-    Delete:            'Cuenta eliminada',
-    CreatePatient:     'Expediente de paciente creado',
-    CreateAppointment: 'Cita registrada',
-    GenerateAiAnalysis:'Análisis IA generado',
-    UploadDocument:    'Documento médico subido',
-    DeletePatient:     'Paciente eliminado',
-    DeleteAppointment: 'Cita eliminada',
-  }
-  return map[log.action] ?? log.entityName ?? '—'
+const limpiarFiltros = () => {
+  Object.assign(filtros, { userName: '', action: '', from: '', to: '' })
+  currentPage.value = 1
+  cargarLogs()
 }
 
+const descripcionEntidad = (log) => ACCIONES[log.action] ?? log.entityName ?? '—'
+
 const formatFecha = (dateStr) => {
-  if (!dateStr) return '-'
+  if (!dateStr) return '—'
   return new Date(dateStr).toLocaleString('es-ES', {
-    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
   })
 }
 
@@ -240,52 +279,39 @@ onMounted(cargarLogs)
 </script>
 
 <style scoped>
-.form-filter {
-  border: 1px solid #d1d5db;
-  background: #fff;
-  padding: 10px 12px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+.audit-detail {
+  background-color: var(--bs-tertiary-bg);
+  padding: 1.25rem;
 }
-.form-filter:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-  background: #fff;
-}
-.form-filter::placeholder {
-  color: #94a3b8;
-  font-size: 0.9rem;
-}
-.form-label {
-  font-size: 0.85rem;
-  color: #334155;
-  margin-bottom: 4px;
-}
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-}
-.detail-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.detail-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-.detail-value {
-  font-weight: 500;
-  color: #1e293b;
-}
-.detail-raw-id {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  font-family: monospace;
+
+.audit-detail__raw {
+  display: block;
+  font-family: var(--bs-font-monospace);
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--app-text-subtle);
   word-break: break-all;
+}
+
+.audit-detail__json {
+  margin: 0.375rem 0 0;
+  padding: 0.75rem;
+  background-color: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  font-size: 0.75rem;
+  color: var(--app-text);
+  max-height: 320px;
+  overflow: auto;
+}
+
+.audit-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--app-border);
 }
 </style>
