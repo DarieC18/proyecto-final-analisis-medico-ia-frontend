@@ -25,6 +25,7 @@ import PatientRecommendationsView from '../views/PatientRecommendationsView.vue'
 import PatientDocumentsView from '../views/PatientDocumentsView.vue'
 import PatientResultsView from '../views/PatientResultsView.vue'
 import NurseFollowUpView from '../views/NurseFollowUpView.vue'
+import AccessDeniedView from '../views/AccessDeniedView.vue'
 
 
 const router = createRouter({
@@ -188,6 +189,11 @@ const router = createRouter({
       component: PatientResultsView,
       meta: { roles: ['Patient'] }
     },
+    {
+      path: '/acceso-denegado',
+      name: 'acceso-denegado',
+      component: AccessDeniedView
+    },
 
   ]
 })
@@ -227,11 +233,7 @@ router.beforeEach((to, from) => {
   if (!to.meta.public && to.meta.roles && isAuthenticated) {
     const hasRole = to.meta.roles.some(r => roles.includes(r))
     if (!hasRole) {
-      if (homeRoute) return homeRoute
-      // Sin rol reconocido: limpiar sesión y redirigir a login
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('user')
-      return '/login'
+      return '/acceso-denegado'
     }
   }
 })

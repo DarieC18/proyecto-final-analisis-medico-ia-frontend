@@ -21,9 +21,38 @@
             </div>
             <StatusBadge :text="r.isReviewed ? 'Revisado' : 'Pendiente'" :variant="r.isReviewed ? 'active' : 'inactive'" />
           </div>
-          <div class="bg-light rounded-3 p-3 mb-3">
-            <small class="text-muted fw-bold d-block mb-1">Resultado:</small>
-            <p class="mb-0" style="white-space: pre-wrap;">{{ r.aiResponse || 'Sin respuesta' }}</p>
+          <div class="mb-3">
+            <template v-if="parsedResponse(r.aiResponse)">
+              <div class="bg-light rounded-3 p-3 mb-2">
+                <small class="text-muted fw-bold d-block mb-1">Resumen:</small>
+                <p class="mb-0">{{ parsedResponse(r.aiResponse).summary }}</p>
+              </div>
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <small class="text-muted fw-bold">Nivel de riesgo:</small>
+                <span class="badge rounded-pill px-3 py-2"
+                  :class="{
+                    'bg-success bg-opacity-10 text-success': parsedResponse(r.aiResponse).riskLevel === 'Bajo',
+                    'bg-warning bg-opacity-10 text-warning': parsedResponse(r.aiResponse).riskLevel === 'Medio',
+                    'bg-danger bg-opacity-10 text-danger': parsedResponse(r.aiResponse).riskLevel === 'Alto'
+                  }">
+                  {{ parsedResponse(r.aiResponse).riskLevel || 'N/A' }}
+                </span>
+              </div>
+              <div v-if="parsedResponse(r.aiResponse).recommendations?.length">
+                <small class="text-muted fw-bold d-block mb-2">Recomendaciones:</small>
+                <div v-for="(rec, i) in parsedResponse(r.aiResponse).recommendations" :key="i"
+                  class="border rounded-3 p-3 mb-2 bg-white">
+                  <p class="fw-semibold mb-1 small">{{ rec.title }}</p>
+                  <p class="text-muted mb-0 small">{{ rec.description }}</p>
+                </div>
+              </div>
+            </template>
+            <template v-else>
+              <div class="bg-light rounded-3 p-3">
+                <small class="text-muted fw-bold d-block mb-1">Resultado:</small>
+                <p class="mb-0" style="white-space: pre-wrap;">{{ r.aiResponse || 'Sin respuesta' }}</p>
+              </div>
+            </template>
           </div>
           <div class="d-flex justify-content-between">
             <small class="text-muted">Modelo: {{ r.modelUsed || 'N/A' }}</small>
@@ -43,6 +72,17 @@ import StatusBadge from '@/components/StatusBadge.vue'
 const loading = ref(true)
 const error = ref('')
 const results = ref([])
+
+const parsedResponse = (aiResponse) => {
+  if (!aiResponse) return null
+  try {
+    const parsed = JSON.parse(aiResponse)
+    if (parsed && typeof parsed === 'object' && parsed.summary) return parsed
+    return null
+  } catch {
+    return null
+  }
+}
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
