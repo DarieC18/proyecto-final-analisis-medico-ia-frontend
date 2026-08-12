@@ -230,7 +230,8 @@ const descripcionEntidad = (log) => {
 
 const formatFecha = (dateStr) => {
   if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleString('es-ES', {
+  const utcStr = dateStr.includes('Z') || dateStr.includes('+') ? dateStr : dateStr + 'Z'
+  return new Date(utcStr).toLocaleString('es-ES', {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
   })
 }
