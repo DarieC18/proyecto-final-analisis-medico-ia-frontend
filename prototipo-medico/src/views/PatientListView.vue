@@ -120,7 +120,7 @@
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-medium">Fecha de Nacimiento</label>
-                    <input v-model="form.birthDate" type="date" class="form-control" required>
+                    <input v-model="form.birthDate" type="date" class="form-control" :max="today" required>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-medium">Género</label>
@@ -259,6 +259,8 @@ import { patientService } from '@/api/patients'
 import { authStore } from '@/stores/auth'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
+
+const today = new Date().toISOString().split('T')[0]
 
 const auth = authStore
 const busqueda = ref('')

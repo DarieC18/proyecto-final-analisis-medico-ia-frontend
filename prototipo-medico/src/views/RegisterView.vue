@@ -65,7 +65,7 @@
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-medium">Fecha de nacimiento</label>
-                      <input v-model="form.birthDate" type="date" class="form-control">
+                      <input v-model="form.birthDate" type="date" class="form-control" :max="today">
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-medium">Tipo de identificación</label>
@@ -125,6 +125,8 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { authService } from '@/api/auth'
+
+const today = new Date().toISOString().split('T')[0]
 
 const loading = ref(false)
 const successMsg = ref('')
