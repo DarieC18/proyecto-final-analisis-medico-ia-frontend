@@ -55,6 +55,10 @@
                 <label class="form-label text-muted small fw-bold text-uppercase">Verificado</label>
                 <p><StatusBadge :text="user?.isVerified ? 'Sí' : 'No'" :variant="user?.isVerified ? 'active' : 'inactive'" /></p>
               </div>
+              <div v-if="user?.specialty" class="col-md-6">
+                <label class="form-label text-muted small fw-bold text-uppercase">Especialidad</label>
+                <p class="fw-medium">{{ user.specialty }}</p>
+              </div>
               <div class="col-12">
                 <label class="form-label text-muted small fw-bold text-uppercase">Fecha de Registro</label>
                 <p class="fw-medium">{{ formatFecha(user?.createdAt) }}</p>

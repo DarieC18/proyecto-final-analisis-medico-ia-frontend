@@ -60,6 +60,10 @@
                         </template>
                       </select>
                     </div>
+                    <div v-if="form.role === 'Doctor'" class="col-md-6">
+                      <label class="form-label fw-medium">Especialidad</label>
+                      <input v-model="form.specialty" type="text" class="form-control" placeholder="Ej: Cardiología, Neurología" required>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -146,7 +150,8 @@ const vista = ref('lista')
 const form = reactive({
   name: '', lastName: '', userName: '', email: '',
   numberIdentification: '',
-  role: 'Doctor'
+  role: 'Doctor',
+  specialty: ''
 })
 
 const cargarUsuarios = async () => {
@@ -168,7 +173,7 @@ const cargarUsuarios = async () => {
 
 const abrirCrear = () => {
   vista.value = 'crear'
-  Object.assign(form, { name: '', lastName: '', userName: '', email: '', numberIdentification: '', role: 'Doctor' })
+  Object.assign(form, { name: '', lastName: '', userName: '', email: '', numberIdentification: '', role: 'Doctor', specialty: '' })
   formError.value = ''
 }
 
@@ -205,7 +210,8 @@ const abrirEditar = (u) => {
   Object.assign(form, {
     id: u.id, name: u.name, lastName: u.lastName,
     userName: u.userName, email: u.email,
-    numberIdentification: u.numberIdentification, role: u.role
+    numberIdentification: u.numberIdentification, role: u.role,
+    specialty: u.specialty || ''
   })
   formError.value = ''
 }
