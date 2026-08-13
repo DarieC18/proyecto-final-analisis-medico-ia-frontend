@@ -22,5 +22,8 @@ export const appointmentService = {
   },
   changeStatus(id, status) {
     return api.patch(`/api/v1/appointment/${id}/status`, { status })
+  },
+  updateNotes(id, notes) {
+    return api.patch(`/api/v1/appointment/${id}/notes`, { notes })
   }
 }

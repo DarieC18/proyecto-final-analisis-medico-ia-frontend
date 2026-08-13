@@ -10,6 +10,9 @@ export const alertService = {
   getActive() {
     return api.get('/api/v1/alert/active')
   },
+  getAll() {
+    return api.get('/api/v1/alert/all')
+  },
   resolve(id) {
     return api.patch(`/api/v1/alert/${id}/resolve`)
   }

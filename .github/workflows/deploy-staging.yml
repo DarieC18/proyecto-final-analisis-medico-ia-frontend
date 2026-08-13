@@ -1,0 +1,24 @@
+name: Deploy Frontend Staging
+
+on:
+  push:
+    branches:
+      - feature/frontend-staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Dokploy redeploy
+        run: |
+          HTTP_STATUS=$(curl -s -o /tmp/response.txt -w "%{http_code}" \
+            -X POST "${{ secrets.DOKPLOY_FRONTEND_STAGING_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -H "X-GitHub-Event: push" \
+            -d "{\"ref\":\"refs/heads/feature/frontend-staging\",\"after\":\"${{ github.sha }}\"}")
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Response: $(cat /tmp/response.txt)"
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "ERROR: Dokploy deploy failed with status $HTTP_STATUS"
+            exit 1
+          fi

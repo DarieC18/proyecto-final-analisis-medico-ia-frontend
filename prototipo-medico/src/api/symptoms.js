@@ -4,6 +4,9 @@ export const symptomService = {
   getByAppointment(appointmentId) {
     return api.get(`/api/v1/symptom/by-appointment/${appointmentId}`)
   },
+  getByPatient(patientId) {
+    return api.get(`/api/v1/symptom/by-patient/${patientId}`)
+  },
   getById(id) {
     return api.get(`/api/v1/symptom/${id}`)
   },

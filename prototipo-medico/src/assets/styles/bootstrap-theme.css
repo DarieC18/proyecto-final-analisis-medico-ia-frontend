@@ -1,0 +1,768 @@
+/* ============================================================================
+   bootstrap-theme.css — re-tematización real de Bootstrap 5.3.8
+   ----------------------------------------------------------------------------
+   POR QUÉ ESTE ARCHIVO ES TAN LARGO
+   El código anterior hacía `:root { --bs-primary: #0ea5e9 }` y no funcionaba.
+   Verificado en bootstrap.min.css 5.3.8:
+
+     .text-primary { color: rgba(var(--bs-primary-rgb), ...) }   <- lee el -rgb
+     .btn-primary  { --bs-btn-bg: #0d6efd; ... }                 <- hex compilado
+
+   Es decir: las utilidades leen el par `-rgb` (que nadie tocaba) y las variantes
+   de componente llevan el hex dentro de la propia regla. De ahí que convivieran
+   dos azules por toda la app. Hay tres niveles de trabajo:
+
+     1. Variables globales en :root          -> arregla utilidades y base
+     2. Variables por componente             -> arregla .btn-*, dropdown, etc.
+     3. Reglas propias                       -> donde Bootstrap no expone variable
+
+   NOTA DE ESPECIFICIDAD: Bootstrap declara sus variables en
+   `:root,[data-bs-theme=light]`. Replicamos el mismo selector para ganar por
+   orden de documento sin depender de la suerte.
+   ========================================================================== */
+
+/* ==========================================================================
+   1. NIVEL GLOBAL
+   ========================================================================== */
+
+:root,
+[data-bs-theme='light'] {
+  /* --- Colores de tema: SIEMPRE el par valor + -rgb -------------------------
+     Sin el `-rgb` no cambian .text-*, .bg-*, .border-*, .link-*, .text-bg-*. */
+  --bs-primary: #0b7590;
+  --bs-primary-rgb: 11, 117, 144;
+  --bs-secondary: #475569;
+  --bs-secondary-rgb: 71, 85, 105;
+  /* #047857 y no #059669: --bs-success alimenta .text-success y .text-bg-success,
+     y con blanco encima el 600 se queda en 3.77:1. */
+  --bs-success: #047857;
+  --bs-success-rgb: 4, 120, 87;
+  --bs-info: #4f46e5;
+  --bs-info-rgb: 79, 70, 229;
+  --bs-warning: #d97706;
+  --bs-warning-rgb: 217, 119, 6;
+  --bs-danger: #dc2626;
+  --bs-danger-rgb: 220, 38, 38;
+  --bs-light: #f1f5f9;
+  --bs-light-rgb: 241, 245, 249;
+  --bs-dark: #0f172a;
+  --bs-dark-rgb: 15, 23, 42;
+
+  /* --- Tríos subtle / border / emphasis -------------------------------------
+     Alimentan .alert-* (que es 100% token-driven), .bg-*-subtle,
+     .border-*-subtle, .text-*-emphasis y el estado activo del accordion. */
+  --bs-primary-bg-subtle: #ecfdff;
+  --bs-primary-border-subtle: #a5ecfa;
+  --bs-primary-text-emphasis: #0d5f76;
+  --bs-secondary-bg-subtle: #f1f5f9;
+  --bs-secondary-border-subtle: #cbd5e1;
+  --bs-secondary-text-emphasis: #334155;
+  --bs-success-bg-subtle: #d1fae5;
+  --bs-success-border-subtle: #6ee7b7;
+  --bs-success-text-emphasis: #065f46;
+  --bs-info-bg-subtle: #e0e7ff;
+  --bs-info-border-subtle: #a5b4fc;
+  --bs-info-text-emphasis: #3730a3;
+  --bs-warning-bg-subtle: #fef3c7;
+  --bs-warning-border-subtle: #fcd34d;
+  --bs-warning-text-emphasis: #92400e;
+  /* Ver nota en tokens.css: mismo ajuste de saturación que --c-danger-subtle/border. */
+  --bs-danger-bg-subtle: #fef2f2;
+  --bs-danger-border-subtle: #fecaca;
+  --bs-danger-text-emphasis: #991b1b;
+  --bs-light-bg-subtle: #f8fafc;
+  --bs-light-border-subtle: #e2e8f0;
+  --bs-light-text-emphasis: #475569;
+  --bs-dark-bg-subtle: #cbd5e1;
+  --bs-dark-border-subtle: #94a3b8;
+  --bs-dark-text-emphasis: #334155;
+
+  /* --- Superficie y texto ---------------------------------------------------
+     Esto es lo que hace funcionar .table, .card, .modal, .dropdown,
+     .list-group, .navbar, .text-muted y .bg-body-*.
+     --bs-body-bg es la SUPERFICIE DE TARJETA, no el fondo de página: el canvas
+     se aplica al <body> en base.css. Ver la nota en tokens.css. */
+  --bs-body-bg: var(--app-surface);
+  --bs-body-bg-rgb: 255, 255, 255;
+  --bs-body-color: var(--app-text);
+  --bs-body-color-rgb: 30, 41, 59;
+  --bs-emphasis-color: var(--app-text-strong);
+  --bs-emphasis-color-rgb: 15, 23, 42;
+  --bs-secondary-color: var(--app-text-muted);
+  --bs-secondary-color-rgb: 100, 116, 139;
+  --bs-secondary-bg: var(--c-slate-100);
+  --bs-secondary-bg-rgb: 241, 245, 249;
+  --bs-tertiary-color: var(--app-text-subtle);
+  --bs-tertiary-color-rgb: 148, 163, 184;
+  --bs-tertiary-bg: var(--c-slate-50);
+  --bs-tertiary-bg-rgb: 248, 250, 252;
+  --bs-heading-color: var(--app-text-strong);
+
+  --bs-border-color: var(--app-border);
+  --bs-border-color-translucent: rgba(15, 23, 42, 0.1);
+
+  --bs-link-color: #0b7590;
+  --bs-link-color-rgb: 11, 117, 144;
+  --bs-link-hover-color: #0d5f76;
+  --bs-link-hover-color-rgb: 13, 95, 118;
+  --bs-link-decoration: none;
+
+  /* --- Forma ----------------------------------------------------------------
+     Con esto muere la necesidad del `.card { border-radius: 1rem !important }`
+     global que peleaba con el CSS de LandingView. */
+  --bs-border-radius: var(--app-radius);
+  --bs-border-radius-sm: var(--app-radius-sm);
+  --bs-border-radius-lg: var(--app-radius-lg);
+  --bs-border-radius-xl: var(--app-radius-xl);
+  --bs-border-radius-xxl: var(--app-radius-2xl);
+  --bs-border-radius-2xl: var(--app-radius-2xl);
+  --bs-border-radius-pill: var(--app-radius-pill);
+
+  --bs-box-shadow-sm: var(--app-shadow-sm);
+  --bs-box-shadow: var(--app-shadow);
+  --bs-box-shadow-lg: var(--app-shadow-lg);
+
+  --bs-focus-ring-width: 3px;
+  --bs-focus-ring-opacity: 0.28;
+  --bs-focus-ring-color: rgba(18, 163, 199, 0.28);
+
+  /* --- Tipografía ----------------------------------------------------------- */
+  --bs-font-sans-serif: var(--app-font-ui);
+  --bs-body-font-family: var(--app-font-ui);
+  --bs-body-font-size: 0.9375rem;
+  --bs-body-line-height: 1.55;
+
+  /* --- Validación y varios -------------------------------------------------- */
+  --bs-form-valid-color: var(--c-success-600);
+  --bs-form-valid-border-color: var(--c-success-600);
+  --bs-form-invalid-color: var(--c-danger-600);
+  --bs-form-invalid-border-color: var(--c-danger-600);
+  --bs-code-color: var(--c-info-600);
+  --bs-highlight-bg: var(--c-warning-subtle);
+  --bs-highlight-color: var(--app-text);
+}
+
+/* ==========================================================================
+   2. NIVEL DE COMPONENTE
+   Bootstrap compila hex DENTRO de cada regla de variante, así que --bs-primary
+   no las alcanza. Hay que reescribir su bloque de variables.
+   ========================================================================== */
+
+/* --- Botones sólidos ------------------------------------------------------ */
+
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--c-brand-600);
+  --bs-btn-border-color: var(--c-brand-600);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-brand-700);
+  --bs-btn-hover-border-color: var(--c-brand-700);
+  --bs-btn-focus-shadow-rgb: 18, 163, 199;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-brand-800);
+  --bs-btn-active-border-color: var(--c-brand-800);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--c-brand-600);
+  --bs-btn-disabled-border-color: var(--c-brand-600);
+}
+
+.btn-secondary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--c-slate-600);
+  --bs-btn-border-color: var(--c-slate-600);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-slate-700);
+  --bs-btn-hover-border-color: var(--c-slate-700);
+  --bs-btn-focus-shadow-rgb: 100, 116, 139;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-slate-800);
+  --bs-btn-active-border-color: var(--c-slate-800);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--c-slate-600);
+  --bs-btn-disabled-border-color: var(--c-slate-600);
+}
+
+/* Arranca en -700, no en -600: con blanco encima, success-600 se queda en
+   3.77:1 y falla AA. -700 da 5.48:1. */
+.btn-success {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--c-success-700);
+  --bs-btn-border-color: var(--c-success-700);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-success-800);
+  --bs-btn-hover-border-color: var(--c-success-800);
+  --bs-btn-focus-shadow-rgb: 5, 150, 105;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-success-emphasis);
+  --bs-btn-active-border-color: var(--c-success-emphasis);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--c-success-700);
+  --bs-btn-disabled-border-color: var(--c-success-700);
+}
+
+.btn-danger {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--c-danger-600);
+  --bs-btn-border-color: var(--c-danger-600);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-danger-700);
+  --bs-btn-hover-border-color: var(--c-danger-700);
+  --bs-btn-focus-shadow-rgb: 220, 38, 38;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-danger-emphasis);
+  --bs-btn-active-border-color: var(--c-danger-emphasis);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--c-danger-600);
+  --bs-btn-disabled-border-color: var(--c-danger-600);
+}
+
+/* El caso trampa: warning lleva texto oscuro, nunca blanco. */
+.btn-warning {
+  --bs-btn-color: var(--c-slate-900);
+  --bs-btn-bg: var(--c-warning-500);
+  --bs-btn-border-color: var(--c-warning-500);
+  --bs-btn-hover-color: var(--c-slate-900);
+  --bs-btn-hover-bg: var(--c-warning-600);
+  --bs-btn-hover-border-color: var(--c-warning-600);
+  --bs-btn-focus-shadow-rgb: 217, 119, 6;
+  --bs-btn-active-color: var(--c-slate-900);
+  --bs-btn-active-bg: var(--c-warning-700);
+  --bs-btn-active-border-color: var(--c-warning-700);
+  --bs-btn-disabled-color: var(--c-slate-900);
+  --bs-btn-disabled-bg: var(--c-warning-500);
+  --bs-btn-disabled-border-color: var(--c-warning-500);
+}
+
+.btn-info {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--c-info-600);
+  --bs-btn-border-color: var(--c-info-600);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-info-700);
+  --bs-btn-hover-border-color: var(--c-info-700);
+  --bs-btn-focus-shadow-rgb: 79, 70, 229;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-info-emphasis);
+  --bs-btn-active-border-color: var(--c-info-emphasis);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--c-info-600);
+  --bs-btn-disabled-border-color: var(--c-info-600);
+}
+
+.btn-light {
+  --bs-btn-color: var(--app-text-strong);
+  --bs-btn-bg: var(--c-slate-100);
+  --bs-btn-border-color: var(--c-slate-200);
+  --bs-btn-hover-color: var(--app-text-strong);
+  --bs-btn-hover-bg: var(--c-slate-200);
+  --bs-btn-hover-border-color: var(--c-slate-300);
+  --bs-btn-focus-shadow-rgb: 100, 116, 139;
+  --bs-btn-active-color: var(--app-text-strong);
+  --bs-btn-active-bg: var(--c-slate-300);
+  --bs-btn-active-border-color: var(--c-slate-300);
+  --bs-btn-disabled-color: var(--app-text-muted);
+  --bs-btn-disabled-bg: var(--c-slate-100);
+  --bs-btn-disabled-border-color: var(--c-slate-200);
+}
+
+.btn-dark {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--c-slate-800);
+  --bs-btn-border-color: var(--c-slate-800);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-slate-900);
+  --bs-btn-hover-border-color: var(--c-slate-900);
+  --bs-btn-focus-shadow-rgb: 30, 41, 59;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-slate-950);
+  --bs-btn-active-border-color: var(--c-slate-950);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--c-slate-800);
+  --bs-btn-disabled-border-color: var(--c-slate-800);
+}
+
+/* --- Botones outline ------------------------------------------------------ */
+
+.btn-outline-primary {
+  --bs-btn-color: var(--c-brand-700);
+  --bs-btn-border-color: var(--c-brand-300);
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-brand-600);
+  --bs-btn-hover-border-color: var(--c-brand-600);
+  --bs-btn-focus-shadow-rgb: 18, 163, 199;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-brand-700);
+  --bs-btn-active-border-color: var(--c-brand-700);
+  --bs-btn-disabled-color: var(--c-brand-600);
+  --bs-btn-disabled-border-color: var(--c-brand-200);
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--app-text);
+  --bs-btn-border-color: var(--app-border-strong);
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-color: var(--app-text-strong);
+  --bs-btn-hover-bg: var(--c-slate-100);
+  --bs-btn-hover-border-color: var(--c-slate-400);
+  --bs-btn-focus-shadow-rgb: 100, 116, 139;
+  --bs-btn-active-color: var(--app-text-strong);
+  --bs-btn-active-bg: var(--c-slate-200);
+  --bs-btn-active-border-color: var(--c-slate-400);
+  --bs-btn-disabled-color: var(--app-text-subtle);
+  --bs-btn-disabled-border-color: var(--app-border);
+}
+
+.btn-outline-success {
+  --bs-btn-color: var(--c-success-emphasis);
+  --bs-btn-border-color: var(--c-success-border);
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-success-700);
+  --bs-btn-hover-border-color: var(--c-success-700);
+  --bs-btn-focus-shadow-rgb: 5, 150, 105;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-success-800);
+  --bs-btn-active-border-color: var(--c-success-800);
+  --bs-btn-disabled-color: var(--c-success-700);
+  --bs-btn-disabled-border-color: var(--c-success-subtle);
+}
+
+.btn-outline-danger {
+  --bs-btn-color: var(--c-danger-emphasis);
+  --bs-btn-border-color: var(--c-danger-border);
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-danger-600);
+  --bs-btn-hover-border-color: var(--c-danger-600);
+  --bs-btn-focus-shadow-rgb: 220, 38, 38;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-danger-700);
+  --bs-btn-active-border-color: var(--c-danger-700);
+  --bs-btn-disabled-color: var(--c-danger-600);
+  --bs-btn-disabled-border-color: var(--c-danger-subtle);
+}
+
+.btn-outline-warning {
+  --bs-btn-color: var(--c-warning-emphasis);
+  --bs-btn-border-color: var(--c-warning-border);
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-color: var(--c-slate-900);
+  --bs-btn-hover-bg: var(--c-warning-500);
+  --bs-btn-hover-border-color: var(--c-warning-500);
+  --bs-btn-focus-shadow-rgb: 217, 119, 6;
+  --bs-btn-active-color: var(--c-slate-900);
+  --bs-btn-active-bg: var(--c-warning-600);
+  --bs-btn-active-border-color: var(--c-warning-600);
+  --bs-btn-disabled-color: var(--c-warning-600);
+  --bs-btn-disabled-border-color: var(--c-warning-subtle);
+}
+
+.btn-outline-info {
+  --bs-btn-color: var(--c-info-emphasis);
+  --bs-btn-border-color: var(--c-info-border);
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-info-600);
+  --bs-btn-hover-border-color: var(--c-info-600);
+  --bs-btn-focus-shadow-rgb: 79, 70, 229;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-info-700);
+  --bs-btn-active-border-color: var(--c-info-700);
+  --bs-btn-disabled-color: var(--c-info-600);
+  --bs-btn-disabled-border-color: var(--c-info-subtle);
+}
+
+.btn-outline-light {
+  --bs-btn-color: var(--app-text);
+  --bs-btn-border-color: var(--app-border);
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-color: var(--app-text-strong);
+  --bs-btn-hover-bg: var(--c-slate-100);
+  --bs-btn-hover-border-color: var(--app-border-strong);
+  --bs-btn-focus-shadow-rgb: 100, 116, 139;
+  --bs-btn-active-color: var(--app-text-strong);
+  --bs-btn-active-bg: var(--c-slate-200);
+  --bs-btn-active-border-color: var(--app-border-strong);
+  --bs-btn-disabled-color: var(--app-text-subtle);
+  --bs-btn-disabled-border-color: var(--app-border);
+}
+
+.btn-outline-dark {
+  --bs-btn-color: var(--app-text-strong);
+  --bs-btn-border-color: var(--c-slate-400);
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-slate-800);
+  --bs-btn-hover-border-color: var(--c-slate-800);
+  --bs-btn-focus-shadow-rgb: 30, 41, 59;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-slate-900);
+  --bs-btn-active-border-color: var(--c-slate-900);
+  --bs-btn-disabled-color: var(--app-text-subtle);
+  --bs-btn-disabled-border-color: var(--app-border);
+}
+
+/* --- Variantes propias ----------------------------------------------------
+   La app venía simulando estas dos a mano: `btn-light border` como secundario
+   de facto (35 usos) y `btn-light text-danger` para logout/eliminar. */
+
+.btn-soft {
+  --bs-btn-color: var(--app-text);
+  --bs-btn-bg: var(--app-surface-sunken);
+  --bs-btn-border-color: var(--app-border);
+  --bs-btn-hover-color: var(--app-text-strong);
+  --bs-btn-hover-bg: var(--c-slate-100);
+  --bs-btn-hover-border-color: var(--app-border-strong);
+  --bs-btn-focus-shadow-rgb: 100, 116, 139;
+  --bs-btn-active-color: var(--app-text-strong);
+  --bs-btn-active-bg: var(--c-slate-200);
+  --bs-btn-active-border-color: var(--app-border-strong);
+  --bs-btn-disabled-color: var(--app-text-subtle);
+  --bs-btn-disabled-bg: var(--app-surface-sunken);
+  --bs-btn-disabled-border-color: var(--app-border);
+}
+
+.btn-soft-primary {
+  --bs-btn-color: var(--bs-primary-text-emphasis);
+  --bs-btn-bg: var(--bs-primary-bg-subtle);
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-brand-600);
+  --bs-btn-hover-border-color: var(--c-brand-600);
+  --bs-btn-focus-shadow-rgb: 18, 163, 199;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-brand-700);
+  --bs-btn-active-border-color: var(--c-brand-700);
+  --bs-btn-disabled-color: var(--app-text-subtle);
+  --bs-btn-disabled-bg: var(--bs-primary-bg-subtle);
+  --bs-btn-disabled-border-color: transparent;
+}
+
+.btn-soft-danger {
+  --bs-btn-color: var(--bs-danger-text-emphasis);
+  --bs-btn-bg: var(--bs-danger-bg-subtle);
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--c-danger-600);
+  --bs-btn-hover-border-color: var(--c-danger-600);
+  --bs-btn-focus-shadow-rgb: 220, 38, 38;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--c-danger-700);
+  --bs-btn-active-border-color: var(--c-danger-700);
+  --bs-btn-disabled-color: var(--app-text-subtle);
+  --bs-btn-disabled-bg: var(--bs-danger-bg-subtle);
+  --bs-btn-disabled-border-color: transparent;
+}
+
+/* Botones para usar SOBRE un panel de color de marca (gradiente de la CTA de
+   la Landing, por ejemplo) — no sobre la superficie normal de la app. Por eso
+   son fijos en blanco y NO se redefinen en theme-dark.css: el panel de marca
+   tiene el mismo gradiente en los dos temas, así que el botón tampoco cambia.
+   `.btn-outline-light` / `.btn-light` normales no sirven aquí porque están
+   pensados para ir sobre `--app-surface`, no sobre un fondo azul saturado:
+   el texto oscuro de `.btn-outline-light` casi desaparece sobre el gradiente. */
+.btn-on-brand {
+  --bs-btn-color: var(--c-brand-700);
+  --bs-btn-bg: #ffffff;
+  --bs-btn-border-color: #ffffff;
+  --bs-btn-hover-color: var(--c-brand-800);
+  --bs-btn-hover-bg: #f1f5f9;
+  --bs-btn-hover-border-color: #f1f5f9;
+  --bs-btn-focus-shadow-rgb: 255, 255, 255;
+  --bs-btn-active-color: var(--c-brand-800);
+  --bs-btn-active-bg: #e2e8f0;
+  --bs-btn-active-border-color: #e2e8f0;
+}
+.btn-on-brand-outline {
+  --bs-btn-color: #ffffff;
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: rgba(255, 255, 255, 0.55);
+  --bs-btn-hover-color: var(--c-brand-700);
+  --bs-btn-hover-bg: #ffffff;
+  --bs-btn-hover-border-color: #ffffff;
+  --bs-btn-focus-shadow-rgb: 255, 255, 255;
+  --bs-btn-active-color: var(--c-brand-700);
+  --bs-btn-active-bg: #f1f5f9;
+  --bs-btn-active-border-color: #f1f5f9;
+}
+
+/* Botón fantasma: sólo texto hasta el hover. Para acciones terciarias. */
+.btn-ghost {
+  --bs-btn-color: var(--app-text-muted);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: var(--app-text-strong);
+  --bs-btn-hover-bg: var(--bs-tertiary-bg);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-focus-shadow-rgb: 100, 116, 139;
+  --bs-btn-active-color: var(--app-text-strong);
+  --bs-btn-active-bg: var(--c-slate-200);
+  --bs-btn-active-border-color: transparent;
+  --bs-btn-disabled-color: var(--app-text-subtle);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: transparent;
+}
+
+/* Peso y forma comunes a todos los botones. Sustituye al `.btn` global que
+   vivía en App.vue con letter-spacing y radio propios. */
+.btn {
+  --bs-btn-font-weight: 500;
+  --bs-btn-padding-x: 1rem;
+  --bs-btn-padding-y: 0.5rem;
+  --bs-btn-border-radius: var(--app-radius);
+}
+.btn-sm {
+  --bs-btn-border-radius: var(--app-radius-sm);
+}
+.btn-lg {
+  --bs-btn-border-radius: var(--app-radius-lg);
+  --bs-btn-font-size: 1rem;
+}
+
+/* --- Otros componentes con hex compilado ---------------------------------- */
+
+.dropdown-menu {
+  --bs-dropdown-bg: var(--app-surface-raised);
+  --bs-dropdown-border-color: var(--app-border);
+  --bs-dropdown-border-radius: var(--app-radius-lg);
+  --bs-dropdown-box-shadow: var(--app-shadow-lg);
+  --bs-dropdown-link-hover-bg: var(--bs-tertiary-bg);
+  --bs-dropdown-link-active-color: #fff; /* venía #fff sobre #0d6efd */
+  --bs-dropdown-link-active-bg: var(--c-brand-600); /* venía #0d6efd */
+  --bs-dropdown-header-color: var(--app-text-muted); /* venía #6c757d */
+  --bs-dropdown-item-padding-y: 0.5rem;
+  --bs-dropdown-padding-x: 0.375rem;
+  --bs-dropdown-padding-y: 0.375rem;
+}
+
+.nav-pills {
+  --bs-nav-pills-border-radius: var(--app-radius);
+  --bs-nav-pills-link-active-color: #fff;
+  --bs-nav-pills-link-active-bg: var(--c-brand-600); /* venía #0d6efd */
+}
+
+.nav-tabs {
+  --bs-nav-tabs-border-color: var(--app-border);
+  --bs-nav-tabs-link-active-color: var(--c-brand-700);
+  --bs-nav-tabs-link-active-border-color: var(--app-border) var(--app-border)
+    var(--app-surface);
+}
+
+.list-group {
+  --bs-list-group-active-color: #fff;
+  --bs-list-group-active-bg: var(--c-brand-600); /* venía #0d6efd */
+  --bs-list-group-active-border-color: var(--c-brand-600);
+  --bs-list-group-border-color: var(--app-border);
+  --bs-list-group-border-radius: var(--app-radius-lg);
+  --bs-list-group-action-hover-bg: var(--bs-tertiary-bg);
+}
+
+.pagination {
+  --bs-pagination-active-color: #fff;
+  --bs-pagination-active-bg: var(--c-brand-600); /* venía #0d6efd */
+  --bs-pagination-active-border-color: var(--c-brand-600);
+  --bs-pagination-border-radius: var(--app-radius-sm);
+  --bs-pagination-focus-box-shadow: var(--app-ring); /* venía rgba(13,110,253,.25) */
+}
+
+.progress,
+.progress-stacked {
+  --bs-progress-bar-bg: var(--c-brand-600); /* venía #0d6efd */
+  --bs-progress-border-radius: var(--app-radius-pill);
+  --bs-progress-bg: var(--bs-secondary-bg);
+  --bs-progress-height: 0.5rem;
+}
+
+.accordion {
+  --bs-accordion-border-color: var(--app-border);
+  --bs-accordion-border-radius: var(--app-radius-lg);
+  --bs-accordion-btn-focus-box-shadow: var(--app-ring); /* venía rgba(13,110,253,.25) */
+}
+
+.card {
+  --bs-card-border-color: var(--app-border);
+  --bs-card-border-radius: var(--app-radius-lg);
+  --bs-card-inner-border-radius: calc(var(--app-radius-lg) - 1px);
+  --bs-card-cap-bg: transparent;
+  --bs-card-spacer-x: 1.25rem;
+  --bs-card-spacer-y: 1.25rem;
+  --bs-card-cap-padding-x: 1.25rem;
+  --bs-card-cap-padding-y: 1rem;
+}
+
+.modal {
+  --bs-modal-border-radius: var(--app-radius-xl);
+  --bs-modal-inner-border-radius: calc(var(--app-radius-xl) - 1px);
+  --bs-modal-box-shadow: var(--app-shadow-lg);
+  --bs-modal-border-color: var(--app-border);
+  --bs-modal-padding: 1.25rem;
+  --bs-modal-header-padding: 1.125rem 1.25rem;
+}
+
+.offcanvas,
+.offcanvas-start,
+.offcanvas-end {
+  --bs-offcanvas-bg: var(--app-surface);
+  --bs-offcanvas-border-color: var(--app-border);
+}
+
+.toast {
+  --bs-toast-bg: var(--app-surface-raised);
+  --bs-toast-border-color: var(--app-border);
+  --bs-toast-border-radius: var(--app-radius-lg);
+  --bs-toast-box-shadow: var(--app-shadow-lg);
+}
+
+.tooltip {
+  --bs-tooltip-bg: var(--c-slate-800);
+  --bs-tooltip-border-radius: var(--app-radius-sm);
+  --bs-tooltip-opacity: 1;
+}
+
+.popover {
+  --bs-popover-bg: var(--app-surface-raised);
+  --bs-popover-border-color: var(--app-border);
+  --bs-popover-border-radius: var(--app-radius-lg);
+}
+
+/* La flecha del select venía con stroke='%23343a40' incrustado. */
+.form-select {
+  --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+/* ==========================================================================
+   3. REGLAS PROPIAS
+   Aquí Bootstrap compila el hex FUERA de toda variable: no hay nada que
+   sobrescribir, hay que reescribir la regla entera.
+   ========================================================================== */
+
+/* El foco de formulario es el caso más visible: sin esto, TODOS los inputs de
+   la app siguen haciendo flash con el azul #0d6efd de Bootstrap.
+   Original: .form-control:focus { border-color:#86b7fe;
+              box-shadow: 0 0 0 .25rem rgba(13,110,253,.25) }  <- cero variables */
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus,
+.form-control:focus-visible {
+  border-color: var(--c-brand-400);
+  box-shadow: var(--app-ring);
+}
+
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus,
+.was-validated .form-control:invalid:focus {
+  border-color: var(--c-danger-500);
+  box-shadow: var(--app-ring-danger);
+}
+
+/* Estado marcado de checkbox / radio / switch: background-color y border-color
+   con hex fijo #0d6efd. */
+.form-check-input:checked {
+  background-color: var(--c-brand-600);
+  border-color: var(--c-brand-600);
+}
+.form-check-input:indeterminate {
+  background-color: var(--c-brand-600);
+  border-color: var(--c-brand-600);
+}
+.form-switch .form-check-input:focus {
+  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%232fc3e3'/%3e%3c/svg%3e");
+}
+.form-range::-webkit-slider-thumb {
+  background-color: var(--c-brand-600);
+}
+.form-range::-moz-range-thumb {
+  background-color: var(--c-brand-600);
+}
+
+/* Densidad y forma base de los campos. Sustituye a los overrides de
+   .form-control que estaban duplicados verbatim en 10 archivos. */
+.form-control,
+.form-select {
+  border-radius: var(--app-radius-sm);
+  padding: 0.5rem 0.75rem;
+  transition: border-color var(--app-transition), box-shadow var(--app-transition);
+}
+.form-select {
+  padding-right: 2.25rem;
+}
+.form-control::placeholder {
+  color: var(--app-text-subtle);
+}
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--app-text);
+  margin-bottom: 0.375rem;
+}
+.input-group-text {
+  background-color: var(--bs-tertiary-bg);
+  border-color: var(--app-border);
+  color: var(--app-text-muted);
+}
+
+/* .text-bg-* llevan `color:#fff!important` (y #000 en warning/light) fijo.
+   Al cambiar la luminosidad de los semánticos hay que reafirmar el par. */
+.text-bg-warning,
+.text-bg-light {
+  color: var(--c-slate-900) !important;
+}
+
+/* .btn-close trae un SVG con fill='%23000'. Lo pasamos al gris de texto para
+   que no sea un aspa negra dura sobre superficie clara. */
+.btn-close {
+  --bs-btn-close-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2364748b'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e");
+  --bs-btn-close-focus-shadow: var(--app-ring);
+}
+
+/* Las flechas del accordion traen stroke='%23212529' y stroke='%23052c65'. */
+.accordion {
+  --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%230d5f76' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+/* Iconos de validación con #198754 / #dc3545 incrustados. */
+.was-validated .form-control:valid,
+.form-control.is-valid {
+  --bs-form-valid-color: var(--c-success-600);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23059669' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+}
+.was-validated .form-control:invalid,
+.form-control.is-invalid {
+  --bs-form-invalid-color: var(--c-danger-600);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc2626'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc2626' stroke='none'/%3e%3c/svg%3e");
+}
+
+/* .progress-bar-striped usa rgba(255,255,255,.15) fijo: ilegible sobre barras
+   claras. Lo bajamos a una trama neutra que funciona en ambos sentidos. */
+.progress-bar-striped {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.22) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(255, 255, 255, 0.22) 75%,
+    transparent 75%,
+    transparent
+  );
+}
+
+/* Los badges de Bootstrap fuerzan color:#fff. Los soft (bg-*-subtle) necesitan
+   que el color lo mande la clase de texto. */
+.badge {
+  --bs-badge-font-weight: 600;
+  --bs-badge-padding-x: 0.6rem;
+  --bs-badge-padding-y: 0.35rem;
+  --bs-badge-border-radius: var(--app-radius-pill);
+}
+.badge[class*='bg-'][class*='-subtle'] {
+  --bs-badge-color: inherit;
+}
+
+.alert {
+  --bs-alert-border-radius: var(--app-radius);
+  --bs-alert-padding-x: 0.875rem;
+  --bs-alert-padding-y: 0.75rem;
+}

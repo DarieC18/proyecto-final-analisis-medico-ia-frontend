@@ -1,0 +1,150 @@
+/* ============================================================================
+   base.css — reset ligero, tipografía y comportamientos globales
+   Sustituye al <style> sin scope que vivía en App.vue.
+   Las fuentes se cargan con <link> desde index.html, nunca con @import aquí:
+   un @import dentro de un SFC bloquea el render y Vite no lo optimiza.
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* El canvas va aquí, separado de --bs-body-bg (que es la superficie de
+     tarjeta). Es el truco que hace que card/modal/dropdown/table hereden bien
+     en ambos temas sin tocar las vistas. */
+  background-color: var(--app-canvas);
+  color: var(--app-text);
+  font-family: var(--app-font-ui);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100dvh;
+  transition: background-color var(--app-transition), color var(--app-transition);
+}
+
+/* Poppins sólo para títulos y marca: sus cifras son poco legibles en la
+   densidad de una tabla, y esta app tiene 11 tablas. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6,
+.display-1,
+.display-2,
+.display-3,
+.display-4,
+.display-5,
+.display-6 {
+  font-family: var(--app-font-display);
+  color: var(--app-text-strong);
+  letter-spacing: -0.011em;
+}
+
+h1,
+.h1 {
+  font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem);
+}
+h2,
+.h2 {
+  font-size: clamp(1.4rem, 1.2rem + 0.8vw, 1.75rem);
+}
+h3,
+.h3 {
+  font-size: 1.3rem;
+}
+h4,
+.h4 {
+  font-size: 1.1rem;
+}
+h5,
+.h5 {
+  font-size: 1rem;
+}
+h6,
+.h6 {
+  font-size: 0.9rem;
+}
+
+/* Las cifras de tablas y datos clínicos en tabular-nums: las columnas de
+   valores quedan alineadas verticalmente aunque cambien los dígitos. */
+table,
+.font-numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+a {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: none;
+}
+
+hr {
+  border-color: var(--app-border);
+  opacity: 1;
+}
+
+/* Foco visible y consistente en todo lo interactivo. Sólo :focus-visible, para
+   no dibujar el anillo en clics de ratón. */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--app-ring);
+  border-radius: var(--app-radius-sm);
+}
+.btn:focus-visible {
+  box-shadow: var(--app-ring);
+}
+
+::selection {
+  background-color: var(--c-brand-200);
+  color: var(--c-brand-950);
+}
+
+/* Barras de scroll acordes al tema (WebKit; Firefox usa scrollbar-color). */
+* {
+  scrollbar-color: var(--app-border-strong) transparent;
+  scrollbar-width: thin;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--app-border-strong);
+  border-radius: var(--app-radius-pill);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--app-text-subtle);
+  background-clip: content-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
