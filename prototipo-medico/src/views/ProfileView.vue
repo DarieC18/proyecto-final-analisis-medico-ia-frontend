@@ -34,6 +34,9 @@
             <StatusBadge :text="translateRole(rolActual)" variant="info" />
           </DataField>
         </div>
+        <div v-if="rolActual === 'Doctor'" class="col-md-6">
+          <DataField label="Especialidad" :value="user?.specialty || 'No especificada'" />
+        </div>
         <div class="col-md-6">
           <DataField label="Estado">
             <StatusBadge

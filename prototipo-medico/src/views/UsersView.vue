@@ -70,6 +70,27 @@
                 </template>
               </select>
             </div>
+            <div v-if="form.role === 'Doctor'" class="col-md-6">
+              <label for="u-specialty" class="form-label">Especialidad</label>
+              <select id="u-specialty" v-model="form.specialty" class="form-select">
+                <option value="">Sin especificar</option>
+                <option value="Cardiología">Cardiología</option>
+                <option value="Dermatología">Dermatología</option>
+                <option value="Endocrinología">Endocrinología</option>
+                <option value="Gastroenterología">Gastroenterología</option>
+                <option value="Ginecología">Ginecología</option>
+                <option value="Medicina Interna">Medicina Interna</option>
+                <option value="Neurología">Neurología</option>
+                <option value="Oftalmología">Oftalmología</option>
+                <option value="Oncología">Oncología</option>
+                <option value="Ortopedia">Ortopedia</option>
+                <option value="Pediatría">Pediatría</option>
+                <option value="Psiquiatría">Psiquiatría</option>
+                <option value="Neumología">Neumología</option>
+                <option value="Reumatología">Reumatología</option>
+                <option value="Urología">Urología</option>
+              </select>
+            </div>
           </div>
         </FormSection>
 
@@ -174,7 +195,8 @@ const EMPTY_FORM = {
   userName: '',
   email: '',
   numberIdentification: '',
-  role: 'Doctor'
+  role: 'Doctor',
+  specialty: ''
 }
 
 const form = reactive({ ...EMPTY_FORM })
@@ -219,7 +241,8 @@ const abrirEditar = (u) => {
     userName: u.userName,
     email: u.email,
     numberIdentification: u.numberIdentification,
-    role: u.role
+    role: u.role,
+    specialty: u.specialty || ''
   })
   formError.value = ''
 }
