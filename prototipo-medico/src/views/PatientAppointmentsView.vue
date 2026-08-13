@@ -30,7 +30,7 @@
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-medium">Fecha de la Cita</label>
-                <input v-model="form.appointmentDate" type="datetime-local" class="form-control" required>
+                <input v-model="form.appointmentDate" type="datetime-local" class="form-control" :min="minDate" required>
               </div>
               <div class="col-12">
                 <label class="form-label fw-medium">Motivo de Consulta</label>
@@ -89,7 +89,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { portalService } from '@/api/portal'
 import StatusBadge from '@/components/StatusBadge.vue'
 
@@ -102,6 +102,13 @@ const doctores = ref([])
 const saving = ref(false)
 const formError = ref('')
 const form = ref({ doctorId: '', appointmentDate: '', reason: '', notes: '' })
+
+const minDate = computed(() => {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  d.setHours(0, 0, 0, 0)
+  return d.toISOString().slice(0, 16)
+})
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
@@ -141,6 +148,16 @@ const solicitar = async () => {
     formError.value = 'Debes seleccionar un doctor para continuar.'
     return
   }
+  if (form.value.appointmentDate) {
+    const selected = new Date(form.value.appointmentDate)
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0)
+    if (selected < tomorrow) {
+      formError.value = 'No puedes agendar una cita para el mismo día ni en el pasado. Selecciona una fecha a partir de mañana.'
+      return
+    }
+  }
   saving.value = true
   try {
     await portalService.requestAppointment({
@@ -152,7 +169,7 @@ const solicitar = async () => {
     await cargarCitas()
     vista.value = 'lista'
   } catch (err) {
-    formError.value = err.response?.data?.message || 'Error al solicitar la cita. Intenta de nuevo.'
+    formError.value = err.response?.data?.message || err.response?.data?.detail || 'Error al solicitar la cita. Intenta de nuevo.'
   } finally {
     saving.value = false
   }
