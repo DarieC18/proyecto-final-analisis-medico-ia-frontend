@@ -60,7 +60,7 @@
                 <td class="pe-4 py-3 text-end">
                   <button @click="abrirDetalle(p)" class="btn btn-sm btn-light border text-info fw-medium px-3 me-2">Ver</button>
                   <button @click="editarPaciente(p)" class="btn btn-sm btn-light border text-warning fw-medium px-3 me-2">Editar</button>
-                  <button @click="confirmarEliminar(p)" class="btn btn-sm btn-light border text-danger fw-medium px-3">Eliminar</button>
+                  <button v-if="auth.isAdmin()" @click="confirmarEliminar(p)" class="btn btn-sm btn-light border text-danger fw-medium px-3">Eliminar</button>
                 </td>
               </tr>
             </tbody>
