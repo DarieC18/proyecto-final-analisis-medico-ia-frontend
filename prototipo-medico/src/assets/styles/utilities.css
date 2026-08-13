@@ -1,0 +1,132 @@
+/* ============================================================================
+   utilities.css — utilidades propias que Bootstrap no cubre bien
+   ========================================================================== */
+
+/* --- Cabecera de tabla ----------------------------------------------------
+   Sustituye a `<thead class="bg-light text-muted">`, repetido en 11 tablas.
+   No se usan .table-light / .table-dark: son 100% hex compilado y NO
+   reaccionan a data-bs-theme. */
+.table > thead.table-head th,
+.table > thead.table-head td {
+  background-color: var(--bs-tertiary-bg);
+  color: var(--app-text-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--bs-border-color);
+  white-space: nowrap;
+}
+
+/* --- Superficies ---------------------------------------------------------- */
+.surface {
+  background-color: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+}
+.surface-sunken {
+  background-color: var(--app-surface-sunken);
+}
+.surface-raised {
+  background-color: var(--app-surface-raised);
+  box-shadow: var(--app-shadow);
+}
+
+/* --- Texto ---------------------------------------------------------------- */
+.text-app-muted {
+  color: var(--app-text-muted) !important;
+}
+.text-app-subtle {
+  color: var(--app-text-subtle) !important;
+}
+.text-app-strong {
+  color: var(--app-text-strong) !important;
+}
+.text-brand {
+  color: var(--bs-primary-text-emphasis) !important;
+}
+
+/* Etiqueta corta en versalitas: cabeceras de dato, secciones de ficha. */
+.label-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+/* Un hijo flex NO encoge por debajo de su contenido sin esto, así que
+   `text-overflow: ellipsis` no llega a aplicarse nunca. Bootstrap no trae la
+   utilidad y el patrón aparece en toda ficha con nombre truncable. */
+.u-min-w-0 {
+  min-width: 0;
+}
+
+/* --- Bordes y formas ------------------------------------------------------ */
+.border-app {
+  border: 1px solid var(--app-border) !important;
+}
+.rounded-app-sm {
+  border-radius: var(--app-radius-sm) !important;
+}
+.rounded-app {
+  border-radius: var(--app-radius) !important;
+}
+.rounded-app-lg {
+  border-radius: var(--app-radius-lg) !important;
+}
+.rounded-app-xl {
+  border-radius: var(--app-radius-xl) !important;
+}
+
+/* --- Sombras -------------------------------------------------------------- */
+.shadow-app-sm {
+  box-shadow: var(--app-shadow-sm) !important;
+}
+.shadow-app {
+  box-shadow: var(--app-shadow) !important;
+}
+.shadow-app-lg {
+  box-shadow: var(--app-shadow-lg) !important;
+}
+
+/* --- Movimiento -----------------------------------------------------------
+   Una sola definición. Antes había 6 copias de .animation-fade con tres
+   valores distintos de translateY (10px, 8px y 5px). */
+.u-fade-in {
+  animation: u-fade-in 0.24s ease-out;
+}
+@keyframes u-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.u-fade {
+  animation: u-fade 0.2s ease-out;
+}
+@keyframes u-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* --- Accesibilidad -------------------------------------------------------- */
+.visually-hidden-focusable-link:focus-visible {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 2000;
+  padding: 0.5rem 1rem;
+  background-color: var(--app-surface-raised);
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow-lg);
+}

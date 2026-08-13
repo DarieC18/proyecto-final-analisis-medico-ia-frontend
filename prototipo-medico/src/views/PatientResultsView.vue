@@ -1,92 +1,104 @@
 <template>
-  <div class="container mt-4">
-    <div class="mb-4">
-      <h3 class="fw-bold mb-0">Resultados de Análisis</h3>
-      <p class="text-muted">Análisis de IA generados para tus consultas</p>
-    </div>
-    <div v-if="loading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-    </div>
-    <div v-else-if="error" class="alert alert-danger border-0 rounded-3">{{ error }}</div>
-    <div v-else-if="results.length === 0" class="text-center py-5 text-muted">
-      <p>No hay resultados disponibles.</p>
-    </div>
-    <div v-else>
-      <div v-for="r in results" :key="r.id" class="card shadow-sm border-0 rounded-4 mb-4">
-        <div class="card-body p-4">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <h6 class="fw-bold mb-1">{{ r.analysisType || 'Análisis' }}</h6>
-              <small class="text-muted">{{ formatDate(r.createdAt) }}</small>
+  <div>
+    <PageHeader
+      title="Resultados de análisis"
+      subtitle="Análisis de IA generados para tus consultas"
+      :icon="IconAi"
+    />
+
+    <LoadingState v-if="loading" label="Cargando resultados…" />
+
+    <AppAlert v-else-if="error" variant="danger" :message="error" />
+
+    <BaseCard v-else-if="results.length === 0" flush padding="none">
+      <EmptyState
+        :icon="IconAi"
+        title="Sin resultados todavía"
+        message="Cuando un médico genere un análisis de IA en una de tus consultas, aparecerá aquí."
+      />
+    </BaseCard>
+
+    <div v-else class="d-grid gap-3">
+      <BaseCard
+        v-for="r in results"
+        :key="r.id"
+        :title="r.analysisType || 'Análisis clínico'"
+        :subtitle="formatDate(r.createdAt)"
+        :icon="IconAi"
+      >
+        <template #header-actions>
+          <StatusBadge
+            :text="r.isReviewed ? 'Revisado' : 'Pendiente'"
+            :variant="r.isReviewed ? 'active' : 'pending'"
+            dot
+          />
+        </template>
+
+        <template v-if="r.aiResponse && !isAiError(r.aiResponse)">
+          <div class="d-grid gap-3">
+            <p v-if="parsed(r)?.summary" class="result__summary">{{ parsed(r).summary }}</p>
+
+            <div v-if="parsed(r)?.riskLevel">
+              <p class="result__label">Nivel de riesgo</p>
+              <StatusBadge :text="parsed(r).riskLevel" :variant="riskTone(parsed(r).riskLevel)" />
             </div>
-            <StatusBadge :text="r.isReviewed ? 'Revisado' : 'Pendiente'" :variant="r.isReviewed ? 'active' : 'inactive'" />
+
+            <div v-if="parsed(r)?.recommendations?.length">
+              <p class="result__label">Recomendaciones</p>
+              <ul class="result__recommendations">
+                <li v-for="(rec, i) in parsed(r).recommendations" :key="i">
+                  <p class="result__rec-title">{{ rec.title }}</p>
+                  <p class="result__rec-desc">{{ rec.description }}</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Respaldo: si la respuesta no es el JSON esperado, se muestra el
+                 texto tal cual en lugar de fallar en silencio. -->
+            <pre v-if="!parsed(r)" class="result__raw">{{ r.aiResponse }}</pre>
           </div>
-          <div class="mb-3">
-            <template v-if="parsedResponse(r.aiResponse)">
-              <div class="bg-light rounded-3 p-3 mb-2">
-                <small class="text-muted fw-bold d-block mb-1">Resumen:</small>
-                <p class="mb-0">{{ parsedResponse(r.aiResponse).summary }}</p>
-              </div>
-              <div class="d-flex align-items-center gap-2 mb-2">
-                <small class="text-muted fw-bold">Nivel de riesgo:</small>
-                <span class="badge rounded-pill px-3 py-2"
-                  :class="{
-                    'bg-success bg-opacity-10 text-success': parsedResponse(r.aiResponse).riskLevel === 'Bajo',
-                    'bg-warning bg-opacity-10 text-warning': parsedResponse(r.aiResponse).riskLevel === 'Medio',
-                    'bg-danger bg-opacity-10 text-danger': parsedResponse(r.aiResponse).riskLevel === 'Alto'
-                  }">
-                  {{ parsedResponse(r.aiResponse).riskLevel || 'N/A' }}
-                </span>
-              </div>
-              <div v-if="parsedResponse(r.aiResponse).recommendations?.length">
-                <small class="text-muted fw-bold d-block mb-2">Recomendaciones:</small>
-                <div v-for="(rec, i) in parsedResponse(r.aiResponse).recommendations" :key="i"
-                  class="border rounded-3 p-3 mb-2 bg-white">
-                  <p class="fw-semibold mb-1 small">{{ rec.title }}</p>
-                  <p class="text-muted mb-0 small">{{ rec.description }}</p>
-                </div>
-              </div>
-            </template>
-            <template v-else>
-              <div class="bg-light rounded-3 p-3">
-                <small class="text-muted fw-bold d-block mb-1">Resultado:</small>
-                <p class="mb-0" style="white-space: pre-wrap;">{{ r.aiResponse || 'Sin respuesta' }}</p>
-              </div>
-            </template>
-          </div>
+        </template>
+
+        <AppAlert v-else-if="isAiError(r.aiResponse)" variant="danger" :message="r.aiResponse" />
+
+        <template #footer>
           <div class="d-flex justify-content-between">
-            <small class="text-muted">Modelo: {{ r.modelUsed || 'N/A' }}</small>
-            <small class="text-muted">Estado: {{ r.status || 'N/A' }}</small>
+            <small class="text-app-muted">Estado: {{ r.status || 'N/D' }}</small>
           </div>
-        </div>
-      </div>
+        </template>
+      </BaseCard>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
+import { AppAlert, BaseCard, EmptyState, LoadingState, PageHeader, StatusBadge } from '@/components/ui'
+import { IconAi } from '@/lib/icons'
+import { isAiError, parseAiResponse, riskTone } from '@/lib/aiAnalysis'
 import { portalService } from '@/api/portal'
-import StatusBadge from '@/components/StatusBadge.vue'
 
 const loading = ref(true)
 const error = ref('')
 const results = ref([])
 
-const parsedResponse = (aiResponse) => {
-  if (!aiResponse) return null
-  try {
-    const parsed = JSON.parse(aiResponse)
-    if (parsed && typeof parsed === 'object' && parsed.summary) return parsed
-    return null
-  } catch {
-    return null
-  }
+// Cachea el parseo por resultado para no re-parsear el mismo JSON en cada
+// referencia dentro de la plantilla (summary, riskLevel, recommendations).
+const parsedCache = new WeakMap()
+const parsed = (r) => {
+  if (!parsedCache.has(r)) parsedCache.set(r, parseAiResponse(r.aiResponse))
+  return parsedCache.get(r)
 }
 
 const formatDate = (dateStr) => {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  if (!dateStr) return '—'
+  return new Date(dateStr).toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
 onMounted(async () => {
@@ -94,13 +106,67 @@ onMounted(async () => {
     const res = await portalService.getResults()
     results.value = res.data || []
   } catch (err) {
-    if (err.response?.status === 404) {
-      error.value = 'No tienes un perfil de paciente registrado. Contacta a un administrador para que vincule tu cuenta.'
-    } else {
-      error.value = 'Error al cargar resultados'
-    }
+    error.value =
+      err.response?.status === 404
+        ? 'No tienes un perfil de paciente registrado. Contacta a un administrador para que vincule tu cuenta.'
+        : 'Error al cargar resultados'
   } finally {
     loading.value = false
   }
 })
 </script>
+
+<style scoped>
+.result__summary {
+  margin: 0;
+  color: var(--app-text);
+}
+
+.result__label {
+  margin: 0 0 0.375rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.result__recommendations {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.625rem;
+}
+
+.result__recommendations li {
+  padding-inline-start: 0.75rem;
+  border-inline-start: 2px solid var(--bs-info-border-subtle);
+}
+
+.result__rec-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--app-text-strong);
+}
+
+.result__rec-desc {
+  margin: 0.125rem 0 0;
+  font-size: 0.825rem;
+  color: var(--app-text-muted);
+}
+
+.result__raw {
+  margin: 0;
+  padding: 0.75rem;
+  background-color: var(--bs-tertiary-bg);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  font-size: 0.8rem;
+  color: var(--app-text);
+  white-space: pre-wrap;
+  overflow-x: auto;
+  max-height: 320px;
+}
+</style>

@@ -1,88 +1,58 @@
 <template>
-  <div class="container">
-    <div v-if="loading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-    </div>
+  <div>
+    <LoadingState v-if="loading" label="Cargando expediente…" />
 
-    <div v-if="error" class="alert alert-danger border-0 rounded-3 d-flex justify-content-between align-items-center">
-      <span>{{ error }}</span>
-      <button @click="error = ''" class="btn-close"></button>
-    </div>
+    <AppAlert v-if="error" variant="danger" :message="error" dismissible class="mb-3" @close="error = ''" />
 
     <template v-if="cita">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h3 class="fw-bold mb-0">Expediente Clínico: {{ patientName }}</h3>
-          <p class="text-muted">Cita #{{ cita.id }} - <StatusBadge :text="cita.status" :variant="statusVariant(cita.status)" /></p>
-        </div>
-        <RouterLink to="/citas" class="btn btn-light border text-muted shadow-sm">Volver al listado</RouterLink>
-      </div>
+      <PageHeader
+        :title="`Expediente Clínico: ${patientName}`"
+        :icon="IconRecord"
+        back-to="/citas"
+      >
+        <template #meta>
+          <p class="d-flex align-items-center gap-2 mt-1 mb-0">
+            <small class="text-app-muted">Cita #{{ cita.id }}</small>
+            <StatusBadge :text="translateStatus(cita.status)" :variant="statusVariant(cita.status)" />
+          </p>
+        </template>
+      </PageHeader>
 
       <div class="row g-3 mb-4">
         <div class="col-md-3">
-          <div class="card bg-light border-0 shadow-sm p-3 text-center rounded-4">
-            <small class="text-muted fw-bold text-uppercase">Fecha</small>
-            <p class="fw-bold mb-0 mt-1">{{ formatDateTime(cita.appointmentDate) }}</p>
-          </div>
+          <BaseCard tone="muted" padding="sm" class="h-100">
+            <DataField label="Fecha" :value="formatDateTime(cita.appointmentDate)" :icon="IconAppointment" />
+          </BaseCard>
         </div>
         <div class="col-md-3">
-          <div class="card bg-light border-0 shadow-sm p-3 text-center rounded-4">
-            <small class="text-muted fw-bold text-uppercase">Motivo</small>
-            <p class="fw-bold mb-0 mt-1 small">{{ cita.reason }}</p>
-          </div>
+          <BaseCard tone="muted" padding="sm" class="h-100">
+            <DataField label="Motivo" :value="cita.reason" :icon="IconNotes" />
+          </BaseCard>
         </div>
         <div class="col-md-3">
-          <div class="card bg-light border-0 shadow-sm p-3 text-center rounded-4">
-            <small class="text-muted fw-bold text-uppercase">Paciente</small>
-            <p class="fw-bold mb-0 mt-1 small">{{ patientName }}</p>
-          </div>
+          <BaseCard tone="muted" padding="sm" class="h-100">
+            <DataField label="Paciente" :value="patientName" :icon="IconUser" />
+          </BaseCard>
         </div>
         <div class="col-md-3">
-          <div class="card bg-light border-0 shadow-sm p-3 text-center rounded-4">
-            <small class="text-muted fw-bold text-uppercase">Estado</small>
-            <div class="mt-1">
-              <select v-model="nuevoEstado" @change="cambiarEstado" class="form-select form-select-sm bg-white border-0 fw-bold text-center">
-                <option value="Pending">Pendiente</option>
-                <option value="InProgress">En Progreso</option>
-                <option value="Completed">Completada</option>
-                <option value="Cancelled">Cancelada</option>
-              </select>
-            </div>
-          </div>
+          <BaseCard tone="muted" padding="sm" class="h-100">
+            <label for="c-estado" class="label-eyebrow d-block mb-1">Estado</label>
+            <select id="c-estado" v-model="nuevoEstado" class="form-select form-select-sm" @change="cambiarEstado">
+              <option value="Pending">Pendiente</option>
+              <option value="InProgress">En Progreso</option>
+              <option value="Completed">Completada</option>
+              <option value="Cancelled">Cancelada</option>
+            </select>
+          </BaseCard>
         </div>
       </div>
 
-      <div class="card shadow-sm p-2 mb-4">
-        <ul class="nav nav-pills nav-fill gap-2 p-1">
-          <li class="nav-item">
-            <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'info', 'text-muted': tabActual !== 'info' }" @click="tabActual = 'info'" href="#">📝 Info Básica</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'sintomas', 'text-muted': tabActual !== 'sintomas' }" @click="tabActual = 'sintomas'" href="#">🤒 Síntomas</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'signos', 'text-muted': tabActual !== 'signos' }" @click="tabActual = 'signos'" href="#">❤️ Signos Vitales</a>
-          </li>
-          <li v-if="!auth.hasRole('Nurse')" class="nav-item">
-            <a class="nav-link rounded-pill fw-bold" :class="{ 'active bg-dark text-white shadow-sm': tabActual === 'ia', 'text-primary bg-primary bg-opacity-10': tabActual !== 'ia' }" @click="tabActual = 'ia'" href="#">🤖 Análisis IA</a>
-          </li>
-          <li v-if="!auth.hasRole('Nurse')" class="nav-item">
-            <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'records', 'text-muted': tabActual !== 'records' }" @click="tabActual = 'records'" href="#">📋 Historial Médico</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'alertas', 'text-muted': tabActual !== 'alertas' }" @click="tabActual = 'alertas'" href="#">🔔 Alertas</a>
-          </li>
-          <li v-if="!auth.hasRole('Nurse')" class="nav-item">
-            <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'recomendaciones', 'text-muted': tabActual !== 'recomendaciones' }" @click="tabActual = 'recomendaciones'" href="#">💡 Recomendaciones</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link rounded-pill fw-medium" :class="{ 'active bg-primary shadow-sm': tabActual === 'documentos', 'text-muted': tabActual !== 'documentos' }" @click="tabActual = 'documentos'" href="#">📄 Documentos</a>
-          </li>
-        </ul>
-      </div>
+      <BaseCard flush padding="none" class="mb-3">
+        <TabNav v-model="tabActual" :tabs="tabsVisibles" />
+      </BaseCard>
 
       <div class="card shadow-sm">
-        <div class="card-body p-5">
+        <div class="card-body p-4">
 
           <!-- INFO TAB -->
           <div v-if="tabActual === 'info'" class="animation-fade">
@@ -97,7 +67,7 @@
                   Guardar Notas
                 </button>
               </div>
-              <div v-if="notasGuardadas" class="alert alert-success border-0 rounded-3 mt-3 small">Notas guardadas exitosamente.</div>
+              <AppAlert v-if="notasGuardadas" variant="success" message="Notas guardadas exitosamente." class="mt-3" />
             </div>
 
             <hr class="my-4">
@@ -129,14 +99,9 @@
               </button>
             </div>
 
-            <div v-if="sintomaError" class="alert alert-danger border-0 rounded-3 py-2 small">{{ sintomaError }}</div>
+            <AppAlert v-if="sintomaError" variant="danger" :message="sintomaError" class="mb-3" />
 
-            <div v-if="showSintomaForm" class="form-section mb-4">
-              <div class="section-header">
-                <span class="section-icon">🩺</span>
-                <span>Nuevo Síntoma</span>
-              </div>
-              <div class="section-body">
+            <FormSection v-if="showSintomaForm" title="Nuevo Síntoma" :icon="IconSymptoms" class="mb-4">
                 <div class="row g-3">
                   <div class="col-md-4">
                     <label class="form-label fw-medium">Síntoma</label>
@@ -165,34 +130,34 @@
                   <label class="form-label fw-medium">Notas</label>
                   <textarea v-model="sintomaForm.notes" class="form-control" rows="2" placeholder="Notas adicionales..."></textarea>
                 </div>
-              </div>
-            </div>
+              
+            </FormSection>
 
-            <div v-if="sintomas.length === 0" class="text-muted text-center py-4">
-              <p>No hay síntomas registrados para esta cita.</p>
-            </div>
-            <div class="row g-4">
+            <EmptyState
+              v-if="sintomas.length === 0"
+              size="sm"
+              :icon="IconSymptoms"
+              title="Sin síntomas registrados"
+            />
+            <div v-else class="row g-3">
               <div class="col-md-6" v-for="(s, idx) in sintomas" :key="s.id || idx">
-                <div class="card bg-light border-0 border-start border-4 shadow-sm h-100 p-3 rounded-4" :class="`border-${severityColor(s.severity)}`">
-                  <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h6 class="fw-bold mb-0">{{ s.name }}</h6>
-                    <span class="badge rounded-pill px-3" :class="severityBadge(s.severity)">{{ s.severity }}</span>
+                <div class="sintoma" :class="`sintoma--${severityVariant(s.severity)}`">
+                  <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                    <h6 class="sintoma__nombre">{{ s.name }}</h6>
+                    <StatusBadge :text="s.severity" :variant="severityVariant(s.severity)" />
                   </div>
-                  <p class="text-muted small mb-2"><strong>Inicio:</strong> {{ formatDate(s.startedAt) }}</p>
-                  <p class="mb-2 text-dark small">{{ s.notes || 'Sin notas adicionales.' }}</p>
-                  <div v-if="!auth.hasRole('Nurse')" class="d-flex justify-content-end gap-2 mt-2">
-                    <button @click="editarSintoma(s)" class="btn btn-sm btn-light border text-warning px-3">Editar</button>
+                  <DataField label="Inicio" :value="formatDate(s.startedAt)" />
+                  <p class="sintoma__notas">{{ s.notes || 'Sin notas adicionales.' }}</p>
+                  <div v-if="!auth.hasRole('Nurse')" class="d-flex justify-content-end mt-2">
+                    <AppButton variant="soft" size="sm" :icon="IconEdit" @click="editarSintoma(s)">
+                      Editar
+                    </AppButton>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div v-if="editSintomaId" class="form-section mt-4">
-              <div class="section-header">
-                <span class="section-icon">✏️</span>
-                <span>Editar Síntoma</span>
-              </div>
-              <div class="section-body">
+            <FormSection v-if="editSintomaId" title="Editar Síntoma" :icon="IconEdit" class="mt-4">
                 <div class="row g-3">
                   <div class="col-md-4">
                     <label class="form-label fw-medium">Síntoma</label>
@@ -222,8 +187,8 @@
                   <label class="form-label fw-medium">Notas</label>
                   <textarea v-model="editSintomaForm.notes" class="form-control" rows="2"></textarea>
                 </div>
-              </div>
-            </div>
+              
+            </FormSection>
 
             <ConfirmDialog
               :visible="deleteSintomaDialog"
@@ -248,14 +213,9 @@
               </button>
             </div>
 
-            <div v-if="signosError" class="alert alert-danger border-0 rounded-3 py-2 small">{{ signosError }}</div>
+            <AppAlert v-if="signosError" variant="danger" :message="signosError" class="mb-3" />
 
-            <div v-if="showSignosForm" class="form-section mb-4">
-              <div class="section-header">
-                <span class="section-icon">❤️</span>
-                <span>Nueva Medición</span>
-              </div>
-              <div class="section-body">
+            <FormSection v-if="showSignosForm" title="Nueva Medición" :icon="IconVitals" class="mb-4">
                 <div class="row g-3">
                   <div class="col-md-4">
                     <label class="form-label fw-medium">🌡️ Temperatura (°C)</label>
@@ -288,8 +248,8 @@
                     💾 Guardar Medición
                   </button>
                 </div>
-              </div>
-            </div>
+              
+            </FormSection>
 
             <div v-if="signos.length === 0 && !showSignosForm" class="text-muted text-center py-4">
               <p>No hay signos vitales registrados para esta cita.</p>
@@ -367,12 +327,7 @@
               </div>
             </div>
 
-            <div v-if="editSignoId" class="form-section mt-4">
-              <div class="section-header">
-                <span class="section-icon">✏️</span>
-                <span>Editar Medición</span>
-              </div>
-              <div class="section-body">
+            <FormSection v-if="editSignoId" title="Editar Medición" :icon="IconEdit" class="mt-4">
                 <div class="row g-3">
                   <div class="col-md-4">
                     <label class="form-label fw-medium">🌡️ Temperatura (°C)</label>
@@ -399,8 +354,6 @@
                     <input v-model.number="editSignoForm.glucose" type="number" class="form-control">
                   </div>
                 </div>
-                <div v-if="editSignoError" class="alert alert-danger border-0 rounded-3 py-2 small mt-3">{{ editSignoError }}</div>
-                <div v-if="editSignoSuccess" class="alert alert-success border-0 rounded-3 py-2 small mt-3">{{ editSignoSuccess }}</div>
                 <div class="d-flex justify-content-end gap-2 mt-4">
                   <button @click="cancelarEditSigno" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</button>
                   <button @click="actualizarSigno" class="btn btn-success rounded-pill px-4 shadow-sm" :disabled="guardandoSignos">
@@ -408,8 +361,8 @@
                     💾 Guardar Cambios
                   </button>
                 </div>
-              </div>
-            </div>
+              
+            </FormSection>
           </div>
 
           <!-- HISTORIAL MÉDICO TAB -->
@@ -421,14 +374,9 @@
               </button>
             </div>
 
-            <div v-if="recordError" class="alert alert-danger border-0 rounded-3 py-2 small">{{ recordError }}</div>
+            <AppAlert v-if="recordError" variant="danger" :message="recordError" class="mb-3" />
 
-            <div v-if="showRecordForm" class="form-section mb-4">
-              <div class="section-header">
-                <span class="section-icon">📋</span>
-                <span>{{ editRecordId ? 'Editar' : 'Nuevo' }} Registro Médico</span>
-              </div>
-              <div class="section-body">
+            <FormSection v-if="showRecordForm" :title="`${editRecordId ? 'Editar' : 'Nuevo'} Registro Médico`" :icon="IconRecord" class="mb-4">
                 <div class="row g-3">
                   <div class="col-md-6">
                     <label class="form-label fw-medium">🩺 Diagnóstico Inicial</label>
@@ -454,8 +402,8 @@
                     💾 {{ editRecordId ? 'Actualizar' : 'Guardar' }}
                   </button>
                 </div>
-              </div>
-            </div>
+              
+            </FormSection>
 
             <div v-if="recordsMedicos.length === 0" class="text-muted text-center py-4">
               <p>No hay registros médicos para esta cita.</p>
@@ -479,9 +427,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h5 class="fw-bold text-dark mb-0">Alertas de la Cita</h5>
             </div>
-            <div v-if="cargandoAlertas" class="text-center py-4">
-              <div class="spinner-border text-primary" role="status"></div>
-            </div>
+            <LoadingState v-if="cargandoAlertas" />
             <div v-else-if="alertas.length === 0" class="text-muted text-center py-4">
               <p>No hay alertas asociadas a esta cita.</p>
             </div>
@@ -504,9 +450,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h5 class="fw-bold text-dark mb-0">Recomendaciones</h5>
             </div>
-            <div v-if="cargandoRecomendaciones" class="text-center py-4">
-              <div class="spinner-border text-primary" role="status"></div>
-            </div>
+            <LoadingState v-if="cargandoRecomendaciones" />
             <div v-else-if="recomendaciones.length === 0" class="text-muted text-center py-4">
               <p>No hay recomendaciones para esta cita.</p>
             </div>
@@ -520,69 +464,65 @@
           <!-- DOCUMENTOS TAB -->
           <div v-if="tabActual === 'documentos'" class="animation-fade">
             <div class="d-flex justify-content-between align-items-center mb-4">
-              <h5 class="fw-bold text-dark mb-0">Documentos</h5>
-              <button @click="showDocUpload = !showDocUpload; docError = ''; docSuccess = ''" class="btn btn-primary btn-sm px-3 shadow-sm">
-                {{ showDocUpload ? 'Cancelar' : '+ Subir Documento' }}
-              </button>
+              <h5 class="fw-bold mb-0">Documentos</h5>
+              <AppButton
+                variant="primary"
+                size="sm"
+                :icon="showDocUpload ? IconClose : IconUpload"
+                @click="showDocUpload = !showDocUpload"
+              >
+                {{ showDocUpload ? 'Cancelar' : 'Subir documento' }}
+              </AppButton>
             </div>
 
-            <div v-if="showDocUpload" class="form-section mb-4">
-              <div class="section-header">
-                <span class="section-icon">📎</span>
-                <span>Subir Documento</span>
-              </div>
-              <div class="section-body">
-                <form @submit.prevent="subirDocumento">
-                  <div class="row g-3">
-                    <div class="col-md-4">
-                      <label class="form-label fw-medium">📄 Archivo</label>
-                      <input ref="docFileInput" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
-                      <small class="text-muted">PDF, JPG o PNG. Máximo 10MB.</small>
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label fw-medium">Tipo de documento</label>
-                      <select v-model="docFileType" class="form-select" required>
-                        <option value="">Seleccionar...</option>
-                        <option value="Resultados de laboratorio">Resultados de laboratorio</option>
-                        <option value="Indicaciones médicas">Indicaciones médicas</option>
-                        <option value="Historial externo">Historial externo</option>
-                        <option value="Estudios en PDF">Estudios en PDF</option>
-                        <option value="Documentos administrativos">Documentos administrativos</option>
-                        <option value="Seguro médico">Seguro médico</option>
-                      </select>
-                    </div>
-                    <div class="col-md-4 d-flex align-items-end">
-                      <button type="submit" class="btn btn-success w-100 rounded-pill shadow-sm" :disabled="subiendoDoc">
-                        <span v-if="subiendoDoc" class="spinner-border spinner-border-sm me-2"></span>
-                        📤 Subir
-                      </button>
-                    </div>
+            <FormSection v-if="showDocUpload" title="Subir documento" :icon="IconUpload" class="mb-4">
+              <form @submit.prevent="subirDocumento">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label for="ad-archivo" class="form-label">Archivo</label>
+                    <input id="ad-archivo" ref="docFileInput" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                    <small class="text-app-muted">PDF, JPG o PNG. Máximo 10MB.</small>
                   </div>
-                  <div v-if="docError" class="alert alert-danger border-0 rounded-3 py-2 small mt-3 mb-0">{{ docError }}</div>
-                  <div v-if="docSuccess" class="alert alert-success border-0 rounded-3 py-2 small mt-3 mb-0">{{ docSuccess }}</div>
-                </form>
-              </div>
-            </div>
-
-            <div v-if="cargandoDocs" class="text-center py-4">
-              <div class="spinner-border text-primary" role="status"></div>
-            </div>
-            <div v-else-if="documentos.length === 0" class="text-muted text-center py-4">
-              <p>No hay documentos asociados a esta cita.</p>
-            </div>
-            <div v-else class="row g-4">
-              <div class="col-md-4 col-sm-6" v-for="d in documentos" :key="d.id">
-                <div class="card border-0 shadow-sm rounded-4 h-100">
-                  <div class="card-body p-4 text-center">
-                    <div class="display-5 mb-2">{{ fileIcon(d.fileName) }}</div>
-                    <h6 class="fw-bold small mb-1">{{ d.fileName }}</h6>
-                    <small class="text-muted d-block mb-2">{{ formatDate(d.uploadedAt) }}</small>
-                    <div class="d-flex justify-content-center gap-2">
-                      <button @click="verDocumento(d)" class="btn btn-sm btn-light border px-3">Ver</button>
-                      <button @click="confirmarEliminarDoc(d)" class="btn btn-sm btn-light border text-danger px-3">Eliminar</button>
-                    </div>
+                  <div class="col-md-4">
+                    <label for="ad-tipo" class="form-label">Tipo de documento</label>
+                    <select id="ad-tipo" v-model="docFileType" class="form-select" required>
+                      <option value="">Seleccionar…</option>
+                      <option value="Resultados de laboratorio">Resultados de laboratorio</option>
+                      <option value="Indicaciones médicas">Indicaciones médicas</option>
+                      <option value="Historial externo">Historial externo</option>
+                      <option value="Estudios en PDF">Estudios en PDF</option>
+                      <option value="Documentos administrativos">Documentos administrativos</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 d-flex align-items-end">
+                    <AppButton type="submit" variant="success" block :icon="IconUpload" :loading="subiendoDoc">
+                      Subir
+                    </AppButton>
                   </div>
                 </div>
+              </form>
+            </FormSection>
+
+            <LoadingState v-if="cargandoDocs" label="Cargando documentos…" />
+            <EmptyState
+              v-else-if="documentos.length === 0"
+              size="sm"
+              :icon="IconDocument"
+              title="Sin documentos asociados"
+            />
+            <div v-else class="row g-3">
+              <div class="col-md-4 col-sm-6" v-for="d in documentos" :key="d.id">
+                <BaseCard class="h-100 text-center">
+                  <IconTile :icon="fileIconFor(d.fileName)" :tone="fileToneFor(d.fileName)" size="lg" class="mx-auto mb-2" />
+                  <p class="doc__name">{{ d.fileName }}</p>
+                  <small class="text-app-muted d-block mb-3">{{ formatDate(d.uploadedAt) }}</small>
+                  <div class="d-flex justify-content-center gap-2">
+                    <AppButton variant="soft" size="sm" :icon="IconView" @click="verDocumento(d)">Ver</AppButton>
+                    <AppButton variant="soft-danger" size="sm" :icon="IconDelete" @click="confirmarEliminarDoc(d)">
+                      Eliminar
+                    </AppButton>
+                  </div>
+                </BaseCard>
               </div>
             </div>
           </div>
@@ -603,11 +543,13 @@
             </div>
 
             <!-- Estado vacío descriptivo -->
-            <div v-if="analisisIA.length === 0 && !generandoIA" class="text-center py-5">
-              <div class="display-4 mb-3">🧠</div>
-              <h4 class="fw-bold">Asistente de Diagnóstico</h4>
-              <p class="text-muted w-50 mx-auto">La Inteligencia Artificial analizará el cuadro clínico, signos vitales y síntomas para sugerir recomendaciones y calcular factores de riesgo.</p>
-            </div>
+            <EmptyState
+              v-if="analisisIA.length === 0 && !generandoIA"
+              :icon="IconAi"
+              tone="brand"
+              title="Asistente de Diagnóstico"
+              message="La inteligencia artificial analizará el cuadro clínico, signos vitales y síntomas para sugerir recomendaciones y calcular factores de riesgo."
+            />
 
             <div v-if="generandoIA" class="text-center py-5">
               <div class="spinner-border text-dark mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
@@ -616,15 +558,18 @@
 
             <div v-for="(ia, idx) in analisisIA" :key="ia.id || idx">
               <div class="bg-light p-4 rounded-4 border-start border-5 position-relative mb-4" :class="ia.isReviewed ? 'border-success' : 'border-info'">
-                <span v-if="ia.isReviewed" class="badge bg-success position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill">✅ Revisado</span>
-                <span v-else class="badge bg-info position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill">🆕 Nuevo</span>
+                <span
+                  class="badge position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill d-inline-flex align-items-center gap-1"
+                  :class="ia.isReviewed ? 'bg-success' : 'bg-info'"
+                >
+                  <Icon :icon="ia.isReviewed ? IconCheck : IconSparkles" :size="13" />
+                  {{ ia.isReviewed ? 'Revisado' : 'Nuevo' }}
+                </span>
 
-                <h5 class="fw-bold mb-3">🤖 {{ ia.analysisType || 'Análisis Clínico' }}</h5>
-
-                <div class="mb-3">
-                  <h6 class="fw-bold text-dark mb-1">Modelo utilizado:</h6>
-                  <p class="text-muted">{{ ia.modelUsed || 'Modelo por defecto' }}</p>
-                </div>
+                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                  <Icon :icon="IconAi" :size="20" />
+                  {{ ia.analysisType || 'Análisis Clínico' }}
+                </h5>
 
                 <template v-if="ia.aiResponse && !ia.aiResponse.startsWith('ERROR')">
                   <div class="mb-3" v-if="parsearRespuestaIA(ia.aiResponse)?.summary">
@@ -657,9 +602,7 @@
                          style="white-space: pre-wrap; overflow-x: auto; max-height: 300px">{{ ia.aiResponse }}</pre>
                   </div>
                 </template>
-                <div v-else-if="ia.aiResponse?.startsWith('ERROR')" class="alert alert-danger border-0 rounded-3 small py-2 mb-3">
-                  {{ ia.aiResponse }}
-                </div>
+                <AppAlert v-else-if="ia.aiResponse?.startsWith('ERROR')" variant="danger" :message="ia.aiResponse" class="mb-3" />
 
                 <div v-if="!ia.isReviewed" class="d-flex justify-content-end mt-3">
                   <button @click="marcarRevisado(ia)" class="btn btn-success btn-sm px-4 rounded-pill">Marcar como Revisado</button>
@@ -681,44 +624,12 @@
       @cancel="deleteDocDialog = false"
     />
 
-    <div v-if="showPreview && previewDoc" class="modal-backdrop fade show"></div>
-    <div v-if="showPreview && previewDoc" class="modal d-block" tabindex="-1" @click.self="showPreview = false">
-      <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4 shadow">
-          <div class="modal-header border-0 pb-0">
-            <h5 class="fw-bold">{{ previewDoc.fileName }}</h5>
-            <button type="button" class="btn-close" @click="showPreview = false"></button>
-          </div>
-          <div class="modal-body p-3 text-center">
-            <template v-if="previewDoc.fileName?.toLowerCase().endsWith('.pdf')">
-              <iframe
-                :src="`/api/v1/MedicalDocument/${previewDoc.id}/file`"
-                class="w-100 border-0 rounded-3"
-                style="height: 70vh;"
-              />
-            </template>
-            <template v-else>
-              <img
-                :src="`/api/v1/MedicalDocument/${previewDoc.id}/file`"
-                class="img-fluid rounded-3"
-                style="max-height: 70vh;"
-                alt="Documento"
-              />
-            </template>
-          </div>
-          <div class="modal-footer border-0 pt-0">
-            <a :href="`/api/v1/MedicalDocument/${previewDoc.id}/file`" :download="previewDoc.fileName" class="btn btn-outline-primary rounded-pill px-4">Descargar</a>
-            <a :href="`/api/v1/MedicalDocument/${previewDoc.id}/file`" target="_blank" class="btn btn-outline-dark rounded-pill px-4">Abrir en nueva pestaña</a>
-            <button @click="showPreview = false" class="btn btn-dark rounded-pill px-4">Cerrar</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <DocumentPreviewModal v-model="showPreview" :doc="previewDoc" />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, markRaw, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { appointmentService } from '@/api/appointments'
 import { medicalRecordService } from '@/api/medicalRecords'
@@ -729,8 +640,43 @@ import { patientService } from '@/api/patients'
 import { alertService } from '@/api/alerts'
 import { recommendationService } from '@/api/recommendations'
 import { medicalDocumentService } from '@/api/medicalDocuments'
-import StatusBadge from '@/components/StatusBadge.vue'
-import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import {
+  AppAlert,
+  AppButton,
+  BaseCard,
+  ConfirmDialog,
+  DataField,
+  DocumentPreviewModal,
+  EmptyState,
+  FormSection,
+  Icon,
+  IconTile,
+  LoadingState,
+  PageHeader,
+  StatusBadge,
+  TabNav
+} from '@/components/ui'
+import {
+  IconAi,
+  IconAlert,
+  IconAppointment,
+  IconCheck,
+  IconClose,
+  IconDelete,
+  IconDocument,
+  IconEdit,
+  IconNotes,
+  IconRecommendation,
+  IconRecord,
+  IconSparkles,
+  IconSymptoms,
+  IconUpload,
+  IconUser,
+  IconView,
+  IconVitals
+} from '@/lib/icons'
+import { fileIconFor, fileToneFor, isPdfFile } from '@/lib/fileIcons'
+import { statusVariant, translateStatus } from '@/utils/appointmentStatus'
 import { authStore } from '@/stores/auth'
 
 const props = defineProps({
@@ -746,6 +692,23 @@ const cita = ref(null)
 const patientName = ref('')
 const tabActual = ref('info')
 const nuevoEstado = ref('Pending')
+
+// `markRaw` como en config/navigation.js: los iconos son componentes, no datos,
+// y envolverlos en un proxy reactivo dispara un aviso de Vue.
+const TABS = [
+  { id: 'info', label: 'Info Básica', icon: markRaw(IconNotes) },
+  { id: 'sintomas', label: 'Síntomas', icon: markRaw(IconSymptoms) },
+  { id: 'signos', label: 'Signos Vitales', icon: markRaw(IconVitals) },
+  { id: 'ia', label: 'Análisis IA', icon: markRaw(IconAi), hideForNurse: true },
+  { id: 'records', label: 'Historial Médico', icon: markRaw(IconRecord), hideForNurse: true },
+  { id: 'alertas', label: 'Alertas', icon: markRaw(IconAlert) },
+  { id: 'recomendaciones', label: 'Recomendaciones', icon: markRaw(IconRecommendation), hideForNurse: true },
+  { id: 'documentos', label: 'Documentos', icon: markRaw(IconDocument) }
+]
+
+const tabsVisibles = computed(() =>
+  TABS.filter((t) => !(t.hideForNurse && auth.hasRole('Nurse')))
+)
 
 const guardandoNotas = ref(false)
 const notasGuardadas = ref(false)
@@ -778,8 +741,6 @@ const deleteSintomaTarget = ref(null)
 const deleteSintomaLoading = ref(false)
 
 const editSignoId = ref(null)
-const editSignoError = ref('')
-const editSignoSuccess = ref('')
 const editSignoForm = reactive({ temperature: 36.5, heartRate: 72, systolicPressure: 120, diastolicPressure: 80, oxygenSaturation: 98, glucose: null })
 
 const recordsMedicos = ref([])
@@ -800,19 +761,12 @@ const showDocUpload = ref(false)
 const subiendoDoc = ref(false)
 const docFileInput = ref(null)
 const docFileType = ref('')
-const docError = ref('')
-const docSuccess = ref('')
 
 const deleteDocDialog = ref(false)
 const deleteDocTarget = ref(null)
 
 const showPreview = ref(false)
 const previewDoc = ref(null)
-
-const statusVariant = (status) => {
-  const map = { Pending: 'pending', InProgress: 'inprogress', Completed: 'completed', Cancelled: 'cancelled' }
-  return map[status] || 'secondary'
-}
 
 const ultimoSigno = computed(() => {
   if (!signos.value.length) return { temperature: 0, heartRate: 0, systolicPressure: 0, diastolicPressure: 0, oxygenSaturation: 0, glucose: null }
@@ -835,15 +789,10 @@ const formatDate = (dateStr) => {
   } catch { return dateStr }
 }
 
-const severityColor = (sev) => {
-  const map = { Leve: 'success', Moderado: 'warning', Severo: 'danger' }
-  return map[sev] || 'secondary'
-}
-
-const severityBadge = (sev) => {
-  const map = { Leve: 'bg-success', Moderado: 'bg-warning text-dark', Severo: 'bg-danger' }
-  return map[sev] || 'bg-secondary'
-}
+// Mismo mapa que NurseFollowUpView: las severidades del dominio se traducen a
+// variantes de StatusBadge, no a clases `bg-*` de Bootstrap.
+const SEVERITY_VARIANTS = { Leve: 'low', Moderado: 'moderate', Severo: 'severe' }
+const severityVariant = (sev) => SEVERITY_VARIANTS[sev] ?? 'secondary'
 
 const cargarDetalle = async () => {
   loading.value = true
@@ -882,11 +831,18 @@ const guardarNotas = async () => {
   guardandoNotas.value = true
   notasGuardadas.value = false
   try {
-    await appointmentService.updateNotes(Number(props.id), notasEdit.value)
+    await appointmentService.update(Number(props.id), {
+      patientId: cita.value.patientId,
+      doctorId: cita.value.doctorId,
+      appointmentDate: cita.value.appointmentDate,
+      status: cita.value.status,
+      reason: cita.value.reason,
+      notes: notasEdit.value
+    })
     notasGuardadas.value = true
     cita.value.notes = notasEdit.value
     setTimeout(() => { notasGuardadas.value = false }, 3000)
-  } catch {
+  } catch (err) {
     error.value = 'Error al guardar las notas'
   } finally {
     guardandoNotas.value = false
@@ -1083,22 +1039,17 @@ const editarSigno = (s) => {
 
 const cancelarEditSigno = () => {
   editSignoId.value = null
-  editSignoError.value = ''
-  editSignoSuccess.value = ''
 }
 
 const actualizarSigno = async () => {
   guardandoSignos.value = true
-  editSignoError.value = ''
-  editSignoSuccess.value = ''
   try {
-    await vitalSignService.update(editSignoId.value, { ...editSignoForm })
+    const res = await vitalSignService.update(editSignoId.value, { ...editSignoForm })
     const idx = signos.value.findIndex(s => s.id === editSignoId.value)
-    if (idx !== -1) signos.value[idx] = { ...signos.value[idx], ...editSignoForm }
-    editSignoSuccess.value = 'Medición actualizada exitosamente.'
-    setTimeout(() => { editSignoId.value = null }, 1500)
-  } catch {
-    editSignoError.value = 'Error al actualizar la medición. Intente de nuevo.'
+    if (idx !== -1) signos.value[idx] = res.data
+    editSignoId.value = null
+  } catch (err) {
+    error.value = 'Error al actualizar signos vitales'
   } finally {
     guardandoSignos.value = false
   }
@@ -1155,37 +1106,26 @@ const editarRecord = (r) => {
   showRecordForm.value = true
 }
 
-const fileIcon = (name) => {
-  if (!name) return '📄'
-  const ext = name.split('.').pop()?.toLowerCase()
-  if (ext === 'pdf') return '📕'
-  if (['jpg', 'jpeg', 'png'].includes(ext)) return '🖼️'
-  return '📄'
-}
-
 const confirmarEliminarDoc = (d) => {
   deleteDocTarget.value = d
   deleteDocDialog.value = true
 }
 
+// Los PDF no se previsualizan dentro del modal: el visor nativo del navegador
+// en una pestaña aparte es mejor que un <embed> encajado (mismo criterio que
+// MedicalDocumentsView).
 const verDocumento = (d) => {
+  if (isPdfFile(d.fileName)) {
+    window.open(`/api/v1/MedicalDocument/${d.id}/file`, '_blank')
+    return
+  }
   previewDoc.value = d
   showPreview.value = true
 }
 
 const subirDocumento = async () => {
   const file = docFileInput.value?.files?.[0]
-  docError.value = ''
-  docSuccess.value = ''
   if (!file) return
-  if (!docFileType.value) {
-    docError.value = 'Selecciona el tipo de documento.'
-    return
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    docError.value = 'El archivo supera el límite de 10 MB.'
-    return
-  }
   subiendoDoc.value = true
   try {
     const formData = new FormData()
@@ -1195,17 +1135,12 @@ const subirDocumento = async () => {
     formData.append('appointmentId', props.id)
     formData.append('patientId', cita.value.patientId)
     await medicalDocumentService.upload(formData)
-    docSuccess.value = 'Documento subido exitosamente.'
+    showDocUpload.value = false
     docFileType.value = ''
     docFileInput.value.value = ''
     await cargarDocumentos()
-    setTimeout(() => {
-      docSuccess.value = ''
-      showDocUpload.value = false
-    }, 1500)
   } catch (err) {
-    const msg = err.response?.data?.message
-    docError.value = msg || 'Error al subir el documento. Verifica el archivo e inténtalo de nuevo.'
+    error.value = 'Error al subir el documento'
   } finally {
     subiendoDoc.value = false
   }
@@ -1273,60 +1208,51 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.animation-fade { animation: fadeIn 0.3s ease-in-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+/* `.animation-fade` se mantiene como alias local de la utilidad global u-fade-in
+   para no tocar los ocho `class="animation-fade"` de las pestañas. */
+.animation-fade {
+  animation: u-fade-in 0.24s ease-out;
+}
 
-.form-section {
-  background: #f8fafc;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: box-shadow 0.2s;
+.sintoma {
+  height: 100%;
+  padding: 0.875rem 1rem;
+  background-color: var(--app-surface-sunken);
+  border: 1px solid var(--app-border);
+  border-inline-start: 3px solid var(--app-border-strong);
+  border-radius: var(--app-radius-lg);
 }
-.form-section:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+
+.sintoma--low {
+  border-inline-start-color: var(--c-success-500);
 }
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: #fff;
-  border-bottom: 1px solid #e9ecef;
+.sintoma--moderate {
+  border-inline-start-color: var(--c-warning-500);
+}
+.sintoma--severe {
+  border-inline-start-color: var(--c-danger-500);
+}
+
+.sintoma__nombre {
+  margin: 0;
+  font-size: 0.9375rem;
   font-weight: 600;
-  font-size: 0.95rem;
-  color: #1e293b;
+  color: var(--app-text-strong);
 }
-.section-icon {
-  font-size: 1.2rem;
-}
-.section-body {
-  padding: 16px;
-}
-.form-section .form-label {
+
+.sintoma__notas {
+  margin: 0.5rem 0 0;
   font-size: 0.85rem;
-  color: #334155;
-  margin-bottom: 4px;
+  color: var(--app-text-muted);
 }
-.form-section .form-control,
-.form-section .form-select,
-.form-section textarea {
-  border: 1px solid #d1d5db;
-  background: #fff;
-  padding: 10px 12px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-.form-section .form-control:focus,
-.form-section .form-select:focus,
-.form-section textarea:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-  background: #fff;
-}
-.form-section .form-control::placeholder,
-.form-section textarea::placeholder {
-  color: #94a3b8;
-  font-size: 0.9rem;
+
+.doc__name {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--app-text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

@@ -1,252 +1,202 @@
 <template>
-  <div class="container">
+  <div>
+    <!-- ============ Listado ============ -->
+    <div v-if="vistaActual === 'lista'" class="u-fade-in">
+      <PageHeader
+        title="Gestión de pacientes"
+        subtitle="Directorio general de pacientes registrados"
+        :icon="IconPatients"
+      >
+        <template #actions>
+          <AppButton
+            v-if="!auth.hasRole('Doctor')"
+            variant="primary"
+            :icon="IconAdd"
+            @click="vistaActual = 'crear'"
+          >
+            Crear paciente
+          </AppButton>
+        </template>
+      </PageHeader>
 
-    <div v-if="vistaActual === 'lista'" class="animation-fade">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h3 class="fw-bold mb-0">Gestión de Pacientes</h3>
-          <p class="text-muted">Directorio general de pacientes registrados</p>
+      <FilterBar>
+        <div class="input-group flex-grow-1">
+          <span class="input-group-text">
+            <Icon :icon="IconSearch" :size="16" />
+          </span>
+          <input
+            v-model="busqueda"
+            type="search"
+            class="form-control"
+            placeholder="Buscar por nombre completo o identificación…"
+            aria-label="Buscar pacientes"
+            @keyup.enter="buscarApi"
+          >
         </div>
-        <button v-if="!auth.hasRole('Doctor')" @click="vistaActual = 'crear'" class="btn btn-primary px-4 shadow-sm">+ Crear Paciente</button>
-      </div>
+        <template #actions>
+          <AppButton variant="primary" :loading="buscandoApi" @click="buscarApi">Buscar</AppButton>
+          <AppButton v-if="busqueda" variant="soft" @click="limpiarBusqueda">Limpiar</AppButton>
+        </template>
+      </FilterBar>
 
-      <div class="card shadow-sm mb-4 border-0">
-        <div class="card-body p-3">
-          <div class="d-flex gap-3">
-            <div class="input-group flex-grow-1">
-              <span class="input-group-text bg-light border-0">🔍</span>
-              <input v-model="busqueda" type="text" class="form-control bg-light border-0" placeholder="Buscar por nombre completo o identificación..." @keyup.enter="buscarApi">
-            </div>
-            <button @click="buscarApi" class="btn btn-dark px-4" :disabled="buscandoApi">
-              <span v-if="buscandoApi" class="spinner-border spinner-border-sm me-1"></span>
-              Buscar
-            </button>
-            <button @click="limpiarBusqueda" class="btn btn-light border px-3" v-if="busqueda">Limpiar</button>
+      <DataTable
+        :columns="columnasPacientes"
+        :rows="pacientesFiltrados"
+        :loading="loading"
+        :error="error"
+        loading-label="Cargando pacientes…"
+        :empty-icon="IconPatients"
+        empty-title="No se encontraron pacientes"
+        :empty-message="busqueda ? 'Prueba con otro nombre o número de identificación.' : 'Todavía no hay pacientes registrados.'"
+      >
+        <template #cell-fullName="{ row }">
+          <div class="d-flex align-items-center gap-2">
+            <AvatarInitials :name="row.fullName" size="sm" />
+            <span class="fw-semibold text-body-emphasis">{{ row.fullName }}</span>
           </div>
-        </div>
-      </div>
+        </template>
+        <template #cell-birthDate="{ row }">{{ formatDate(row.birthDate) }}</template>
+        <template #cell-createdAt="{ row }">{{ formatDate(row.createdAt) }}</template>
+        <template #cell-gender="{ row }">
+          <StatusBadge :text="row.gender || '—'" variant="secondary" size="sm" />
+        </template>
 
-      <div v-if="loading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status"></div>
-      </div>
-
-      <div v-else-if="error" class="alert alert-danger border-0 rounded-3">{{ error }}</div>
-
-      <div v-else-if="pacientesFiltrados.length === 0" class="text-center py-5 text-muted">
-        <p>No se encontraron pacientes.</p>
-      </div>
-      <div v-else class="card shadow-sm overflow-hidden border-0">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light text-muted">
-              <tr>
-                <th class="ps-4 py-3 fw-medium">Nombre Completo</th>
-                <th class="py-3 fw-medium">Identificación</th>
-                <th class="py-3 fw-medium">F. Nacimiento</th>
-                <th class="py-3 fw-medium">Teléfono</th>
-                <th class="py-3 fw-medium">Género</th>
-                <th class="py-3 fw-medium">Registro</th>
-                <th class="pe-4 py-3 fw-medium text-end">Acciones</th>
-              </tr>
-            </thead>
-            <tbody class="border-top-0">
-              <tr v-for="p in pacientesFiltrados" :key="p.id">
-                <td class="ps-4 py-3 fw-bold text-dark">{{ p.fullName }}</td>
-                <td class="py-3 text-muted">{{ p.identificationNumber }}</td>
-                <td class="py-3 text-muted">{{ formatDate(p.birthDate) }}</td>
-                <td class="py-3 text-muted">{{ p.phoneNumber }}</td>
-                <td class="py-3"><span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">{{ p.gender }}</span></td>
-                <td class="py-3 text-muted">{{ formatDate(p.createdAt) }}</td>
-                <td class="pe-4 py-3 text-end">
-                  <button @click="abrirDetalle(p)" class="btn btn-sm btn-light border text-info fw-medium px-3 me-2">Ver</button>
-                  <button @click="editarPaciente(p)" class="btn btn-sm btn-light border text-warning fw-medium px-3 me-2">Editar</button>
-                  <button v-if="auth.isAdmin()" @click="confirmarEliminar(p)" class="btn btn-sm btn-light border text-danger fw-medium px-3">Eliminar</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <template #actions="{ row }">
+          <AppButton variant="ghost" size="sm" :icon="IconView" aria-label="Ver expediente" @click="abrirDetalle(row)" />
+          <AppButton variant="ghost" size="sm" :icon="IconEdit" aria-label="Editar paciente" @click="editarPaciente(row)" />
+          <AppButton variant="ghost" size="sm" :icon="IconDelete" aria-label="Eliminar paciente" @click="confirmarEliminar(row)" />
+        </template>
+      </DataTable>
     </div>
 
-    <div v-else-if="vistaActual === 'crear' || vistaActual === 'editar'" class="animation-fade">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h3 class="fw-bold mb-0">{{ vistaActual === 'crear' ? 'Nuevo Paciente' : 'Editar Paciente' }}</h3>
-          <p v-if="vistaActual === 'editar'" class="text-muted">Modificando datos de: <strong class="text-dark">{{ form.fullName }}</strong></p>
-        </div>
-        <button @click="cancelarForm" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
-          ← Volver
-        </button>
-      </div>
+    <!-- ============ Crear / editar ============ -->
+    <div v-else-if="vistaActual === 'crear' || vistaActual === 'editar'" class="u-fade-in">
+      <PageHeader
+        :title="vistaActual === 'crear' ? 'Nuevo paciente' : 'Editar paciente'"
+        :subtitle="vistaActual === 'editar' ? `Modificando datos de ${form.fullName}` : 'Registra un paciente en el sistema'"
+        :icon="vistaActual === 'crear' ? IconUserAdd : IconEdit"
+      >
+        <template #actions>
+          <AppButton variant="soft" :icon="IconBack" @click="cancelarForm">Volver</AppButton>
+        </template>
+      </PageHeader>
 
-      <div class="card shadow border-0 rounded-4 form-card">
-        <div class="card-body p-4 p-lg-5">
-          <div v-if="formError" class="alert alert-danger border-0 rounded-3 py-2 small mb-4">{{ formError }}</div>
-          <form @submit.prevent="guardarPaciente">
+      <BaseCard>
+        <AppAlert v-if="formError" variant="danger" :message="formError" class="mb-3" />
 
-            <div class="form-section mb-4">
-              <div class="section-header">
-                <span class="section-icon">🆔</span>
-                <span>Identificación</span>
+        <form @submit.prevent="guardarPaciente" class="d-grid gap-3">
+          <FormSection title="Identificación" :icon="IconIdentification">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="p-idtype" class="form-label">Tipo de identificación</label>
+                <select id="p-idtype" v-model="form.identificationType" class="form-select" required>
+                  <option value="Cédula">Cédula</option>
+                  <option value="Pasaporte">Pasaporte</option>
+                </select>
               </div>
-              <div class="section-body">
-                <div class="row g-3">
-                  <div class="col-md-4">
-                    <label class="form-label fw-medium">Tipo ID</label>
-                    <select v-model="form.identificationType" class="form-select" required>
-                      <option value="Cédula">Cédula</option>
-                      <option value="Pasaporte">Pasaporte</option>
-                    </select>
-                  </div>
-                  <div class="col-md-8">
-                    <label class="form-label fw-medium">Número de Identificación</label>
-                    <input v-model="form.identificationNumber" type="text" class="form-control" placeholder="Ej: 001-1234567-8" required>
-                  </div>
-                </div>
+              <div class="col-md-8">
+                <label for="p-idnum" class="form-label">Número de identificación</label>
+                <input id="p-idnum" v-model="form.identificationNumber" type="text" class="form-control" placeholder="Ej: 001-1234567-8" required>
               </div>
             </div>
+          </FormSection>
 
-            <div class="form-section mb-4">
-              <div class="section-header">
-                <span class="section-icon">👤</span>
-                <span>Datos Personales</span>
+          <FormSection title="Datos personales" :icon="IconUser" tone="info">
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="p-name" class="form-label">Nombre completo</label>
+                <input id="p-name" v-model="form.fullName" type="text" class="form-control" placeholder="Nombre y apellidos del paciente" required>
               </div>
-              <div class="section-body">
-                <div class="row g-3">
-                  <div class="col-12">
-                    <label class="form-label fw-medium">Nombre Completo</label>
-                    <input v-model="form.fullName" type="text" class="form-control" placeholder="Nombre y apellidos del paciente" required>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label fw-medium">Fecha de Nacimiento</label>
-                    <input v-model="form.birthDate" type="date" class="form-control" :max="today" required>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label fw-medium">Género</label>
-                    <select v-model="form.gender" class="form-select" required>
-                      <option value="Masculino">Masculino</option>
-                      <option value="Femenino">Femenino</option>
-                      <option value="Otro">Otro</option>
-                    </select>
-                  </div>
-                </div>
+              <div class="col-md-6">
+                <label for="p-birth" class="form-label">Fecha de nacimiento</label>
+                <input id="p-birth" v-model="form.birthDate" type="date" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label for="p-gender" class="form-label">Género</label>
+                <select id="p-gender" v-model="form.gender" class="form-select" required>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Femenino">Femenino</option>
+                  <option value="Otro">Otro</option>
+                </select>
               </div>
             </div>
+          </FormSection>
 
-            <div class="form-section mb-4">
-              <div class="section-header">
-                <span class="section-icon">📞</span>
-                <span>Contacto y Clasificación</span>
+          <FormSection title="Contacto y clasificación" :icon="IconPhone" tone="success">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="p-email" class="form-label">Correo electrónico</label>
+                <input id="p-email" v-model="form.email" type="email" class="form-control" placeholder="correo@ejemplo.com" required>
               </div>
-              <div class="section-body">
-                <div class="row g-3">
-                  <div class="col-md-4">
-                    <label class="form-label fw-medium">Email</label>
-                    <input v-model="form.email" type="email" class="form-control" placeholder="correo@ejemplo.com" required>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label fw-medium">Teléfono</label>
-                    <input v-model="form.phoneNumber" type="tel" class="form-control" placeholder="(809) 555-1234" required>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label fw-medium">Tipo de Paciente</label>
-                    <select v-model="form.patientType" class="form-select" required>
-                      <option value="Asegurado">Asegurado</option>
-                      <option value="No Asegurado">No Asegurado</option>
-                    </select>
-                  </div>
-                </div>
+              <div class="col-md-4">
+                <label for="p-phone" class="form-label">Teléfono</label>
+                <input id="p-phone" v-model="form.phoneNumber" type="tel" class="form-control" placeholder="(809) 555-1234" required>
+              </div>
+              <div class="col-md-4">
+                <label for="p-ptype" class="form-label">Tipo de paciente</label>
+                <select id="p-ptype" v-model="form.patientType" class="form-select" required>
+                  <option value="Asegurado">Asegurado</option>
+                  <option value="No Asegurado">No Asegurado</option>
+                </select>
               </div>
             </div>
+          </FormSection>
 
-            <hr class="my-4">
-
-            <div class="d-flex justify-content-end gap-3">
-              <button type="button" @click="cancelarForm" class="btn btn-outline-secondary rounded-pill px-4 py-2">
-                Cancelar
-              </button>
-              <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow" :disabled="saving">
-                <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                {{ saving ? 'Guardando...' : '💾 Guardar Paciente' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+          <div class="d-flex justify-content-end gap-2">
+            <AppButton type="button" variant="soft" @click="cancelarForm">Cancelar</AppButton>
+            <AppButton type="submit" variant="primary" :icon="IconSave" :loading="saving">
+              {{ saving ? 'Guardando…' : 'Guardar paciente' }}
+            </AppButton>
+          </div>
+        </form>
+      </BaseCard>
     </div>
 
-    <div v-else-if="vistaActual === 'detalle'" class="animation-fade">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h3 class="fw-bold mb-0">{{ detalle?.fullName }}</h3>
-          <p class="text-muted">Expediente completo del paciente</p>
-        </div>
-        <button @click="cancelarForm" class="btn btn-light border text-muted shadow-sm">Volver al listado</button>
-      </div>
-      <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-5">
-          <div class="row g-4 mb-4">
-            <div class="col-md-4">
-              <label class="form-label text-muted small fw-bold text-uppercase">Identificación</label>
-              <p class="fw-medium">{{ detalle?.identificationNumber }}</p>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label text-muted small fw-bold text-uppercase">Teléfono</label>
-              <p class="fw-medium">{{ detalle?.phoneNumber }}</p>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label text-muted small fw-bold text-uppercase">Género</label>
-              <p class="fw-medium">{{ detalle?.gender }}</p>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label text-muted small fw-bold text-uppercase">Fecha Nacimiento</label>
-              <p class="fw-medium">{{ formatDate(detalle?.birthDate) }}</p>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label text-muted small fw-bold text-uppercase">Tipo Paciente</label>
-              <p class="fw-medium">{{ detalle?.patientType }}</p>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label text-muted small fw-bold text-uppercase">Registrado</label>
-              <p class="fw-medium">{{ formatDate(detalle?.createdAt) }}</p>
-            </div>
-          </div>
+    <!-- ============ Detalle ============ -->
+    <div v-else-if="vistaActual === 'detalle'" class="u-fade-in">
+      <PageHeader
+        :title="detalle?.fullName || 'Expediente'"
+        subtitle="Expediente completo del paciente"
+        :icon="IconUser"
+      >
+        <template #actions>
+          <AppButton variant="soft" :icon="IconBack" @click="cancelarForm">Volver al listado</AppButton>
+        </template>
+      </PageHeader>
 
-          <h5 class="fw-bold mt-5 mb-3">Historial de Citas</h5>
-          <div v-if="detalle?.appointments?.length" class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="bg-light text-muted">
-                <tr>
-                  <th class="ps-4 py-3 fw-medium">Fecha</th>
-                  <th class="py-3 fw-medium">Médico</th>
-                  <th class="py-3 fw-medium">Motivo</th>
-                  <th class="py-3 fw-medium">Estado</th>
-                </tr>
-              </thead>
-              <tbody class="border-top-0">
-                <tr v-for="r in detalle.appointments" :key="r.id">
-                  <td class="ps-4 py-3">{{ formatDate(r.appointmentDate) }}</td>
-                  <td class="py-3">{{ r.doctorName }}</td>
-                  <td class="py-3">{{ r.reason }}</td>
-                  <td class="py-3">
-                    <StatusBadge :text="r.status" :variant="r.status?.toLowerCase()" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+      <div class="d-grid gap-3">
+        <BaseCard title="Datos del paciente" :icon="IconIdentification">
+          <div class="row g-4">
+            <div class="col-md-4"><DataField label="Identificación" :value="detalle?.identificationNumber" /></div>
+            <div class="col-md-4"><DataField label="Teléfono" :value="detalle?.phoneNumber" /></div>
+            <div class="col-md-4"><DataField label="Género" :value="detalle?.gender" /></div>
+            <div class="col-md-4"><DataField label="Fecha de nacimiento" :value="formatDate(detalle?.birthDate)" /></div>
+            <div class="col-md-4"><DataField label="Tipo de paciente" :value="detalle?.patientType" /></div>
+            <div class="col-md-4"><DataField label="Registrado" :value="formatDate(detalle?.createdAt)" /></div>
           </div>
-          <div v-else class="text-muted text-center py-4">No hay citas registradas para este paciente.</div>
-        </div>
+        </BaseCard>
+
+        <DataTable
+          :columns="columnasCitas"
+          :rows="detalle?.appointments ?? []"
+          :empty-icon="IconAppointment"
+          empty-title="Sin citas registradas"
+          empty-message="Este paciente todavía no tiene citas en su historial."
+        >
+          <template #cell-appointmentDate="{ row }">{{ formatDate(row.appointmentDate) }}</template>
+          <template #cell-status="{ row }">
+            <StatusBadge :text="row.status" :variant="row.status?.toLowerCase()" />
+          </template>
+        </DataTable>
       </div>
     </div>
 
     <ConfirmDialog
       :visible="deleteDialog"
-      title="Eliminar Paciente"
-      message="¿Está seguro que desea eliminar este paciente y todo su historial clínico? Esta acción no se puede deshacer."
-      confirmText="Eliminar"
-      :danger="true"
+      danger
+      title="Eliminar paciente"
+      :message="`¿Seguro que deseas eliminar a ${deleteTarget?.fullName ?? 'este paciente'} y todo su historial clínico? Esta acción no se puede deshacer.`"
+      confirm-text="Eliminar"
       @confirm="eliminarPaciente"
       @cancel="deleteDialog = false"
     />
@@ -254,13 +204,38 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import {
+  AppAlert,
+  AppButton,
+  AvatarInitials,
+  BaseCard,
+  ConfirmDialog,
+  DataField,
+  DataTable,
+  FilterBar,
+  FormSection,
+  Icon,
+  PageHeader,
+  StatusBadge
+} from '@/components/ui'
+import {
+  IconAdd,
+  IconAppointment,
+  IconBack,
+  IconDelete,
+  IconEdit,
+  IconIdentification,
+  IconPatients,
+  IconPhone,
+  IconSave,
+  IconSearch,
+  IconUser,
+  IconUserAdd,
+  IconView
+} from '@/lib/icons'
 import { patientService } from '@/api/patients'
 import { authStore } from '@/stores/auth'
-import ConfirmDialog from '@/components/ConfirmDialog.vue'
-import StatusBadge from '@/components/StatusBadge.vue'
-
-const today = new Date().toISOString().split('T')[0]
 
 const auth = authStore
 const busqueda = ref('')
@@ -277,25 +252,52 @@ const editId = ref(null)
 const editUserId = ref(null)
 const buscandoApi = ref(false)
 
-const form = reactive({
-  fullName: '', identificationNumber: '', identificationType: 'Cédula',
-  birthDate: '', gender: 'Masculino', phoneNumber: '', email: '',
+const EMPTY_FORM = {
+  fullName: '',
+  identificationNumber: '',
+  identificationType: 'Cédula',
+  birthDate: '',
+  gender: 'Masculino',
+  phoneNumber: '',
+  email: '',
   patientType: 'Asegurado'
-})
+}
+
+const form = reactive({ ...EMPTY_FORM })
+
+const columnasPacientes = [
+  { key: 'fullName', label: 'Nombre completo' },
+  { key: 'identificationNumber', label: 'Identificación' },
+  { key: 'birthDate', label: 'F. nacimiento' },
+  { key: 'phoneNumber', label: 'Teléfono' },
+  { key: 'gender', label: 'Género' },
+  { key: 'createdAt', label: 'Registro' }
+]
+
+const columnasCitas = [
+  { key: 'appointmentDate', label: 'Fecha' },
+  { key: 'doctorName', label: 'Médico' },
+  { key: 'reason', label: 'Motivo' },
+  { key: 'status', label: 'Estado' }
+]
 
 const pacientesFiltrados = computed(() => {
-  let list = pacientes.value.filter(p => p.fullName)
+  const list = pacientes.value.filter((p) => p.fullName)
   if (!busqueda.value) return list
   const q = busqueda.value.toLowerCase()
-  return list.filter(p =>
-    p.fullName.toLowerCase().includes(q) || p.identificationNumber?.includes(q)
+  return list.filter(
+    (p) => p.fullName.toLowerCase().includes(q) || p.identificationNumber?.includes(q)
   )
 })
 
 const formatDate = (dateStr) => {
-  if (!dateStr || dateStr.startsWith('0001-01-01')) return '-'
+  if (!dateStr || dateStr.startsWith('0001-01-01')) return '—'
   try {
-    return new Date(dateStr).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+    return new Date(dateStr).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    })
   } catch {
     return dateStr
   }
@@ -363,10 +365,10 @@ const guardarPaciente = async () => {
     await cargarPacientes()
   } catch (err) {
     const data = err.response?.data
-    if (data?.errors && typeof data.errors === 'object') {
-      formError.value = Object.values(data.errors).flat().join(', ')
-    } else if (data?.errors && Array.isArray(data.errors)) {
+    if (data?.errors && Array.isArray(data.errors)) {
       formError.value = data.errors.join(', ')
+    } else if (data?.errors && typeof data.errors === 'object') {
+      formError.value = Object.values(data.errors).flat().join(', ')
     } else {
       formError.value = data?.message || data?.detail || 'Error al guardar paciente'
     }
@@ -380,11 +382,7 @@ const cancelarForm = () => {
   detalle.value = null
   editId.value = null
   editUserId.value = null
-  Object.assign(form, {
-    fullName: '', identificationNumber: '', identificationType: 'Cédula',
-    birthDate: '', gender: 'Masculino', phoneNumber: '', email: '',
-    patientType: 'Asegurado'
-  })
+  Object.assign(form, EMPTY_FORM)
 }
 
 const confirmarEliminar = (p) => {
@@ -401,7 +399,7 @@ const buscarApi = async () => {
   try {
     const res = await patientService.search(busqueda.value)
     pacientes.value = res.data || []
-  } catch (err) {
+  } catch {
     error.value = 'Error en la búsqueda'
   } finally {
     buscandoApi.value = false
@@ -418,75 +416,10 @@ const eliminarPaciente = async () => {
   try {
     await patientService.remove(deleteTarget.value.id)
     await cargarPacientes()
-  } catch (err) {
+  } catch {
     error.value = 'Error al eliminar paciente'
   }
 }
 
 onMounted(cargarPacientes)
 </script>
-
-<style scoped>
-.animation-fade { animation: fadeIn 0.3s ease-in-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-.form-card {
-  border-top: 4px solid #0d6efd !important;
-}
-
-.form-section {
-  background: #f8fafc;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: box-shadow 0.2s;
-}
-.form-section:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: #fff;
-  border-bottom: 1px solid #e9ecef;
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: #1e293b;
-}
-
-.section-icon {
-  font-size: 1.2rem;
-}
-
-.section-body {
-  padding: 16px;
-}
-
-.form-section .form-label {
-  font-size: 0.85rem;
-  color: #334155;
-  margin-bottom: 4px;
-}
-
-.form-section .form-control,
-.form-section .form-select {
-  border: 1px solid #d1d5db;
-  background: #fff;
-  padding: 10px 12px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-.form-section .form-control:focus,
-.form-section .form-select:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-  background: #fff;
-}
-.form-section .form-control::placeholder {
-  color: #94a3b8;
-  font-size: 0.9rem;
-}
-</style>

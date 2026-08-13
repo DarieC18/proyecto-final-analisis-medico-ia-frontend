@@ -1,0 +1,156 @@
+/* ============================================================================
+   tokens.css — primitivas de color y capa semántica de aplicación
+   ----------------------------------------------------------------------------
+   Dos niveles:
+     1. --c-*    primitivas. Rampas crudas. NO se usan directamente en vistas.
+     2. --app-*  semánticas. Lo que consumen componentes y vistas. Es la capa
+                 que se redefine entera en modo oscuro.
+   El mapeo a Bootstrap vive en bootstrap-theme.css.
+   ========================================================================== */
+
+:root,
+[data-bs-theme='light'] {
+  /* Explícito y no heredado del SO: sin esto, un usuario con el SO en oscuro
+     pero la app en modo claro (o al revés) recibe los popups nativos del
+     calendario/select en el tema equivocado, aunque el resto de la página
+     esté correcto. Ver el comentario gemelo en theme-dark.css. */
+  color-scheme: light;
+
+  /* --- Neutro: Tailwind slate ------------------------------------------------
+     Rampa única. Quedan desterradas la rampa `gray` de Tailwind y el #e9ecef
+     de Bootstrap que convivían con esta en el código anterior. Subtono azul
+     frío: con la marca cián el conjunto lee "clínico" y no "gris corporativo". */
+  --c-slate-50: #f8fafc;
+  --c-slate-100: #f1f5f9;
+  --c-slate-200: #e2e8f0;
+  --c-slate-300: #cbd5e1;
+  --c-slate-400: #94a3b8;
+  --c-slate-500: #64748b;
+  --c-slate-600: #475569;
+  --c-slate-700: #334155;
+  --c-slate-800: #1e293b;
+  --c-slate-900: #0f172a;
+  --c-slate-950: #020617;
+
+  /* --- Marca: cián clínico profundo -----------------------------------------
+     El #0ea5e9 anterior daba ~2.6:1 con texto blanco y se usaba como fondo de
+     botón: fallaba AA. El punto interactivo baja a -600 (~5.3:1 con blanco).
+     REGLA DURA: --c-brand-500 nunca lleva texto blanco encima (~2.9:1).
+     Es color de identidad, borde e icono. Para texto sobre blanco, -700. */
+  --c-brand-50: #ecfdff;
+  --c-brand-100: #d0f6fd;
+  --c-brand-200: #a5ecfa;
+  --c-brand-300: #6ddcf2;
+  --c-brand-400: #2fc3e3;
+  --c-brand-500: #12a3c7; /* identidad: logo, acentos, gráficos */
+  --c-brand-600: #0b7590; /* interactivo: btn-primary */
+  --c-brand-700: #0d5f76; /* hover/active, texto sobre blanco */
+  --c-brand-800: #124d60;
+  --c-brand-900: #133f4f;
+  --c-brand-950: #0a2833;
+
+  --c-brand-500-rgb: 18, 163, 199;
+  --c-brand-600-rgb: 11, 117, 144;
+
+  /* --- Semánticos en clave médica -------------------------------------------
+     success = normal / estable / completado
+     warning = valor límite / pendiente / requiere revisión
+     danger  = crítico / alerta severa / acción destructiva
+     info    = informativo / análisis IA */
+  /* Ojo: -500 y -600 NO valen como fondo con texto blanco (#10b981 da 2.5:1,
+     #059669 sólo 3.77:1 — falla AA). El relleno de botón usa -700 (5.48:1);
+     los pasos claros quedan para iconos y bordes sobre fondo claro. */
+  --c-success-500: #10b981;
+  --c-success-600: #059669;
+  --c-success-700: #047857;
+  --c-success-800: #065f46;
+  --c-success-subtle: #d1fae5;
+  --c-success-border: #6ee7b7;
+  --c-success-emphasis: #065f46;
+
+  --c-warning-500: #f59e0b;
+  --c-warning-600: #d97706;
+  --c-warning-700: #b45309;
+  --c-warning-subtle: #fef3c7;
+  --c-warning-border: #fcd34d;
+  --c-warning-emphasis: #92400e;
+
+  --c-danger-500: #ef4444;
+  --c-danger-600: #dc2626;
+  --c-danger-700: #b91c1c;
+  /* Antes #fee2e2 / #fca5a5: la pareja subtle/border quedaba tan saturada como
+     success/warning, pero el rojo se percibe más "urgente" a igual saturación
+     que verde o ámbar. Se baja un escalón para que una tarjeta de alerta no
+     grite al lado de badges y bordes normales. */
+  --c-danger-subtle: #fef2f2;
+  --c-danger-border: #fecaca;
+  --c-danger-emphasis: #991b1b;
+
+  /* Violeta a propósito: el --bs-info:#3b82f6 anterior chocaba con el primario
+     azul y no se distinguía. El violeta separa "análisis IA" del resto. */
+  --c-info-500: #6366f1;
+  --c-info-600: #4f46e5;
+  --c-info-700: #4338ca;
+  --c-info-subtle: #e0e7ff;
+  --c-info-border: #a5b4fc;
+  --c-info-emphasis: #3730a3;
+
+  /* ==========================================================================
+     Capa semántica de aplicación
+     ======================================================================== */
+
+  /* Superficie. Ojo a la distinción canvas vs surface: --bs-body-bg se mapea a
+     `surface` (la superficie de tarjeta) y el canvas se aplica al <body> por
+     separado. Así card/modal/dropdown/form-control/table heredan la superficie
+     correcta en ambos temas sin tocar ni una vista. */
+  --app-canvas: var(--c-slate-100);
+  --app-surface: #ffffff;
+  --app-surface-sunken: var(--c-slate-50);
+  --app-surface-raised: #ffffff;
+
+  /* Texto */
+  --app-text: var(--c-slate-800);
+  --app-text-strong: var(--c-slate-900);
+  /* Un paso más oscuro que slate-500: sobre el canvas (slate-100) el 500 sólo
+     llega a 4.34:1 y falla AA. Este valor da 5.76:1 sobre canvas y 6.31:1
+     sobre blanco, sin perder la jerarquía respecto a --app-text. */
+  --app-text-muted: #556170;
+  --app-text-subtle: var(--c-slate-400);
+  --app-text-on-brand: #ffffff;
+
+  /* Líneas */
+  --app-border: var(--c-slate-200);
+  --app-border-strong: var(--c-slate-300);
+
+  /* Elevación. En oscuro se sustituyen por versiones opacas (una sombra negra
+     sobre fondo oscuro es invisible) y la jerarquía pasa a darla el color. */
+  --app-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --app-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --app-shadow-lg: 0 16px 32px -8px rgba(15, 23, 42, 0.14);
+
+  /* Forma: UNA escala. Sustituye a los radios crudos 8/10/12/14/18/22/28px y
+     al reparto arbitrario rounded-3 / rounded-4 / rounded-pill. */
+  --app-radius-sm: 0.375rem;
+  --app-radius: 0.625rem;
+  --app-radius-lg: 0.875rem;
+  --app-radius-xl: 1.25rem;
+  --app-radius-2xl: 1.75rem;
+  --app-radius-pill: 999px;
+
+  /* Shell. Estos tokens eliminan el número mágico `76px` que estaba copiado
+     en dos archivos como altura del navbar. */
+  --app-sidebar-w: 260px;
+  --app-topbar-h: 64px;
+  --app-content-max: 1360px;
+
+  /* Foco */
+  --app-ring: 0 0 0 3px rgba(18, 163, 199, 0.28);
+  --app-ring-danger: 0 0 0 3px rgba(220, 38, 38, 0.25);
+
+  /* Tipografía */
+  --app-font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --app-font-display: 'Poppins', var(--app-font-ui);
+
+  /* Movimiento */
+  --app-transition: 0.18s ease;
+}

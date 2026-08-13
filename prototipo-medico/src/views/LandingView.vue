@@ -1,176 +1,147 @@
 <template>
-  <div class="landing bg-white">
-    <!-- Header -->
-    <header class="header d-flex align-items-center justify-content-between">
-      <RouterLink to="/" class="brand d-flex align-items-center gap-2">
-        <span class="brand-icon d-flex align-items-center justify-content-center">⚕️</span>
-        <span class="fw-bold">MedAnalyzer</span>
-      </RouterLink>
-      <div class="d-flex align-items-center gap-2">
-        <RouterLink to="/login" class="btn btn-login">Iniciar sesión</RouterLink>
-        <RouterLink to="/registro" class="btn btn-primary btn-cta">Crear cuenta</RouterLink>
+  <div class="landing">
+    <!-- ============ Header ============ -->
+    <header class="l-header">
+      <div class="l-header__inner">
+        <RouterLink to="/" class="l-header__brand">
+          <BrandMark :size="34" />
+        </RouterLink>
+        <div class="l-header__actions">
+          <ThemeToggle />
+          <AppButton variant="soft" to="/login">Iniciar sesión</AppButton>
+          <AppButton variant="primary" to="/registro" class="d-none d-sm-inline-flex">Crear cuenta</AppButton>
+        </div>
       </div>
     </header>
 
-    <!-- Hero -->
-    <section class="hero container">
-      <div class="row align-items-center gy-5">
-        <div class="col-lg-6">
-          <span class="badge rounded-pill px-3 py-2 eyebrow d-inline-flex align-items-center gap-2">
-            <span class="pulse-dot"></span> Análisis clínico con inteligencia artificial
+    <!-- ============ Hero ============ -->
+    <section class="l-hero">
+      <div class="l-container l-hero__grid">
+        <div class="l-hero__copy">
+          <span class="l-eyebrow">
+            <span class="l-pulse" aria-hidden="true" />
+            Análisis clínico con inteligencia artificial
           </span>
-          <h1 class="fw-bold hero-title mt-4 mb-3">
-            Diagnosticar con IA, <span class="text-primary">sin demoras</span>
+
+          <h1 class="l-hero__title">
+            Diagnosticar con IA,
+            <span class="l-hero__title-accent">sin demoras</span>
           </h1>
-          <p class="hero-sub mt-3 mb-4">
+
+          <p class="l-hero__sub">
             Plataforma clínica que conecta pacientes, médicos y administración en un solo lugar:
             citas inteligentes, signos vitales, síntomas y diagnóstico asistido por IA.
           </p>
-          <div class="d-flex flex-wrap gap-3 mb-4">
-            <RouterLink to="/registro" class="btn btn-primary btn-lg px-4 shadow-lg d-inline-flex align-items-center gap-2">
+
+          <div class="l-hero__cta">
+            <AppButton variant="primary" size="lg" to="/registro" :icon-right="IconForward">
               Empezar ahora
-              <span>→</span>
-            </RouterLink>
-            <RouterLink to="/login" class="btn btn-outline-secondary btn-lg px-4">
-              Ya tengo cuenta
-            </RouterLink>
+            </AppButton>
+            <AppButton variant="outline" size="lg" to="/login">Ya tengo cuenta</AppButton>
           </div>
-          <div class="d-flex flex-wrap gap-4 trusted">
-            <span class="d-flex align-items-center gap-2"><i class="check text-success">✔</i> Sin instalación</span>
-            <span class="d-flex align-items-center gap-2"><i class="check text-success">✔</i> Datos privados</span>
-            <span class="d-flex align-items-center gap-2"><i class="check text-success">✔</i> Gratis para pacientes</span>
-          </div>
+
+          <ul class="l-checklist">
+            <li v-for="item in trustItems" :key="item">
+              <Icon :icon="IconSuccess" :size="16" tone="success" />
+              {{ item }}
+            </li>
+          </ul>
         </div>
-        <div class="col-lg-6">
-          <div class="mockup-wrap">
-            <div class="mockup">
-              <div class="mockup-head d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">Dashboard clínico</span>
-                <span class="badge virtual-badge">Vista en vivo</span>
+
+        <div class="l-hero__visual">
+          <div class="l-mockup">
+            <div class="l-mockup__head">
+              <span class="l-mockup__head-title">Dashboard clínico</span>
+              <StatusBadge text="Vista en vivo" variant="active" size="sm" dot />
+            </div>
+
+            <div class="l-mockup__stats">
+              <div v-for="s in mockStats" :key="s.label" class="l-stat">
+                <p class="l-stat__label">{{ s.label }}</p>
+                <p class="l-stat__value">{{ s.value }}</p>
+                <p class="l-stat__hint" :class="{ 'l-stat__hint--up': s.up }">{{ s.hint }}</p>
               </div>
-              <div class="mockup-stat row g-3">
-                <div class="col">
-                  <div class="stat-box">
-                    <small>Pacientes</small>
-                    <strong>1,248</strong>
-                    <span class="trend up">+12%</span>
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="stat-box">
-                    <small>Citas agendadas</small>
-                    <strong>86</strong>
-                    <span class="trend neutral">hoy</span>
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="stat-box">
-                    <small>Análisis IA</small>
-                    <strong>532</strong>
-                    <span class="trend up">esta semana</span>
-                  </div>
-                </div>
+            </div>
+
+            <div class="l-mockup__chart">
+              <p class="l-mockup__chart-label">Diagnósticos asistidos por IA (últimos 7 días)</p>
+              <div class="l-bars">
+                <span v-for="(h, i) in chartBars" :key="i" class="l-bar" :style="{ height: h + '%' }" />
               </div>
-              <div class="mockup-chart card-body">
-                <small class="text-muted">Diagnósticos asistidos por IA (últimos 7 días)</small>
-                <div class="bars d-flex align-items-end gap-2">
-                  <span class="bar" v-for="(h, i) in bars" :key="i" :style="{ height: h + '%' }"></span>
-                </div>
+            </div>
+
+            <div class="l-mockup__foot">
+              <div>
+                <p class="l-mockup__foot-label">Recomendación IA</p>
+                <p class="l-mockup__foot-value">Seguimiento en 7 días</p>
               </div>
-              <div class="mockup-foot d-flex justify-content-between align-items-center">
-                <div>
-                  <small class="text-muted d-block">Recomendación IA</small>
-                  <strong>Seguimiento en 7 días</strong>
-                </div>
-                <span class="status-badge">● On track</span>
-              </div>
+              <StatusBadge text="On track" variant="active" size="sm" dot />
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Features -->
-    <section class="features">
-      <div class="container">
-        <div class="text-center mx-auto section-head">
-          <span class="eyebrow d-inline-block px-3 py-2 rounded-pill">Todo en una plataforma</span>
-          <h2 class="fw-bold section-title">Pensada para la atención moderna</h2>
-          <p class="text-secondary section-sub mx-auto">
-            Herramientas integradas que ahorran horas a tu equipo médico cada día.
+    <!-- ============ Features ============ -->
+    <section class="l-section l-section--sunken">
+      <div class="l-container">
+        <div class="l-section-head">
+          <span class="l-eyebrow l-eyebrow--static">Todo en una plataforma</span>
+          <h2 class="l-section-title">Pensada para la atención moderna</h2>
+          <p class="l-section-sub">Herramientas integradas que ahorran horas a tu equipo médico cada día.</p>
+        </div>
+
+        <div class="l-features">
+          <BaseCard v-for="f in features" :key="f.title" hoverable padding="md">
+            <IconTile :icon="f.icon" :tone="f.tone" size="lg" class="mb-3" />
+            <h3 class="l-feature__title">{{ f.title }}</h3>
+            <p class="l-feature__desc">{{ f.desc }}</p>
+          </BaseCard>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Prueba ============ -->
+    <section class="l-section">
+      <div class="l-container l-proof__grid">
+        <div class="l-proof__visual">
+          <BaseCard padding="md">
+            <div class="l-proof__header">
+              <span class="fw-semibold">Expediente del paciente</span>
+              <StatusBadge text="ID #00258" variant="secondary" size="sm" />
+            </div>
+
+            <div v-for="v in vitalsSample" :key="v.label" class="l-proof__row">
+              <div class="l-proof__row-top">
+                <span class="text-app-muted">{{ v.label }}</span>
+                <strong>
+                  {{ v.value }}
+                  <small class="text-success-emphasis fw-semibold">{{ v.tag }}</small>
+                </strong>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" :style="{ width: v.pct + '%' }" />
+              </div>
+            </div>
+          </BaseCard>
+        </div>
+
+        <div class="l-proof__copy">
+          <span class="l-eyebrow l-eyebrow--static">Asistencia real</span>
+          <h2 class="l-section-title mt-3">
+            Datos clínicos, <span class="l-hero__title-accent">interpretados por IA</span>
+          </h2>
+          <p class="l-proof__sub">
+            La IA cruza síntomas, signos vitales e historial para sugerir diagnósticos y alertar
+            al equipo médico sobre riesgos en el momento exacto.
           </p>
-        </div>
-        <div class="row g-4">
-          <div class="col-md-6 col-lg-3" v-for="f in features" :key="f.title">
-            <div class="card feature-card h-100">
-              <div class="feature-icon d-flex align-items-center justify-content-center" :style="{ background: f.bg, color: f.color }">
-                {{ f.icon }}
-              </div>
-              <h3 class="h6 fw-semibold">{{ f.title }}</h3>
-              <p class="feature-desc">{{ f.desc }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- Prueba / Demo -->
-    <section class="proof">
-      <div class="container">
-        <div class="row align-items-center gy-5">
-          <div class="col-lg-6">
-            <div class="proof-visual rounded-3 shadow-2xl-soft p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="fw-semibold">Expediente del paciente</span>
-                <span class="badge text-bg-light border">ID #00258</span>
-              </div>
-              <div class="proof-row d-flex justify-content-between">
-                <span>Presión arterial</span>
-                <strong>120/80 <small class="text-success">Normal</small></strong>
-              </div>
-              <div class="progress mb-3"><div class="progress-bar-a" style="width: 72%"></div></div>
-              <div class="proof-row d-flex justify-content-between">
-                <span>Frecuencia cardíaca</span>
-                <strong>68 bpm <small class="text-success">Normal</small></strong>
-              </div>
-              <div class="progress mb-3"><div class="progress-bar-b" style="width: 85%"></div></div>
-              <div class="proof-row d-flex justify-content-between">
-                <span>Saturación de oxígeno</span>
-                <strong>98% <small class="text-success">Óptimo</small></strong>
-              </div>
-              <div class="progress"><div class="progress-bar-c" style="width: 96%"></div></div>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <span class="eyebrow d-inline-block px-3 py-2 rounded-pill">Asistencia real</span>
-            <h2 class="fw-bold section-title mt-3 mb-3">
-              Datos clínicos, <span class="text-primary">interpretados por IA</span>
-            </h2>
-            <p class="proof-sub mb-4">
-              La IA cruza síntomas, signos vitales e historial para sugerir diagnósticos
-              y alertar al equipo médico sobre riesgos en el momento exacto.
-            </p>
-            <div class="proof-list">
-              <div class="proof-item d-flex align-items-start gap-3">
-                <span class="proof-dot d-flex align-items-center justify-content-center">⚡</span>
-                <div>
-                  <strong>Sugerencias de diagnóstico</strong>
-                  <p class="mb-0">Recomendaciones basadas en el expediente completo del paciente.</p>
-                </div>
-              </div>
-              <div class="proof-item d-flex align-items-start gap-3">
-                <span class="proof-dot d-flex align-items-center justify-content-center">🔔</span>
-                <div>
-                  <strong>Alertas tempranas</strong>
-                  <p class="mb-0">Detecta valores críticos y notifica al equipo al instante.</p>
-                </div>
-              </div>
-              <div class="proof-item d-flex align-items-start gap-3">
-                <span class="proof-dot d-flex align-items-center justify-content-center">📄</span>
-                <div>
-                  <strong>Reportes listos</strong>
-                  <p class="mb-0">Genera resúmenes y reportes en PDF con un clic.</p>
-                </div>
+          <div class="l-proof__list">
+            <div v-for="item in aiHighlights" :key="item.title" class="l-proof__item">
+              <IconTile :icon="item.icon" :tone="item.tone" size="md" />
+              <div>
+                <strong class="d-block">{{ item.title }}</strong>
+                <p class="mb-0 text-app-muted">{{ item.desc }}</p>
               </div>
             </div>
           </div>
@@ -178,299 +149,564 @@
       </div>
     </section>
 
-    <!-- CTA final -->
-    <section class="cta-final container text-center rounded-4">
-      <h2 class="fw-bold text-white cta-title mb-3">El futuro de tu consulta empieza hoy</h2>
-      <p class="cta-sub text-white opacity-75 mx-auto mb-4">
-        Únete a los centros que ya diagnostican más rápido con MedAnalyzer.
-      </p>
-      <div class="d-flex flex-wrap gap-3 justify-content-center">
-        <RouterLink to="/registro" class="btn btn-cta-final btn-lg px-4">Crear cuenta gratis</RouterLink>
-        <RouterLink to="/login" class="btn btn-outline-light btn-lg px-4">Iniciar sesión</RouterLink>
+    <!-- ============ CTA final ============ -->
+    <section class="l-container">
+      <div class="l-cta">
+        <h2 class="l-cta__title">El futuro de tu consulta empieza hoy</h2>
+        <p class="l-cta__sub">
+          Únete a los centros que ya diagnostican más rápido con MedAnalyzer.
+        </p>
+        <div class="l-cta__actions">
+          <AppButton variant="on-brand" size="lg" to="/registro">Crear cuenta gratis</AppButton>
+          <AppButton variant="on-brand-outline" size="lg" to="/login">Iniciar sesión</AppButton>
+        </div>
       </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-      <div class="d-flex align-items-center gap-2">
-        <span class="brand-mark small d-flex align-items-center justify-content-center">⚕️</span>
-        <span class="fw-semibold">MedAnalyzer</span>
-      </div>
-      <small class="text-muted">© 2026 MedAnalyzer. Proyecto académico.</small>
-      <div class="d-flex gap-4 small text-muted">
-        <RouterLink to="/login" class="footer-link">Acceso</RouterLink>
-        <RouterLink to="/registro" class="footer-link">Registro</RouterLink>
+    <!-- ============ Footer ============ -->
+    <footer class="l-footer">
+      <div class="l-container l-footer__inner">
+        <BrandMark :size="26" compact />
+        <small class="text-app-muted">© {{ year }} MedAnalyzer. Proyecto académico.</small>
+        <div class="l-footer__links">
+          <RouterLink to="/login">Acceso</RouterLink>
+          <RouterLink to="/registro">Registro</RouterLink>
+        </div>
       </div>
     </footer>
   </div>
 </template>
 
 <script setup>
-const bars = [42, 58, 46, 72, 64, 88, 96]
+import { markRaw } from 'vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BrandMark from '@/components/ui/BrandMark.vue'
+import Icon from '@/components/ui/Icon.vue'
+import IconTile from '@/components/ui/IconTile.vue'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
+import ThemeToggle from '@/components/ui/ThemeToggle.vue'
+import {
+  IconAi,
+  IconAlert,
+  IconChart,
+  IconClinical,
+  IconFast,
+  IconForward,
+  IconReport,
+  IconSuccess,
+  IconVitals
+} from '@/lib/icons'
 
-const features = [
-  { icon: '🩺', title: 'Citas inteligentes', desc: 'Agenda, síntomas y signos vitales en un solo flujo por cita.', bg: '#e0f2fe', color: '#0ea5e9' },
-  { icon: '🧠', title: 'Diagnóstico con IA', desc: 'Recomendaciones basadas en el historial completo del paciente.', bg: '#ede9fe', color: '#8b5cf6' },
-  { icon: '🫀', title: 'Signos vitales', desc: 'Registro y seguimiento de presión, frecuencia y saturación.', bg: '#d1fae5', color: '#10b981' },
-  { icon: '📊', title: 'Reportes en PDF', desc: 'Resúmenes clínicos listos para imprimir o compartir.', bg: '#fee2e2', color: '#ef4444' }
+const year = new Date().getFullYear()
+
+const chartBars = [42, 58, 46, 72, 64, 88, 96]
+
+const trustItems = ['Sin instalación', 'Datos privados', 'Gratis para pacientes']
+
+const mockStats = [
+  { label: 'Pacientes', value: '1,248', hint: '+12%', up: true },
+  { label: 'Citas agendadas', value: '86', hint: 'hoy', up: false },
+  { label: 'Análisis IA', value: '532', hint: 'esta semana', up: true }
 ]
+
+// markRaw: son componentes de icono en un array de datos; sin esto Vue los
+// envolvería en proxies reactivos sin necesidad.
+const features = [
+  {
+    icon: markRaw(IconClinical),
+    tone: 'brand',
+    title: 'Citas inteligentes',
+    desc: 'Agenda, síntomas y signos vitales en un solo flujo por cita.'
+  },
+  {
+    icon: markRaw(IconAi),
+    tone: 'info',
+    title: 'Diagnóstico con IA',
+    desc: 'Recomendaciones basadas en el historial completo del paciente.'
+  },
+  {
+    icon: markRaw(IconVitals),
+    tone: 'success',
+    title: 'Signos vitales',
+    desc: 'Registro y seguimiento de presión, frecuencia y saturación.'
+  },
+  {
+    icon: markRaw(IconChart),
+    tone: 'warning',
+    title: 'Reportes en PDF',
+    desc: 'Resúmenes clínicos listos para imprimir o compartir.'
+  }
+]
+
+const vitalsSample = [
+  { label: 'Presión arterial', value: '120/80', tag: 'Normal', pct: 72 },
+  { label: 'Frecuencia cardíaca', value: '68 bpm', tag: 'Normal', pct: 85 },
+  { label: 'Saturación de oxígeno', value: '98%', tag: 'Óptimo', pct: 96 }
+]
+
+const aiHighlights = [
+  {
+    icon: markRaw(IconFast),
+    tone: 'brand',
+    title: 'Sugerencias de diagnóstico',
+    desc: 'Recomendaciones basadas en el expediente completo del paciente.'
+  },
+  {
+    icon: markRaw(IconAlert),
+    tone: 'danger',
+    title: 'Alertas tempranas',
+    desc: 'Detecta valores críticos y notifica al equipo al instante.'
+  },
+  {
+    icon: markRaw(IconReport),
+    tone: 'info',
+    title: 'Reportes listos',
+    desc: 'Genera resúmenes y reportes en PDF con un clic.'
+  }
+]
+
 </script>
 
 <style scoped>
 .landing {
-  font-family: 'Poppins', sans-serif;
-  color: #111827;
-  min-height: 100vh;
+  background-color: var(--app-canvas);
 }
 
-/* Header */
-.header {
+.l-container {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .l-container {
+    padding-inline: 1.5rem;
+  }
+}
+
+/* ============ Header ============ */
+.l-header {
   position: sticky;
   top: 0;
   z-index: 50;
-  padding: 1rem clamp(1.25rem, 5vw, 4rem);
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid #f3f4f6;
+  background-color: color-mix(in srgb, var(--app-surface) 86%, transparent);
+  backdrop-filter: saturate(180%) blur(8px);
+  border-bottom: 1px solid var(--app-border);
 }
-.brand-mark {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #0ea5e9, #2563eb);
-  color: #fff;
-  font-size: 1.1rem;
+
+.l-header__inner {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: 0.875rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
-.brand-mark.small {
-  width: 30px;
-  height: 30px;
-  font-size: 0.9rem;
-  border-radius: 9px;
+
+.l-header__brand {
+  display: inline-flex;
 }
-.brand {
-  text-decoration: none;
-  color: #111827;
-  font-size: 1.1rem;
+
+.l-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
-.btn-login {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  color: #111827;
-  font-weight: 600;
-  border-radius: 10px;
-  padding: 0.5rem 1.1rem;
-}
-.btn-cta {
-  border-radius: 10px;
-  font-weight: 600;
-}
-.eyebrow {
-  background: #e0f2fe;
-  color: #0ea5e9;
+
+/* ============ Eyebrow / pulse ============ */
+.l-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--app-radius-pill);
+  background-color: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary-text-emphasis);
   font-size: 0.8rem;
   font-weight: 600;
 }
-.pulse-dot {
+
+.l-eyebrow--static {
+  margin-bottom: 0.75rem;
+}
+
+.l-pulse {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #10b981;
-  display: inline-block;
+  background-color: var(--c-success-500);
+  box-shadow: 0 0 0 3px var(--c-success-subtle);
 }
 
-/* Hero */
-.hero {
-  padding-top: 80px;
-  padding-bottom: 80px;
-  max-width: 1200px;
+/* ============ Hero ============ */
+.l-hero {
+  padding-block: clamp(2.5rem, 6vw, 5rem);
+  background:
+    radial-gradient(
+      50rem 28rem at 15% -8rem,
+      color-mix(in srgb, var(--c-brand-500) 16%, transparent),
+      transparent 70%
+    ),
+    var(--app-canvas);
 }
-.hero-title {
-  font-size: 2.6rem;
-  line-height: 1.1;
+
+.l-hero__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  align-items: center;
 }
-.hero-sub {
-  max-width: 520px;
+
+@media (min-width: 992px) {
+  .l-hero__grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
-.trusted .check {
-  font-style: normal;
-  font-size: 0.95rem;
+
+.l-hero__title {
+  margin: 1.25rem 0 1rem;
+  font-size: clamp(2rem, 1.5rem + 2vw, 2.75rem);
+  line-height: 1.12;
+  font-weight: 700;
 }
-.trusted span {
-  color: #4b5563;
-  font-size: 0.9rem;
+
+.l-hero__title-accent {
+  color: var(--bs-primary-text-emphasis);
+}
+
+.l-hero__sub {
+  max-width: 34rem;
+  color: var(--app-text-muted);
+  font-size: 1.05rem;
+}
+
+.l-hero__cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.l-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+
+.l-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
   font-weight: 500;
+  color: var(--app-text);
 }
-.mockup-wrap {
+
+@media (max-width: 991.98px) {
+  .l-hero__copy {
+    text-align: center;
+  }
+  .l-hero__sub {
+    margin-inline: auto;
+  }
+  .l-hero__cta,
+  .l-checklist {
+    justify-content: center;
+  }
+}
+
+/* ============ Mockup del dashboard ============ */
+.l-hero__visual {
   position: relative;
 }
-.mockup-wrap::before {
+
+.l-mockup {
+  position: relative;
+  padding: 1.25rem;
+  background-color: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-xl);
+  box-shadow: var(--app-shadow-lg);
+}
+
+/* Marco de acento detrás de la tarjeta: color puro de marca, no depende del
+   tema (a diferencia del resto de la superficie). */
+.l-mockup::before {
   content: '';
   position: absolute;
-  inset: -18px 10px 10px -18px;
-  background: linear-gradient(135deg, #0ea5e9, #2563eb);
-  border-radius: 28px;
-  transform: rotate(2deg);
+  inset: -14px 10px 10px -14px;
+  background: linear-gradient(135deg, var(--c-brand-500), var(--c-brand-700));
+  border-radius: calc(var(--app-radius-xl) + 6px);
+  transform: rotate(1.5deg);
+  z-index: -1;
   opacity: 0.9;
 }
-.mockup {
-  position: relative;
-  z-index: 1;
-  background: #fff;
-  border-radius: 22px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  padding: 20px;
-  border: 1px solid #f3f4f6;
+
+.l-mockup__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.875rem;
+  margin-bottom: 0.875rem;
+  border-bottom: 1px solid var(--app-border);
 }
-.mockup-head {
-  border-bottom: 1px solid #f3f4f6;
-  padding-bottom: 14px;
-}
-.virtual-badge {
-  background: #d1fae5;
-  color: #059669;
-  font-size: 0.72rem;
-}
-.stat-box {
-  background: #f9fafb;
-  border: 1px solid #f3f4f6;
-  border-radius: 14px;
-  padding: 14px;
-}
-.stat-box small {
-  display: block;
-  color: #6b7280;
-  font-size: 0.75rem;
-}
-.stat-box strong {
-  font-size: 1.5rem;
-  display: block;
-}
-.trend {
-  font-size: 0.72rem;
+
+.l-mockup__head-title {
   font-weight: 600;
 }
-.trend.up { color: #10b981; }
-.mockup-chart {
-  margin-top: 14px;
-  border: 1px solid #f3f4f6;
-  border-radius: 14px;
-  padding: 14px;
-}
-.bars {
-  height: 90px;
-}
-.bar {
-  flex: 1;
-  background: linear-gradient(180deg, #0ea5e9, #38bdf8);
-  border-radius: 6px 6px 2px 2px;
-  opacity: 0.9;
-}
-.mockup-footer {
-  margin-top: 14px;
-}
-.status-badge {
-  color: #059669;
-  font-weight: 600;
-  font-size: 0.8rem;
+
+.l-mockup__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.625rem;
 }
 
-/* Features */
-.features {
-  background: #f9fafb;
-  padding: 80px 0;
-}
-.section-head {
-  max-width: 640px;
-  margin-bottom: 48px;
-}
-.section-title { font-size: 1.9rem; }
-.section-sub { color: #6b7280; font-size: 1.05rem; }
-.card {
-  border: 1px solid #f3f4f6 !important;
-  border-radius: 18px !important;
-  padding: 22px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-.feature-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  font-size: 1.3rem;
-  margin-bottom: 16px;
-}
-.feature-desc { color: #6b7280; font-size: 0.88rem; margin: 0; }
-
-/* Proof */
-.proof {
-  padding: 80px 24px;
-  background: #fff;
-}
-.proof-sub {
-  max-width: 560px;
-}
-.proof-row {
-  padding: 8px 0;
-  border-bottom: 1px dashed #e5e7eb;
-  font-size: 0.9rem;
-}
-.proof-row small { font-weight: 600; }
-.progress {
-  height: 6px;
-  background: #e5e7eb;
-  border-radius: 99px;
-}
-.progress-bar-a { background: #0ea5e9; border-radius: 99px; height: 100%; }
-.progress-bar-b { background: #10b981; border-radius: 99px; height: 100%; }
-.progress-bar-c { background: #8b5cf6; border-radius: 99px; height: 100%; }
-.proof-item { padding: 10px 0; }
-.proof-dot {
-  width: 42px;
-  height: 42px;
-  border-radius: 13px;
-  background: #e0f2fe;
-  font-size: 1.1rem;
-  flex-shrink: 0;
+.l-stat {
+  padding: 0.75rem;
+  background-color: var(--app-surface-sunken);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
 }
 
-/* CTA final */
-.cta-final {
-  position: relative;
-  background: linear-gradient(135deg, #0ea5e9, #2563eb);
-  margin: 40px auto 80px;
-  padding: 64px 24px;
-  max-width: 1000px;
-  box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.45);
+.l-stat__label {
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--app-text-muted);
 }
-.cta-title { font-size: 2rem; }
-.cta-sub { max-width: 480px; }
-.btn-cta-final {
-  background: #fff;
-  color: #2563eb;
+
+.l-stat__value {
+  margin: 0.125rem 0;
+  font-size: 1.15rem;
   font-weight: 700;
-  border-radius: 12px;
-  border: none;
+  font-variant-numeric: tabular-nums;
 }
-.btn-cta-final:hover { background: #f1f5f9; color: #1e40af; }
-.btn-outline-light { border-radius: 12px; font-weight: 600; }
 
-/* Footer */
-.footer {
-  padding: 28px 32px;
-  background: #fff;
+.l-stat__hint {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--app-text-muted);
 }
-.footer-link {
-  text-decoration: none;
-  color: inherit;
-}
-.footer-link:hover { color: #0ea5e9; }
 
-/* Responsive */
-@media (max-width: 991px) {
-  .hero {
-    padding: 48px 20px;
+.l-stat__hint--up {
+  color: var(--c-success-emphasis);
+}
+
+.l-mockup__chart {
+  margin-top: 0.875rem;
+  padding: 0.875rem;
+  background-color: var(--app-surface-sunken);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+}
+
+.l-mockup__chart-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  color: var(--app-text-muted);
+}
+
+.l-bars {
+  height: 90px;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.375rem;
+}
+
+.l-bar {
+  flex: 1;
+  background: linear-gradient(180deg, var(--c-brand-400), var(--c-brand-600));
+  border-radius: 6px 6px 2px 2px;
+}
+
+.l-mockup__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.l-mockup__foot-label {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--app-text-muted);
+}
+
+.l-mockup__foot-value {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ============ Secciones ============ */
+.l-section {
+  padding-block: clamp(3rem, 6vw, 5rem);
+}
+
+.l-section--sunken {
+  background-color: var(--app-surface-sunken);
+  border-block: 1px solid var(--app-border);
+}
+
+.l-section-head {
+  max-width: 40rem;
+  margin: 0 auto 2.5rem;
+  text-align: center;
+}
+
+.l-section-title {
+  margin: 0 0 0.625rem;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 1.9rem);
+  font-weight: 700;
+}
+
+.l-section-sub {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 1.02rem;
+}
+
+/* ============ Features ============ */
+.l-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.25rem;
+}
+
+.l-feature__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.375rem;
+}
+
+.l-feature__desc {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--app-text-muted);
+}
+
+/* ============ Prueba ============ */
+.l-proof__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (min-width: 992px) {
+  .l-proof__grid {
+    grid-template-columns: 1fr 1fr;
   }
-  .hero-title { text-align: center; }
-  .hero-sub { margin-left: auto; margin-right: auto; text-align: center; }
-  .trusted { justify-content: center; }
+}
+
+.l-proof__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.l-proof__row {
+  padding-block: 0.5rem;
+}
+
+.l-proof__row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.9rem;
+  margin-bottom: 0.375rem;
+}
+
+.l-proof__sub {
+  max-width: 34rem;
+  color: var(--app-text-muted);
+  margin: 0 0 1.5rem;
+}
+
+.l-proof__list {
+  display: grid;
+  gap: 1.125rem;
+}
+
+.l-proof__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+}
+
+/* ============ CTA final ============ */
+.l-cta {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  margin-block: 1rem 4rem;
+  padding: clamp(2.5rem, 6vw, 4rem) 1.5rem;
+  border-radius: var(--app-radius-xl);
+  background: linear-gradient(135deg, var(--c-brand-600), var(--c-brand-800));
+  box-shadow: 0 25px 50px -12px color-mix(in srgb, var(--c-brand-700) 45%, transparent);
+}
+
+.l-cta__title {
+  margin: 0 0 0.75rem;
+  color: #fff;
+  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  font-weight: 700;
+}
+
+.l-cta__sub {
+  max-width: 32rem;
+  margin: 0 auto 1.75rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.l-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+/* ============ Footer ============ */
+.l-footer {
+  border-top: 1px solid var(--app-border);
+  padding-block: 1.5rem;
+}
+
+.l-footer__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .l-footer__inner {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+}
+
+.l-footer__links {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.875rem;
+}
+
+.l-footer__links a {
+  color: var(--app-text-muted);
+}
+
+.l-footer__links a:hover {
+  color: var(--bs-primary-text-emphasis);
 }
 </style>

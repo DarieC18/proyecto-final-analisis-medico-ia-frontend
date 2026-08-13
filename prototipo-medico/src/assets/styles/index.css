@@ -1,0 +1,8 @@
+/* Capa de diseño de MedAnalyzer.
+   Se importa DESPUÉS de bootstrap.min.css en src/main.js — el orden importa.
+   El orden interno también: tokens -> mapeo a Bootstrap -> base -> utilidades. */
+@import './tokens.css';
+@import './bootstrap-theme.css';
+@import './theme-dark.css';
+@import './base.css';
+@import './utilities.css';

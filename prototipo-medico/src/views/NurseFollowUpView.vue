@@ -1,211 +1,246 @@
 <template>
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h3 class="fw-bold mb-0">Seguimiento de Pacientes</h3>
-        <p class="text-muted">Registro de síntomas y signos vitales fuera de cita</p>
-      </div>
-    </div>
+  <div>
+    <PageHeader
+      title="Seguimiento de Pacientes"
+      subtitle="Registro de síntomas y signos vitales fuera de cita"
+      :icon="IconClinical"
+    />
 
-    <!-- Buscador de pacientes -->
-    <div class="card shadow-sm border-0 mb-4">
-      <div class="card-body p-4">
-        <h6 class="fw-bold mb-3">Buscar Paciente</h6>
-        <div class="d-flex gap-3">
+    <!-- ============ Buscador ============ -->
+    <BaseCard title="Buscar paciente" :icon="IconSearch" class="mb-3">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-7">
+          <label for="n-busqueda" class="form-label">Nombre, identificación o teléfono</label>
           <input
+            id="n-busqueda"
             v-model="busqueda"
             type="text"
             class="form-control"
-            placeholder="Nombre, identificación o teléfono..."
+            placeholder="Ej: María González o 0801199012345"
             @keyup.enter="buscarPaciente"
-          >
-          <button @click="buscarPaciente" class="btn btn-dark px-4" :disabled="buscando">
-            <span v-if="buscando" class="spinner-border spinner-border-sm me-1"></span>
+          />
+        </div>
+        <div class="col-md-3">
+          <AppButton variant="primary" block :icon="IconSearch" :loading="buscando" @click="buscarPaciente">
             Buscar
-          </button>
-          <button v-if="busqueda" @click="limpiar" class="btn btn-light border px-3">Limpiar</button>
+          </AppButton>
         </div>
-        <div v-if="resultados.length" class="mt-3">
-          <div
-            v-for="p in resultados"
-            :key="p.id"
+        <div class="col-md-2">
+          <AppButton v-if="busqueda" variant="soft" block @click="limpiar">Limpiar</AppButton>
+        </div>
+      </div>
+
+      <ul v-if="resultados.length" class="resultados">
+        <li v-for="p in resultados" :key="p.id">
+          <button
+            type="button"
+            class="resultados__item"
+            :class="{ 'resultados__item--sel': pacienteSeleccionado?.id === p.id }"
             @click="seleccionarPaciente(p)"
-            class="resultado-item p-3 border rounded-3 mb-2 cursor-pointer"
-            :class="{ 'border-primary bg-primary bg-opacity-10': pacienteSeleccionado?.id === p.id }"
           >
-            <strong>{{ p.fullName }}</strong>
-            <span class="text-muted ms-2">{{ p.identificationNumber }}</span>
-          </div>
-        </div>
-        <p v-else-if="buscado && !resultados.length" class="text-muted mt-3 mb-0">No se encontraron pacientes.</p>
-      </div>
-    </div>
+            <span class="fw-medium">{{ p.fullName }}</span>
+            <small class="text-app-muted">{{ p.identificationNumber }}</small>
+          </button>
+        </li>
+      </ul>
 
-    <!-- Panel del paciente seleccionado -->
-    <div v-if="pacienteSeleccionado" class="animation-fade">
-      <div class="alert alert-success border-0 rounded-3 mb-4">
-        <strong>Paciente:</strong> {{ pacienteSeleccionado.fullName }}
-        <span class="ms-3 text-muted">{{ pacienteSeleccionado.identificationNumber }}</span>
-      </div>
+      <p v-else-if="buscado && !buscando" class="text-app-muted small mb-0 mt-2">
+        No se encontraron pacientes.
+      </p>
+    </BaseCard>
 
-      <!-- Tabs -->
-      <div class="card shadow-sm p-2 mb-4">
-        <ul class="nav nav-pills nav-fill gap-2 p-1">
-          <li class="nav-item">
-            <a class="nav-link rounded-pill fw-medium" :class="tab === 'sintomas' ? 'active bg-primary shadow-sm' : 'text-muted'" @click="tab = 'sintomas'" href="#">🤒 Síntomas</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link rounded-pill fw-medium" :class="tab === 'signos' ? 'active bg-primary shadow-sm' : 'text-muted'" @click="tab = 'signos'" href="#">❤️ Signos Vitales</a>
-          </li>
-        </ul>
-      </div>
+    <!-- ============ Panel del paciente ============ -->
+    <BaseCard v-if="!pacienteSeleccionado" flush padding="none">
+      <EmptyState
+        :icon="IconPatients"
+        title="Ningún paciente seleccionado"
+        message="Busca un paciente para registrar síntomas o signos vitales de seguimiento."
+      />
+    </BaseCard>
 
-      <!-- TAB SÍNTOMAS -->
-      <div v-if="tab === 'sintomas'" class="animation-fade">
-        <div class="card shadow-sm border-0 mb-4">
-          <div class="card-body p-4">
-            <h6 class="fw-bold mb-3">Registrar Síntoma</h6>
-            <div v-if="sintomaError" class="alert alert-danger border-0 py-2 small">{{ sintomaError }}</div>
-            <form @submit.prevent="guardarSintoma">
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">Síntoma</label>
-                  <input v-model="sintomaForm.name" type="text" class="form-control" placeholder="Ej: Fiebre" required>
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label fw-medium">Severidad</label>
-                  <select v-model="sintomaForm.severity" class="form-select" required>
-                    <option value="Leve">Leve</option>
-                    <option value="Moderado">Moderado</option>
-                    <option value="Severo">Severo</option>
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label fw-medium">Inicio</label>
-                  <input v-model="sintomaForm.startedAt" type="date" class="form-control" required>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                  <button type="submit" class="btn btn-success w-100 rounded-pill" :disabled="guardandoSintoma">
-                    <span v-if="guardandoSintoma" class="spinner-border spinner-border-sm"></span>
-                    <span v-else>+ Agregar</span>
-                  </button>
-                </div>
+    <div v-else class="u-fade-in">
+      <AppAlert variant="brand" class="mb-3">
+        <strong>{{ pacienteSeleccionado.fullName }}</strong>
+        <span class="ms-2">{{ pacienteSeleccionado.identificationNumber }}</span>
+      </AppAlert>
+
+      <BaseCard flush padding="none" class="mb-3">
+        <TabNav v-model="tab" :tabs="TABS" />
+      </BaseCard>
+
+      <!-- ---- Síntomas ---- -->
+      <template v-if="tab === 'sintomas'">
+        <BaseCard title="Registrar síntoma" :icon="IconSymptoms" class="mb-3">
+          <AppAlert v-if="sintomaError" variant="danger" :message="sintomaError" class="mb-3" />
+
+          <form @submit.prevent="guardarSintoma">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="n-sintoma" class="form-label">Síntoma</label>
+                <input id="n-sintoma" v-model="sintomaForm.name" type="text" class="form-control" placeholder="Ej: Fiebre" required />
               </div>
-              <div class="mt-3">
-                <label class="form-label fw-medium">Notas</label>
-                <textarea v-model="sintomaForm.notes" class="form-control" rows="2" placeholder="Notas adicionales..."></textarea>
+              <div class="col-md-3">
+                <label for="n-severidad" class="form-label">Severidad</label>
+                <select id="n-severidad" v-model="sintomaForm.severity" class="form-select" required>
+                  <option value="Leve">Leve</option>
+                  <option value="Moderado">Moderado</option>
+                  <option value="Severo">Severo</option>
+                </select>
               </div>
-            </form>
-          </div>
-        </div>
+              <div class="col-md-3">
+                <label for="n-inicio" class="form-label">Inicio</label>
+                <input id="n-inicio" v-model="sintomaForm.startedAt" type="date" class="form-control" required />
+              </div>
+              <div class="col-md-2 d-flex align-items-end">
+                <AppButton type="submit" variant="primary" block :icon="IconAdd" :loading="guardandoSintoma">
+                  Agregar
+                </AppButton>
+              </div>
+              <div class="col-12">
+                <label for="n-notas" class="form-label">Notas</label>
+                <textarea id="n-notas" v-model="sintomaForm.notes" class="form-control" rows="2" placeholder="Notas adicionales…" />
+              </div>
+            </div>
+          </form>
+        </BaseCard>
 
-        <!-- Historial de síntomas -->
-        <div class="card shadow-sm border-0">
-          <div class="card-body p-4">
-            <h6 class="fw-bold mb-3">Historial de Síntomas</h6>
-            <div v-if="cargandoSintomas" class="text-center py-3"><div class="spinner-border text-primary" role="status"></div></div>
-            <div v-else-if="sintomas.length === 0" class="text-muted text-center py-4">No hay síntomas de seguimiento registrados.</div>
-            <div v-else class="row g-3">
-              <div class="col-md-6" v-for="s in sintomas" :key="s.id">
-                <div class="card bg-light border-0 border-start border-4 shadow-sm h-100 p-3 rounded-4" :class="`border-${severityColor(s.severity)}`">
-                  <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h6 class="fw-bold mb-0">{{ s.name }}</h6>
-                    <span class="badge rounded-pill px-3" :class="severityBadge(s.severity)">{{ s.severity }}</span>
-                  </div>
-                  <p class="text-muted small mb-1"><strong>Inicio:</strong> {{ s.startedAt }}</p>
-                  <p class="text-dark small mb-0">{{ s.notes || 'Sin notas.' }}</p>
+        <BaseCard title="Historial de síntomas" :icon="IconHistory">
+          <LoadingState v-if="cargandoSintomas" label="Cargando síntomas…" />
+          <EmptyState
+            v-else-if="sintomas.length === 0"
+            size="sm"
+            :icon="IconSymptoms"
+            title="Sin síntomas de seguimiento"
+          />
+          <div v-else class="row g-3">
+            <div v-for="s in sintomas" :key="s.id" class="col-md-6">
+              <div class="sintoma" :class="`sintoma--${severityVariant(s.severity)}`">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                  <h4 class="sintoma__nombre">{{ s.name }}</h4>
+                  <StatusBadge :text="s.severity" :variant="severityVariant(s.severity)" />
                 </div>
+                <DataField label="Inicio" :value="formatDate(s.startedAt)" />
+                <p class="sintoma__notas">{{ s.notes || 'Sin notas.' }}</p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </BaseCard>
+      </template>
 
-      <!-- TAB SIGNOS VITALES -->
-      <div v-if="tab === 'signos'" class="animation-fade">
-        <div class="card shadow-sm border-0 mb-4">
-          <div class="card-body p-4">
-            <h6 class="fw-bold mb-3">Registrar Signos Vitales</h6>
-            <div v-if="signosError" class="alert alert-danger border-0 py-2 small">{{ signosError }}</div>
-            <form @submit.prevent="guardarSignos">
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">🌡️ Temperatura (°C)</label>
-                  <input v-model.number="signosForm.temperature" type="number" step="0.1" class="form-control" placeholder="36.5">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">💓 Frec. Cardíaca (lpm)</label>
-                  <input v-model.number="signosForm.heartRate" type="number" class="form-control" placeholder="72">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">🩸 Presión Sistólica</label>
-                  <input v-model.number="signosForm.systolicPressure" type="number" class="form-control" placeholder="120">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">🩸 Presión Diastólica</label>
-                  <input v-model.number="signosForm.diastolicPressure" type="number" class="form-control" placeholder="80">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">💨 O₂ Saturación (%)</label>
-                  <input v-model.number="signosForm.oxygenSaturation" type="number" step="0.1" class="form-control" placeholder="98">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">🩻 Glucosa (mg/dL)</label>
-                  <input v-model.number="signosForm.glucose" type="number" step="0.1" class="form-control" placeholder="90">
-                </div>
-                <div class="col-12 d-flex justify-content-end">
-                  <button type="submit" class="btn btn-success rounded-pill px-5" :disabled="guardandoSignos">
-                    <span v-if="guardandoSignos" class="spinner-border spinner-border-sm me-2"></span>
-                    {{ guardandoSignos ? 'Guardando...' : 'Registrar Medición' }}
-                  </button>
-                </div>
+      <!-- ---- Signos vitales ---- -->
+      <template v-else>
+        <BaseCard title="Registrar signos vitales" :icon="IconVitals" class="mb-3">
+          <AppAlert v-if="signosError" variant="danger" :message="signosError" class="mb-3" />
+
+          <form @submit.prevent="guardarSignos">
+            <div class="row g-3">
+              <div v-for="campo in CAMPOS_SIGNOS" :key="campo.key" class="col-md-4">
+                <label :for="`n-${campo.key}`" class="form-label d-flex align-items-center gap-2">
+                  <Icon :icon="campo.icon" :size="15" tone="muted" />
+                  {{ campo.label }}
+                </label>
+                <input
+                  :id="`n-${campo.key}`"
+                  v-model.number="signosForm[campo.key]"
+                  type="number"
+                  :step="campo.step ?? 1"
+                  class="form-control"
+                  :placeholder="campo.placeholder"
+                />
               </div>
-            </form>
-          </div>
-        </div>
-
-        <!-- Historial de signos -->
-        <div class="card shadow-sm border-0">
-          <div class="card-body p-4">
-            <h6 class="fw-bold mb-3">Historial de Signos Vitales</h6>
-            <div v-if="cargandoSignos" class="text-center py-3"><div class="spinner-border text-primary" role="status"></div></div>
-            <div v-else-if="signos.length === 0" class="text-muted text-center py-4">No hay signos vitales de seguimiento registrados.</div>
-            <div v-else class="table-responsive">
-              <table class="table table-sm table-hover align-middle mb-0">
-                <thead class="bg-light text-muted">
-                  <tr>
-                    <th class="ps-3 py-2 fw-medium">Fecha</th>
-                    <th class="py-2 fw-medium">Temp.</th>
-                    <th class="py-2 fw-medium">FC</th>
-                    <th class="py-2 fw-medium">PA</th>
-                    <th class="py-2 fw-medium">O₂</th>
-                    <th class="pe-3 py-2 fw-medium">Glucosa</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="v in signos" :key="v.id">
-                    <td class="ps-3 py-2 text-muted small">{{ formatDateTime(v.measuredAt) }}</td>
-                    <td class="py-2">{{ v.temperature != null ? v.temperature + '°C' : '-' }}</td>
-                    <td class="py-2">{{ v.heartRate != null ? v.heartRate + ' lpm' : '-' }}</td>
-                    <td class="py-2">{{ v.systolicPressure != null && v.diastolicPressure != null ? `${v.systolicPressure}/${v.diastolicPressure}` : '-' }}</td>
-                    <td class="py-2">{{ v.oxygenSaturation != null ? v.oxygenSaturation + '%' : '-' }}</td>
-                    <td class="pe-3 py-2">{{ v.glucose != null ? v.glucose + ' mg/dL' : '-' }}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="col-12 d-flex justify-content-end">
+                <AppButton type="submit" variant="primary" :icon="IconSave" :loading="guardandoSignos">
+                  Registrar medición
+                </AppButton>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </form>
+        </BaseCard>
+
+        <BaseCard title="Historial de signos vitales" :icon="IconHistory" flush padding="none">
+          <DataTable
+            :columns="COLUMNAS_SIGNOS"
+            :rows="signos"
+            :loading="cargandoSignos"
+            loading-label="Cargando mediciones…"
+            :empty-icon="IconVitals"
+            empty-title="Sin mediciones de seguimiento"
+            dense
+          >
+            <template #cell-measuredAt="{ value }">{{ formatDateTime(value) }}</template>
+            <template #cell-temperature="{ value }">{{ value != null ? `${value} °C` : '—' }}</template>
+            <template #cell-heartRate="{ value }">{{ value != null ? `${value} lpm` : '—' }}</template>
+            <template #cell-presion="{ row }">
+              {{ row.systolicPressure != null && row.diastolicPressure != null
+                ? `${row.systolicPressure}/${row.diastolicPressure}`
+                : '—' }}
+            </template>
+            <template #cell-oxygenSaturation="{ value }">{{ value != null ? `${value} %` : '—' }}</template>
+            <template #cell-glucose="{ value }">{{ value != null ? `${value} mg/dL` : '—' }}</template>
+          </DataTable>
+        </BaseCard>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { markRaw, reactive, ref, watch } from 'vue'
 import { patientService } from '@/api/patients'
 import { symptomService } from '@/api/symptoms'
 import { vitalSignService } from '@/api/vitalSigns'
+import {
+  AppAlert,
+  AppButton,
+  BaseCard,
+  DataField,
+  DataTable,
+  EmptyState,
+  Icon,
+  LoadingState,
+  PageHeader,
+  StatusBadge,
+  TabNav
+} from '@/components/ui'
+import {
+  IconAdd,
+  IconBlood,
+  IconClinical,
+  IconHeartRate,
+  IconHistory,
+  IconOxygen,
+  IconPatients,
+  IconSave,
+  IconSearch,
+  IconSymptoms,
+  IconTemperature,
+  IconVitals
+} from '@/lib/icons'
+
+const TABS = [
+  { id: 'sintomas', label: 'Síntomas', icon: markRaw(IconSymptoms) },
+  { id: 'signos', label: 'Signos Vitales', icon: markRaw(IconVitals) }
+]
+
+// Los seis campos de medición se declaran una vez en lugar de repetir el mismo
+// bloque label+input con distinto emoji, como estaba antes.
+const CAMPOS_SIGNOS = [
+  { key: 'temperature', label: 'Temperatura (°C)', icon: markRaw(IconTemperature), step: 0.1, placeholder: '36.5' },
+  { key: 'heartRate', label: 'Frec. cardíaca (lpm)', icon: markRaw(IconHeartRate), placeholder: '72' },
+  { key: 'systolicPressure', label: 'Presión sistólica', icon: markRaw(IconBlood), placeholder: '120' },
+  { key: 'diastolicPressure', label: 'Presión diastólica', icon: markRaw(IconBlood), placeholder: '80' },
+  { key: 'oxygenSaturation', label: 'Saturación O₂ (%)', icon: markRaw(IconOxygen), step: 0.1, placeholder: '98' },
+  { key: 'glucose', label: 'Glucosa (mg/dL)', icon: markRaw(IconBlood), step: 0.1, placeholder: '90' }
+]
+
+const COLUMNAS_SIGNOS = [
+  { key: 'measuredAt', label: 'Fecha' },
+  { key: 'temperature', label: 'Temp.' },
+  { key: 'heartRate', label: 'FC' },
+  { key: 'presion', label: 'PA' },
+  { key: 'oxygenSaturation', label: 'O₂' },
+  { key: 'glucose', label: 'Glucosa' }
+]
 
 const busqueda = ref('')
 const buscando = ref(false)
@@ -226,9 +261,40 @@ const guardandoSignos = ref(false)
 
 const sintomaForm = reactive({ name: '', severity: 'Moderado', startedAt: '', notes: '' })
 const signosForm = reactive({
-  temperature: null, heartRate: null, systolicPressure: null,
-  diastolicPressure: null, oxygenSaturation: null, glucose: null
+  temperature: null,
+  heartRate: null,
+  systolicPressure: null,
+  diastolicPressure: null,
+  oxygenSaturation: null,
+  glucose: null
 })
+
+const SEVERITY_VARIANTS = { Leve: 'low', Moderado: 'moderate', Severo: 'severe' }
+const severityVariant = (s) => SEVERITY_VARIANTS[s] ?? 'secondary'
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return ''
+  try {
+    return new Date(dateStr).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+  } catch {
+    return dateStr
+  }
+}
+
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '—'
+  try {
+    return new Date(dateStr).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  } catch {
+    return dateStr
+  }
+}
 
 const buscarPaciente = async () => {
   if (!busqueda.value.trim()) return
@@ -237,27 +303,12 @@ const buscarPaciente = async () => {
   try {
     const res = await patientService.search(busqueda.value)
     resultados.value = res.data || []
-    buscado.value = true
   } catch {
     resultados.value = []
-    buscado.value = true
   } finally {
+    buscado.value = true
     buscando.value = false
   }
-}
-
-const seleccionarPaciente = async (p) => {
-  pacienteSeleccionado.value = p
-  await Promise.all([cargarSintomas(), cargarSignos()])
-}
-
-const limpiar = () => {
-  busqueda.value = ''
-  resultados.value = []
-  buscado.value = false
-  pacienteSeleccionado.value = null
-  sintomas.value = []
-  signos.value = []
 }
 
 const cargarSintomas = async () => {
@@ -282,6 +333,20 @@ const cargarSignos = async () => {
   } finally {
     cargandoSignos.value = false
   }
+}
+
+const seleccionarPaciente = async (p) => {
+  pacienteSeleccionado.value = p
+  await Promise.all([cargarSintomas(), cargarSignos()])
+}
+
+const limpiar = () => {
+  busqueda.value = ''
+  resultados.value = []
+  buscado.value = false
+  pacienteSeleccionado.value = null
+  sintomas.value = []
+  signos.value = []
 }
 
 const guardarSintoma = async () => {
@@ -320,7 +385,7 @@ const guardarSignos = async () => {
       oxygenSaturation: signosForm.oxygenSaturation || null,
       glucose: signosForm.glucose || null
     })
-    Object.keys(signosForm).forEach(k => signosForm[k] = null)
+    Object.keys(signosForm).forEach((k) => (signosForm[k] = null))
     await cargarSignos()
   } catch (err) {
     signosError.value = err.response?.data?.message || 'Error al guardar los signos vitales.'
@@ -332,33 +397,81 @@ const guardarSignos = async () => {
 watch(tab, (t) => {
   if (!pacienteSeleccionado.value) return
   if (t === 'sintomas') cargarSintomas()
-  else if (t === 'signos') cargarSignos()
+  else cargarSignos()
 })
-
-const severityColor = (s) => ({ Leve: 'success', Moderado: 'warning', Severo: 'danger' }[s] || 'secondary')
-const severityBadge = (s) => ({ Leve: 'bg-success bg-opacity-75', Moderado: 'bg-warning text-dark', Severo: 'bg-danger' }[s] || 'bg-secondary')
-
-const formatDateTime = (dateStr) => {
-  if (!dateStr) return '-'
-  try {
-    return new Date(dateStr).toLocaleDateString('es-ES', {
-      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-    })
-  } catch {
-    return dateStr
-  }
-}
 </script>
 
 <style scoped>
-.animation-fade { animation: fadeIn 0.3s ease-in-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-.resultado-item {
-  cursor: pointer;
-  transition: background-color 0.15s;
+.resultados {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  overflow: hidden;
 }
-.resultado-item:hover {
-  background-color: #f0f9ff;
+
+.resultados li + li {
+  border-top: 1px solid var(--app-border);
+}
+
+.resultados__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.5rem 0.875rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.resultados__item:hover {
+  background-color: var(--app-surface-sunken);
+}
+
+.resultados__item--sel {
+  background-color: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary-text-emphasis);
+}
+
+.resultados__item:focus-visible {
+  outline: none;
+  box-shadow: var(--app-ring);
+}
+
+.sintoma {
+  height: 100%;
+  padding: 0.875rem 1rem;
+  background-color: var(--app-surface-sunken);
+  border: 1px solid var(--app-border);
+  border-inline-start: 3px solid var(--app-border-strong);
+  border-radius: var(--app-radius-lg);
+}
+
+.sintoma--low {
+  border-inline-start-color: var(--c-success-500);
+}
+.sintoma--moderate {
+  border-inline-start-color: var(--c-warning-500);
+}
+.sintoma--severe {
+  border-inline-start-color: var(--c-danger-500);
+}
+
+.sintoma__nombre {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--app-text-strong);
+}
+
+.sintoma__notas {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--app-text-muted);
 }
 </style>
